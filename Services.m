@@ -70,9 +70,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	else if (input && accepttypes&2 &&
 	    (data=[pb propertyListForType: NSFilenamesPboardType]))
 	{
-		/* TODO: investigate. sometimes we get an NSString here instaed of an
-		NSArray */
-		NSLog(@"got filenames '%@' '%@' %i",data,[data class],[data isProxy]);
+		NSDebugLLog(@"service",@"got filenames '%@' '%@' %i",data,[data class],[data isProxy]);
 	}
 
 	NSDebugLLog(@"service",@"got data '%@'",data);
