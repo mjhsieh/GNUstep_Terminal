@@ -101,6 +101,8 @@ static int scrollBackLines;
 		}
 
 		scrollBackLines=[ud integerForKey: ScrollBackLinesKey];
+		if (scrollBackLines<=0)
+			scrollBackLines=256;
 	}
 }
 
