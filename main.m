@@ -126,7 +126,7 @@ static const float col[16][3]={
 {
 	int ix,iy;
 	unsigned char buf[8];
-	char *pbuf=buf;
+	unsigned char *pbuf=buf;
 	int dlen;
 	NSGraphicsContext *cur=GSCurrentContext();
 
@@ -468,8 +468,9 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		}
 }
 
-#define scrup(foo,t,b,nr) do { \
+#define scrup(foo,t,b,pnr) do { \
 	screen_char_t *d, *s; \
+	int nr=pnr; \
  \
 	if (t+nr >= b) \
 		nr = b - t - 1; \
@@ -481,9 +482,10 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	memset(d + (b-t-nr) * video_num_columns, video_erase_char, sizeof(screen_char_t)*sx*nr); \
 } while (0)
 
-#define scrdown(foo,t,b,nr) do { \
+#define scrdown(foo,t,b,pnr) do { \
 	screen_char_t *s; \
 	unsigned int step; \
+	int nr=pnr; \
  \
 	if (t+nr >= b) \
 		nr = b - t - 1; \
@@ -707,8 +709,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 #define lf() do { \
 	if (y+1==bottom) \
 	{ \
-		memmove(&SCREEN(0,top),&SCREEN(0,top+1),sizeof(screen_char_t)*sx*(bottom-top-1)); \
-		memset(&SCREEN(0,bottom-1),0,sizeof(screen_char_t)*sx); \
+		scrup(foo,top,bottom,1); \
 	} \
 	else if (y<sy-1) \
 		y++; \
@@ -717,8 +718,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 #define ri() do { \
 	if (y==top) \
 	{ \
-		memmove(&SCREEN(0,top+1),&SCREEN(0,top),sizeof(screen_char_t)*sx*(bottom-top-1)); \
-		memset(&SCREEN(0,top),0,sizeof(screen_char_t)*sx); \
+		scrdown(foo,top,bottom,1); \
 	} \
 	else if (y>0) \
 		y--; \
@@ -1252,8 +1252,16 @@ while (1)
 	if (copy_sx>nsx)
 		copy_sx=nsx;
 
+	NSLog(@"copy %i+%i %i  (%ix%i)-(%ix%i)\n",start,num,copy_sx,sx,sy,nsx,nsy);
+
 	for (iy=start;iy<start+num;iy++)
 	{
+#define CHECK(x,y,z) if ((unsigned int)(x)<(unsigned int)(y) || (unsigned int)(x)>=((unsigned int)(y)+(unsigned int)(z))) \
+	NSLog(@"broken iy=%i  x=%08x y=%08x y+z=%08x",iy,x,y,(unsigned int)(y)+(unsigned int)(z));
+
+		CHECK(&nscreen[nsx*(iy-start)],nscreen,nsx*nsy*sizeof(screen_char_t))
+		CHECK(&nscreen[nsx*(iy-start)+copy_sx],nscreen,nsx*nsy*sizeof(screen_char_t))
+
 		memcpy(&nscreen[nsx*(iy-start)],&screen[sx*iy],copy_sx*sizeof(screen_char_t));
 	}
 
