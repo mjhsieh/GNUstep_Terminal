@@ -1,16 +1,15 @@
 /***
 Swedish.lproj/Localizable.strings
-updated by make_strings 2002-06-08 19:11:17 +0200
+updated by make_strings 2002-06-09 18:50:23 +0200
 add comments above this one
 ***/
 
 
-/*** Unmatched/untranslated keys ***/
+/*** Keys found in multiple places ***/
 
-/* File: Services.m:48 */
-/* Flag: untranslated */
-"There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
-= "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it.";
+/* File: ServicesParameterWindowController.m:92 */
+/* File: ServicesPrefs.m:419 */
+"Command line:" = "Kommandorad:";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -22,8 +21,60 @@ add comments above this one
 "Revert" = "Återställ";
 
 
+/*** Strings from Services.m ***/
+/* File: Services.m:141 */
+"Service aborted by user." = "Tjänsten avbröts av användaren.";
+/* File: Services.m:51 */
+"There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
+= "Det finns ingen terminaltjänst '%@'.\nDin tjänstlista är troligen gammal.\nKör 'make_services' för att uppdatera den.";
+
+
+/*** Strings from ServicesParameterWindowController.m ***/
+/* File: ServicesParameterWindowController.m:60 */
+"Cancel" = "Avbryt";
+/* File: ServicesParameterWindowController.m:68 */
+"OK" = "OK";
+/* File: ServicesParameterWindowController.m:112 */
+"Parameter for service %@" = "Parameter fär tjänst %@";
+
+
+/*** Strings from ServicesPrefs.m ***/
+/* File: ServicesPrefs.m:335 */
+"Accept types" = "Acceptera typer";
+/* File: ServicesPrefs.m:259 */
+"Add" = "Lägg till";
+/* File: ServicesPrefs.m:344 */
+"Filenames" = "Filnamn";
+/* File: ServicesPrefs.m:301 */
+"Ignore output" = "Ignorera utdata";
+/* File: ServicesPrefs.m:311 */
+"Input in stdin" = "Indata till stdin";
+/* File: ServicesPrefs.m:312 */
+"Input on command line" = "Indata på kommandoraden";
+/* File: ServicesPrefs.m:399 */
+"Key:" = "Tangent:";
+/* File: ServicesPrefs.m:379 */
+"Name:" = "Namn:";
+/* File: ServicesPrefs.m:310 */
+"No input" = "Ingen indata";
+/* File: ServicesPrefs.m:352 */
+"Plain text" = "Vanlig text";
+/* File: ServicesPrefs.m:267 */
+"Remove" = "Ta bort";
+/* File: ServicesPrefs.m:302 */
+"Return output" = "Returnera utdata";
+/* File: ServicesPrefs.m:320 */
+"Run in background" = "Kör i bakgrunden";
+/* File: ServicesPrefs.m:228 */
+"Terminal services" = "Terminaltjänster";
+/* File: ServicesPrefs.m:233 */
+"Terminal\nservices" = "Terminal-\ntjänster";
+/* File: ServicesPrefs.m:219 */
+"Unnamed service" = "Icke namngiven tjänst";
+
+
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:958 */
+/* File: TerminalView.m:989 */
 "Unable to spawn process: %m." = "Kunde inte starta process: %m.";
 
 
@@ -55,30 +106,30 @@ add comments above this one
 
 
 /*** Strings from main.m ***/
-/* File: main.m:261 */
+/* File: main.m:263 */
 "Close" = "Stäng";
-/* File: main.m:247 */
+/* File: main.m:249 */
 "Copy" = "Kopiera";
-/* File: main.m:250 */
+/* File: main.m:252 */
 "Cut" = "Klipp";
-/* File: main.m:256 */
+/* File: main.m:258 */
 "Edit" = "Redigera";
-/* File: main.m:273 */
+/* File: main.m:275 */
 "Hide" = "Göm";
+/* File: main.m:236 */
 /* File: main.m:234 */
-/* File: main.m:232 */
 "Info" = "Info";
-/* File: main.m:239 */
+/* File: main.m:241 */
 "New window" = "Nytt fönster";
-/* File: main.m:253 */
+/* File: main.m:255 */
 "Paste" = "Klistra";
-/* File: main.m:230 */
+/* File: main.m:232 */
 "Preferences..." = "Inställningar...";
-/* File: main.m:277 */
+/* File: main.m:279 */
 "Quit" = "Avsluta";
-/* File: main.m:269 */
+/* File: main.m:271 */
 "Services" = "Tjänster";
-/* File: main.m:242 */
+/* File: main.m:244 */
 "Terminal" = "Terminal";
-/* File: main.m:264 */
+/* File: main.m:266 */
 "Windows" = "Fönster";

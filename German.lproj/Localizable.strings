@@ -4,17 +4,106 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-08 19:11:17 +0200
+updated by make_strings 2002-06-09 18:50:23 +0200
 add comments above this one
 ***/
 
 
+/*** Keys found in multiple places ***/
+
+/* File: ServicesParameterWindowController.m:92 */
+/* Flag: untranslated */
+/* File: ServicesPrefs.m:419 */
+/* Flag: untranslated */
+"Command line:" = "Command line:";
+
+
 /*** Unmatched/untranslated keys ***/
 
-/* File: Services.m:48 */
+/* File: Services.m:51 */
 /* Flag: untranslated */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
 = "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it.";
+
+/* File: Services.m:141 */
+/* Flag: untranslated */
+"Service aborted by user." = "Service aborted by user.";
+
+/* File: ServicesParameterWindowController.m:60 */
+/* Flag: untranslated */
+"Cancel" = "Cancel";
+
+/* File: ServicesParameterWindowController.m:68 */
+/* Flag: untranslated */
+"OK" = "OK";
+
+/* File: ServicesParameterWindowController.m:112 */
+/* Flag: untranslated */
+"Parameter for service %@" = "Parameter for service %@";
+
+/* File: ServicesPrefs.m:219 */
+/* Flag: untranslated */
+"Unnamed service" = "Unnamed service";
+
+/* File: ServicesPrefs.m:228 */
+/* Flag: untranslated */
+"Terminal services" = "Terminal services";
+
+/* File: ServicesPrefs.m:233 */
+/* Flag: untranslated */
+"Terminal\nservices" = "Terminal\nservices";
+
+/* File: ServicesPrefs.m:259 */
+/* Flag: untranslated */
+"Add" = "Add";
+
+/* File: ServicesPrefs.m:267 */
+/* Flag: untranslated */
+"Remove" = "Remove";
+
+/* File: ServicesPrefs.m:301 */
+/* Flag: untranslated */
+"Ignore output" = "Ignore output";
+
+/* File: ServicesPrefs.m:302 */
+/* Flag: untranslated */
+"Return output" = "Return output";
+
+/* File: ServicesPrefs.m:310 */
+/* Flag: untranslated */
+"No input" = "No input";
+
+/* File: ServicesPrefs.m:311 */
+/* Flag: untranslated */
+"Input in stdin" = "Input in stdin";
+
+/* File: ServicesPrefs.m:312 */
+/* Flag: untranslated */
+"Input on command line" = "Input on command line";
+
+/* File: ServicesPrefs.m:320 */
+/* Flag: untranslated */
+"Run in background" = "Run in background";
+
+/* File: ServicesPrefs.m:335 */
+/* Flag: untranslated */
+"Accept types" = "Accept types";
+
+/* File: ServicesPrefs.m:344 */
+/* Flag: untranslated */
+"Filenames" = "Filenames";
+
+/* File: ServicesPrefs.m:352 */
+/* Flag: untranslated */
+"Plain text" = "Plain text";
+
+/* File: ServicesPrefs.m:379 */
+/* Flag: untranslated */
+"Name:" = "Name:";
+
+/* File: ServicesPrefs.m:399 */
+/* Flag: untranslated */
+"Key:" = "Key:";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -27,7 +116,7 @@ add comments above this one
 
 
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:958 */
+/* File: TerminalView.m:989 */
 "Unable to spawn process: %m." = "Kann keinen Prozess erzeugen: %m.";
 
 
@@ -59,30 +148,30 @@ add comments above this one
 
 
 /*** Strings from main.m ***/
-/* File: main.m:261 */
+/* File: main.m:263 */
 "Close" = "Schließen";
-/* File: main.m:247 */
+/* File: main.m:249 */
 "Copy" = "Kopieren";
-/* File: main.m:250 */
+/* File: main.m:252 */
 "Cut" = "Ausschneiden";
-/* File: main.m:256 */
+/* File: main.m:258 */
 "Edit" = "Bearbeiten";
-/* File: main.m:273 */
+/* File: main.m:275 */
 "Hide" = "Ausblenden";
+/* File: main.m:236 */
 /* File: main.m:234 */
-/* File: main.m:232 */
 "Info" = "Info";
-/* File: main.m:239 */
+/* File: main.m:241 */
 "New window" = "Neues Fenster";
-/* File: main.m:253 */
+/* File: main.m:255 */
 "Paste" = "Einfügen";
-/* File: main.m:230 */
+/* File: main.m:232 */
 "Preferences..." = "Grundeinstellungen...";
-/* File: main.m:277 */
+/* File: main.m:279 */
 "Quit" = "Beenden";
-/* File: main.m:269 */
+/* File: main.m:271 */
 "Services" = "Dienste";
-/* File: main.m:242 */
+/* File: main.m:244 */
 "Terminal" = "Terminal";
-/* File: main.m:264 */
+/* File: main.m:266 */
 "Windows" = "Fenster";
