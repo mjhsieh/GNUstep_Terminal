@@ -18,6 +18,9 @@ Terminal_LDFLAGS = -lutil
 Terminal_LOCALIZED_RESOURCE_FILES = Localizable.strings
 Terminal_LANGUAGES = English Swedish
 
+Terminal_APPLICATION_ICON = Terminal.tiff
+Terminal_RESOURCE_FILES = Terminal.tiff
+
 MAKE_STRINGS_OPTIONS = --aggressive-match --aggressive-remove
 
 include $(GNUSTEP_MAKEFILES)/application.make
