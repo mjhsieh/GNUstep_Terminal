@@ -33,6 +33,7 @@ struct selection_range
 	NSScroller *scroller;
 
 	NSFont *font,*boldFont;
+	int font_encoding,boldFont_encoding;
 	float fx,fy,fx0,fy0;
 
 	struct

@@ -248,6 +248,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	int x0,y0,x1,y1;
 	NSFont *f,*current_font=nil;
 
+	int encoding;
+
 	int total_draw=0;
 
 	NSDebugLLog(@"draw",@"drawRect: (%g %g)+(%g %g) %i\n",
@@ -302,20 +304,26 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	
 				if (ch->ch!=0 && ch->ch!=32)
 				{
-					dlen=sizeof(buf)-1;
-					GSFromUnicode(&pbuf,&dlen,&ch->ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
 					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
 
 					if ((ch->attr&3)==2)
+					{
+						encoding=boldFont_encoding;
 						f=boldFont;
+					}
 					else
+					{
+						encoding=font_encoding;
 						f=font;
+					}
 					if (f!=current_font)
 					{
 						[f set];
 						current_font=f;
 					}
 
+					dlen=sizeof(buf)-1;
+					GSFromUnicode(&pbuf,&dlen,&ch->ch,1,encoding,NULL,GSUniTerminate);
 					DPSshow(cur,buf);
 				}
 
@@ -337,20 +345,26 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	
 				if (SCREEN(ix,iy).ch!=0 && SCREEN(ix,iy).ch!=32)
 				{
-					dlen=sizeof(buf)-1;
-					GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
 					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
 
 					if ((SCREEN(ix,iy).attr&3)==2)
+					{
+						encoding=boldFont_encoding;
 						f=boldFont;
+					}
 					else
+					{
+						encoding=font_encoding;
 						f=font;
+					}
 					if (f!=current_font)
 					{
 						[f set];
 						current_font=f;
 					}
 
+					dlen=sizeof(buf)-1;
+					GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,encoding,NULL,GSUniTerminate);
 					DPSshow(cur,buf);
 				}
 
@@ -1562,6 +1576,8 @@ misc. stuff
 		else
 			fy0=r.origin.y;
 		NSDebugLLog(@"term",@"Bounding (%g %g)+(%g %g)",fx0,fy0,fx,fy);
+		font_encoding=[font mostCompatibleStringEncoding];
+		boldFont_encoding=[boldFont mostCompatibleStringEncoding];
 	}
 
 	screen=malloc(sizeof(screen_char_t)*sx*sy);
