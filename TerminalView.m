@@ -39,6 +39,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include "TerminalViewPrefs.h"
 
 
+/* TODO */
 @interface NSView (unlockfocus)
 -(void) unlockFocusNeedsFlush: (BOOL)flush;
 @end
@@ -48,6 +49,30 @@ NSString
 	*TerminalViewEndOfInputNotification=@"TerminalViewEndOfInput",
 	*TerminalViewTitleDidChangeNotification=@"TerminalViewTitleDidChange";
 
+
+
+@interface TerminalView (scrolling)
+-(void) _scrollTo: (int)new_scroll  update: (BOOL)update;
+-(void) setScroller: (NSScroller *)sc;
+@end
+
+@interface TerminalView (keyboard)
+-(void) _sendString: (NSString *)s; /* TODO: move? */
+@end
+
+@interface TerminalView (selection)
+-(void) _clearSelection;
+@end
+
+@interface TerminalView (input) <RunLoopEvents>
+@end
+
+
+/**
+TerminalScreen protocol implementation and rendering methods
+**/
+
+@implementation TerminalView (display)
 
 #define ADD_DIRTY(ax0,ay0,asx,asy) do { \
 		if (dirty.x0==-1) \
@@ -66,11 +91,6 @@ NSString
 		} \
 	} while (0)
 
-
-@interface TerminalView (private) <RunLoopEvents>
-@end
-
-@implementation TerminalView
 
 #define SCREEN(x,y) (screen[(y)*sx+(x)])
 
@@ -365,822 +385,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 }
 
 
--(void) _scrollTo: (int)new_scroll  update: (BOOL)update
-{
-	if (new_scroll>0)
-		new_scroll=0;
-	if (new_scroll<-sb_length)
-		new_scroll=-sb_length;
-
-	if (new_scroll==current_scroll)
-		return;
-	current_scroll=new_scroll;
-
-	if (update)
-	{
-		if (sb_length)
-			[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-				knobProportion: sy/(float)(sy+sb_length)];
-		else
-			[scroller setFloatValue: 1.0 knobProportion: 1.0];
-	}
-
-	draw_all=YES;
-	[self setNeedsDisplay: YES];
-}
-
-
--(void) _sendString: (NSString *)s
-{
-	int i;
-	unsigned char tmp;
-	unichar ch;
-	for (i=0;i<[s length];i++)
-	{
-		ch=[s characterAtIndex: i];
-		if (ch>256)
-			NSBeep();
-		else
-		{
-			tmp=ch;
-			write(master_fd,&tmp,1);
-		}
-	}
-}
-
--(void) keyDown: (NSEvent *)e
-{
-/* TODO: what do we do with non-ascii characters? */
-	NSString *s=[e charactersIgnoringModifiers];
-	unsigned int mask=[e modifierFlags];
-	unichar ch,ch2;
-	unsigned char tmp;
-	const char *str;
-
-	NSDebugLLog(@"key",@"got key flags=%08x  repeat=%i '%@' '%@' %4i %04x %i %04x %i\n",
-		[e modifierFlags],[e isARepeat],[e characters],[e charactersIgnoringModifiers],[e keyCode],
-		[[e characters] characterAtIndex: 0],[[e characters] length],
-		[[e charactersIgnoringModifiers] characterAtIndex: 0],[[e charactersIgnoringModifiers] length]);
-
-	if ([s length]>1)
-	{
-		s=[e characters];
-		NSDebugLLog(@"key",@" writing '%@'\n",s);
-		[self _sendString: s];
-		return;
-	}
-
-	ch=[s characterAtIndex: 0];
-	str=NULL;
-	ch2=0;
-	switch (ch)
-	{
-	case NSUpArrowFunctionKey   : str="\e[A"; break;
-	case NSDownArrowFunctionKey : str="\e[B"; break;
-	case NSLeftArrowFunctionKey : str="\e[D"; break;
-	case NSRightArrowFunctionKey: str="\e[C"; break;
-
-	case NSF1FunctionKey : str="\e[[A"; break;
-	case NSF2FunctionKey : str="\e[[B"; break;
-	case NSF3FunctionKey : str="\e[[C"; break;
-	case NSF4FunctionKey : str="\e[[D"; break;
-	case NSF5FunctionKey : str="\e[[E"; break;
-
-	case NSF6FunctionKey : str="\e[17~"; break;
-	case NSF7FunctionKey : str="\e[18~"; break;
-	case NSF8FunctionKey : str="\e[19~"; break;
-	case NSF9FunctionKey : str="\e[20~"; break;
-	case NSF10FunctionKey: str="\e[21~"; break;
-	case NSF11FunctionKey: str="\e[23~"; break;
-	case NSF12FunctionKey: str="\e[24~"; break;
-
-	case NSF13FunctionKey: str="\e[25~"; break;
-	case NSF14FunctionKey: str="\e[26~"; break;
-	case NSF15FunctionKey: str="\e[28~"; break;
-	case NSF16FunctionKey: str="\e[29~"; break;
-	case NSF17FunctionKey: str="\e[31~"; break;
-	case NSF18FunctionKey: str="\e[32~"; break;
-	case NSF19FunctionKey: str="\e[33~"; break;
-	case NSF20FunctionKey: str="\e[34~"; break;
-
-	case NSHomeFunctionKey    : str="\e[1~"; break;
-	case NSInsertFunctionKey  : str="\e[2~"; break;
-	case NSDeleteFunctionKey  : str="\e[3~"; break;
-	case NSEndFunctionKey     : str="\e[4~"; break;
-	case NSPageUpFunctionKey  :
-		if (mask&NSShiftKeyMask)
-		{
-			[self _scrollTo: current_scroll-sy+1  update: YES];
-			return;
-		}
-		str="\e[5~";
-		break;
-	case NSPageDownFunctionKey:
-		if (mask&NSShiftKeyMask)
-		{
-			[self _scrollTo: current_scroll+sy-1  update: YES];
-			return;
-		}
-		str="\e[6~";
-		break;
-
-	case 8: ch2=0x7f; break;
-	case 3: ch2=0x0d; break;
-
-	default:
-	{
-		s=[e characters];
-		[self _sendString: s];
-		return;
-	}
-	}
-
-	if (mask&NSCommandKeyMask)
-	{
-		NSDebugLLog(@"key",@"  meta");
-		write(master_fd,"\e",1);
-	}
-
-	if (str)
-	{
-		NSDebugLLog(@"key",@"  send '%s'",str);
-		[self ts_sendCString: str];
-	}
-	else if (ch2>256)
-	{
-		NSDebugLLog(@"key",@"  couldn't send %04x",ch2);
-		NSBeep();
-	}
-	else if (ch2>0)
-	{
-		tmp=ch2;
-		NSDebugLLog(@"key",@"  send %02x",ch2);
-		write(master_fd,&tmp,1);
-	}
-}
-
--(void) paste: (id)sender
-{
-	NSPasteboard *pb=[NSPasteboard generalPasteboard];
-	NSString *type;
-	NSString *str;
-
-	type=[pb availableTypeFromArray: [NSArray arrayWithObject: NSStringPboardType]];
-	if (!type)
-		return;
-	str=[pb stringForType: NSStringPboardType];
-	[self _sendString: str];
-}
-
-
--(NSString *) _selectionAsString
-{
-	int ofs=max_scrollback*sx;
-	NSMutableString *mstr;
-	NSString *tmp;
-	unichar buf[32];
-	unichar ch;
-	int len;
-	int i,j;
-
-	if (selection.length==0)
-		return nil;
-
-	mstr=[[NSMutableString alloc] init];
-	j=selection.location+selection.length;
-	len=0;
-	for (i=selection.location;i<j;i++)
-	{
-		if (i%sx==0 && i>selection.location)
-		{
-			buf[len++]='\n';
-			if (len==32)
-			{
-				tmp=[[NSString alloc] initWithCharacters: buf length: 32];
-				[mstr appendString: tmp];
-				DESTROY(tmp);
-				len=0;
-			}
-		}
-		if (i<0)
-			ch=sbuf[ofs+i].ch;
-		else
-			ch=screen[i].ch;
-		if (ch)
-		{
-			buf[len++]=ch;
-			if (len==32)
-			{
-				tmp=[[NSString alloc] initWithCharacters: buf length: 32];
-				[mstr appendString: tmp];
-				DESTROY(tmp);
-				len=0;
-			}
-		}
-	}
-
-	if (len)
-	{
-		tmp=[[NSString alloc] initWithCharacters: buf length: len];
-		[mstr appendString: tmp];
-		DESTROY(tmp);
-	}
-
-	return AUTORELEASE(mstr);
-}
-
--(void) _setSelection: (struct selection_range)s
-{
-	int i,j,ofs2;
-	if (!s.length && !selection.length)
-		return;
-	if (s.length==selection.length && s.location==selection.location)
-		return;
-
-	if (s.location<-sb_length*sx)
-	{
-		s.length+=sb_length*sx+s.location;
-		s.location=-sb_length*sx;
-	}
-	if (s.location+s.length>sx*sy)
-	{
-		s.length=sx*sy-s.location;
-	}
-	if (s.length<0)
-		s.length=0;
-
-	ofs2=max_scrollback*sx;
-
-	j=selection.location+selection.length;
-	if (j>s.location)
-		j=s.location;
-
-	for (i=selection.location;i<j && i<0;i++)
-	{
-		sbuf[ofs2+i].attr&=0xbf;
-		sbuf[ofs2+i].attr|=0x80;
-	}
-	for (;i<j;i++)
-	{
-		screen[i].attr&=0xbf;
-		screen[i].attr|=0x80;
-	}
-
-	i=s.location+s.length;
-	if (i<selection.location)
-		i=selection.location;
-	j=selection.location+selection.length;
-	for (;i<j && i<0;i++)
-	{
-		sbuf[ofs2+i].attr&=0xbf;
-		sbuf[ofs2+i].attr|=0x80;
-	}
-	for (;i<j;i++)
-	{
-		screen[i].attr&=0xbf;
-		screen[i].attr|=0x80;
-	}
-
-	i=s.location;
-	j=s.location+s.length;
-	for (;i<j && i<0;i++)
-	{
-		if (!(sbuf[ofs2+i].attr&0x40))
-			sbuf[ofs2+i].attr|=0xc0;
-	}
-	for (;i<j;i++)
-	{
-		if (!(screen[i].attr&0x40))
-			screen[i].attr|=0xc0;
-	}
-
-	selection=s;
-	[self setNeedsDisplay: YES];
-}
-
--(void) _clearSelection
-{
-	struct selection_range s;
-	s.location=s.length=0;
-	[self _setSelection: s];
-}
-
-
--(void) copy: (id)sender
-{
-	NSPasteboard *pb=[NSPasteboard generalPasteboard];
-	NSString *s=[self _selectionAsString];
-	if (!s)
-	{
-		NSBeep();
-		return;
-	}
-	[pb declareTypes: [NSArray arrayWithObject: NSStringPboardType]
-		owner: self];
-	[pb setString: s forType: NSStringPboardType];
-}
-
-
--(BOOL) writeSelectionToPasteboard: (NSPasteboard *)pb
-	types: (NSArray *)t
-{
-	int i;
-	[pb declareTypes: t  owner: self];
-	for (i=0;i<[t count];i++)
-	{
-		if ([[t objectAtIndex: i] isEqual: NSStringPboardType])
-		{
-			[pb setString: [self _selectionAsString]
-				forType: NSStringPboardType];
-			return YES;
-		}
-	}
-	return NO;
-}
-
--(BOOL) readSelectionFromPasteboard: (NSPasteboard *)pb
-{ /* TODO: is it really necessary to implement this? */
-	return YES;
-}
-
--(id) validRequestorForSendType: (NSString *)st
-	returnType: (NSString *)rt
-{
-	if (!selection.length)
-		return nil;
-	if (st!=nil && ![st isEqual: NSStringPboardType])
-		return nil;
-	if (rt!=nil)
-		return nil;
-	return self;
-}
-
-
--(void) mouseDown: (NSEvent *)e
-{
-	int ofs0,ofs1,first;
-	NSPoint p;
-	struct selection_range s;
-
-	first=YES;
-	ofs0=0; /* get compiler to shut up */
-	while ([e type]!=NSLeftMouseUp)
-	{
-		p=[e locationInWindow];
-
-		p=[self convertPoint: p  fromView: nil];
-		p.x=floor(p.x/fx);
-		if (p.x<0) p.x=0;
-		if (p.x>=sx) p.x=sx-1;
-		p.y=ceil(p.y/fy);
-		if (p.y<0) p.y=0;
-		if (p.y>sy) p.y=sy;
-		p.y=sy-p.y+current_scroll;
-		ofs1=((int)p.x)+((int)p.y)*sx;
-
-		if (first)
-		{
-			ofs0=ofs1;
-			first=0;
-		}
-
-		if (ofs1>ofs0)
-		{
-			s.location=ofs0;
-			s.length=ofs1-ofs0;
-		}
-		else
-		{
-			s.location=ofs1;
-			s.length=ofs0-ofs1;
-		}
-
-		[self _setSelection: s];
-		[self displayIfNeeded];
-
-		e=[NSApp nextEventMatchingMask: NSLeftMouseDownMask|NSLeftMouseUpMask|
-		                                NSLeftMouseDraggedMask|NSMouseMovedMask
-			untilDate: [NSDate distantFuture]
-			inMode: NSEventTrackingRunLoopMode
-			dequeue: YES];
-	}
-}
-
-
--(void) scrollWheel: (NSEvent *)e
-{
-	float delta=[e deltaY];
-	int new_scroll;
-	int mult;
-
-	if ([e modifierFlags]&NSShiftKeyMask)
-		mult=1;
-	else if ([e modifierFlags]&NSControlKeyMask)
-		mult=sy;
-	else
-		mult=5;
-
-	new_scroll=current_scroll-delta*mult;
-	[self _scrollTo: new_scroll  update: YES];
-}
-
-
--(BOOL) acceptsFirstResponder
-{
-	return YES;
-}
--(BOOL) becomeFirstResponder
-{
-	return YES;
-}
--(BOOL) resignFirstResponder
-{
-	return YES;
-}
-
-
--(void) ts_sendCString: (const char *)msg
-{
-	int len=strlen(msg);
-	write(master_fd,msg,len);
-}
-
-
--(NSDate *) timedOutEvent: (void *)data type: (RunLoopEventType)t
-	forMode: (NSString *)mode
-{
-	NSLog(@"timedOutEvent:type:forMode: ignored");
-	return nil;
-}
-
--(void) receivedEvent: (void *)data
-	type: (RunLoopEventType)t
-	extra: (void *)extra
-	forMode: (NSString *)mode
-{
-	char buf[8];
-	int size,total;
-
-//	get_zombies();
-
-//	printf("got event %i %i\n",(int)data,t);
-	total=0;
-	num_scrolls=0;
-	dirty.x0=-1;
-
-	current_x=cursor_x;
-	current_y=cursor_y;
-
-	[self _clearSelection]; /* TODO? */
-
-	NSDebugLLog(@"term",@"receiving output");
-
-	while (1)
-	{
-		{
-			fd_set s;
-			struct timeval tv;
-			FD_ZERO(&s);
-			FD_SET(master_fd,&s);
-			tv.tv_sec=0;
-			tv.tv_usec=0;
-			if (!select(master_fd+1,&s,NULL,NULL,&tv)) break;
-		}
-
-		size=read(master_fd,buf,1);
-		if (size<=0)
-		{
-//			get_zombies();
-			[[NSNotificationCenter defaultCenter]
-				postNotificationName: TerminalViewEndOfInputNotification
-				object: self];
-			break;
-		}
-//		printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
-
-
-		[tp processByte: buf[0]];
-
-		total++;
-		if (total>=8192 || (num_scrolls+abs(pending_scroll))>10)
-			break; /* give other things a chance */
-	}
-
-	if (cursor_x!=current_x || cursor_y!=current_y)
-	{
-		ADD_DIRTY(current_x,current_y,1,1);
-		SCREEN(current_x,current_y).attr|=0x80;
-		ADD_DIRTY(cursor_x,cursor_y,1,1);
-		draw_cursor=YES;
-	}
-
-	NSDebugLLog(@"term",@"done (%i %i) (%i %i)\n",
-		dirty.x0,dirty.y0,dirty.x1,dirty.y1);
-
-	if (dirty.x0>=0)
-	{
-		NSRect dr;
-
-		if (sb_length)
-			[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-				knobProportion: sy/(float)(sy+sb_length)];
-		else
-			[scroller setFloatValue: 1.0 knobProportion: 1.0];
-
-//		NSLog(@"dirty=(%i %i)-(%i %i)\n",dirty.x0,dirty.y0,dirty.x1,dirty.y1);
-		dr.origin.x=dirty.x0*fx;
-		dr.origin.y=dirty.y0*fy;
-		dr.size.width=(dirty.x1-dirty.x0)*fx;
-		dr.size.height=(dirty.y1-dirty.y0)*fy;
-		dr.origin.y=fy*sy-(dr.origin.y+dr.size.height);
-//		NSLog(@"-> dirty=(%g %g)+(%g %g)\n",dirty.origin.x,dirty.origin.y,dirty.size.width,dirty.size.height);
-		[self setNeedsDisplayInRect: dr];
-
-		if (current_scroll!=0)
-		{ /* TODO */
-			current_scroll=0;
-			draw_all=YES;
-			[self setNeedsDisplay: YES];
-		}
-	}
-}
-
-
--(void) _resizeTerminalTo: (NSSize)size
-{
-	int nsx,nsy;
-	struct winsize ws;
-	screen_char_t *nscreen,*nsbuf;
-	int iy,ny;
-	int copy_sx;
-
-	nsx=size.width/fx;
-	nsy=size.height/fy;
-
-	NSDebugLLog(@"term",@"_resizeTerminalTo: (%g %g) %i %i (%g %g)\n",
-		size.width,size.height,
-		nsx,nsy,
-		nsx*fx,nsy*fy);
-
-	if (ignore_resize)
-	{
-		NSDebugLLog(@"term",@"ignored");
-		return;
-	}
-
-	if (nsx<1) nsx=1;
-	if (nsy<1) nsy=1;
-
-	if (nsx==sx && nsy==sy)
-	{
-		/* Do a complete redraw anyway. Even though we don't really need it,
-		the resize ight have caused other things to overwrite our part of the
-		window. */
-		draw_all=YES;
-		return;
-	}
-
-	[self _clearSelection]; /* TODO? */
-
-	nscreen=malloc(nsx*nsy*sizeof(screen_char_t));
-	nsbuf=malloc(nsx*max_scrollback*sizeof(screen_char_t));
-	if (!nscreen || !nsbuf)
-	{
-		NSLog(@"Failed to allocate screen buffer!");
-		return;
-	}
-	memset(nscreen,0,sizeof(screen_char_t)*nsx*nsy);
-	memset(nsbuf,0,sizeof(screen_char_t)*nsx*max_scrollback);
-
-	copy_sx=sx;
-	if (copy_sx>nsx)
-		copy_sx=nsx;
-
-//	NSLog(@"copy %i+%i %i  (%ix%i)-(%ix%i)\n",start,num,copy_sx,sx,sy,nsx,nsy);
-
-/* TODO: handle resizing and scrollback */
-	for (iy=-sb_length;iy<sy;iy++)
-	{
-		screen_char_t *src,*dst;
-		ny=iy-sy+nsy;
-		if (ny<-max_scrollback)
-			continue;
-
-		if (iy<0)
-			src=&sbuf[sx*(max_scrollback+iy)];
-		else
-			src=&screen[sx*iy];
-
-		if (ny<0)
-			dst=&nsbuf[nsx*(max_scrollback+ny)];
-		else
-			dst=&nscreen[nsx*ny];
-
-		memcpy(dst,src,copy_sx*sizeof(screen_char_t));
-	}
-
-	sb_length=sb_length+sy-nsy;
-	if (sb_length>max_scrollback)
-		sb_length=max_scrollback;
-	if (sb_length<0)
-		sb_length=0;
-
-	sx=nsx;
-	sy=nsy;
-	free(screen);
-	free(sbuf);
-	screen=nscreen;
-	sbuf=nsbuf;
-
-	if (cursor_x>sx) cursor_x=sx-1;
-	if (cursor_y>sy) cursor_y=sy-1;
-
-	if (sb_length)
-		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-			knobProportion: sy/(float)(sy+sb_length)];
-	else
-		[scroller setFloatValue: 1.0 knobProportion: 1.0];
-
-	[tp setTerminalScreenWidth: sx height: sy];
-
-	ws.ws_row=nsy;
-	ws.ws_col=nsx;
-	ioctl(master_fd,TIOCSWINSZ,&ws);
-
-	draw_all=YES;
-	[self setNeedsDisplay: YES];
-}
-
-
--(void) setFrame: (NSRect)frame
-{
-	[super setFrame: frame];
-	[self _resizeTerminalTo: frame.size];
-}
-
--(void) setFrameSize: (NSSize)size
-{
-	[super setFrameSize: size];
-	[self _resizeTerminalTo: size];
-}
-
-
-- initWithFrame: (NSRect)frame
-{
-	int ret;
-	NSRunLoop *rl;
-	struct winsize ws;
-
-	sx=80;
-	sy=25;
-
-	ws.ws_row=sy;
-	ws.ws_col=sx;
-	ret=forkpty(&master_fd,NULL,NULL,&ws);
-	if (ret<0)
-	{
-		NSLog(_(@"Unable to spawn process: %m."));
-		return nil;
-	}
-
-	if (ret==0)
-	{
-		const char *shell=getenv("SHELL");
-		if (!shell) shell="/bin/sh";
-		putenv("TERM=linux");
-		putenv("TERM_PROGRAM=GNUstep_Terminal");
-		execl(shell,shell,NULL);
-		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
-		exit(1);
-	}
-
-
-	if (!(self=[super initWithFrame: frame])) return nil;
-
-	{
-		NSRect r;
-		font=[TerminalView terminalFont];
-		boldFont=[TerminalViewDisplayPrefs boldTerminalFont];
-		r=[font boundingRectForFont];
-		fx=r.size.width;
-		fy=r.size.height;
-		/* TODO: clear up font metrics issues with xlib/backart */
-		fx0=fabs(r.origin.x);
-		if (r.origin.y<0)
-			fy0=fy+r.origin.y;
-		else
-			fy0=r.origin.y;
-		NSDebugLLog(@"term",@"Bounding (%g %g)+(%g %g)",fx0,fy0,fx,fy);
-	}
-
-	screen=malloc(sizeof(screen_char_t)*sx*sy);
-	memset(screen,0,sizeof(screen_char_t)*sx*sy);
-	draw_all=YES;
-
-	max_scrollback=256;
-	sbuf=malloc(sizeof(screen_char_t)*sx*max_scrollback);
-	memset(sbuf,0,sizeof(screen_char_t)*sx*max_scrollback);
-
-	tp=[[TerminalParser_Linux alloc] initWithTerminalScreen: self
-		width: sx  height: sy];
-
-//	NSLog(@"Got master fd=%i",master_fd);
-
-	rl=[NSRunLoop currentRunLoop];
-	[rl addEvent: (void *)master_fd
-		type: ET_RDESC
-		watcher: self
-		forMode: NSDefaultRunLoopMode];
-	return self;
-}
-
-
--(void) _updateScroll: (id)sender
-{
-	int new_scroll;
-	int part=[scroller hitPart];
-	BOOL update=YES;
-
-	if (part==NSScrollerKnob ||
-	    part==NSScrollerKnobSlot)
-	{
-		float f=[scroller floatValue];
-		new_scroll=(f-1.0)*sb_length;
-		update=NO;
-	}
-	else if (part==NSScrollerDecrementLine)
-		new_scroll=current_scroll-1;
-	else if (part==NSScrollerDecrementPage)
-		new_scroll=current_scroll-sy/2;
-	else if (part==NSScrollerIncrementLine)
-		new_scroll=current_scroll+1;
-	else if (part==NSScrollerIncrementPage)
-		new_scroll=current_scroll+sy/2;
-	else
-		return;
-
-	[self _scrollTo: new_scroll  update: update];
-}
-
--(void) setScroller: (NSScroller *)sc
-{
-	[scroller setTarget: nil];
-	ASSIGN(scroller,sc);
-	if (sb_length)
-		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-			knobProportion: sy/(float)(sy+sb_length)];
-	else
-		[scroller setFloatValue: 1.0 knobProportion: 1.0];
-	[scroller setTarget: self];
-	[scroller setAction: @selector(_updateScroll:)];
-}
-
-
--(void) dealloc
-{
-//	NSLog(@"closing master fd=%i\n",master_fd);
-	[[NSRunLoop currentRunLoop] removeEvent: (void *)master_fd
-		type: ET_RDESC
-		forMode: NSDefaultRunLoopMode
-		all: YES];
-
-	close(master_fd);
-//	get_zombies();
-
-	DESTROY(tp);
-
-	[scroller setTarget: nil];
-	DESTROY(scroller);
-
-	free(screen);
-	free(sbuf);
-	screen=NULL;
-	sbuf=NULL;
-
-	DESTROY(title_window);
-	DESTROY(title_miniwindow);
-
-	[super dealloc];
-}
-
-
--(NSString *) windowTitle
-{
-	return title_window;
-}
-
--(NSString *) miniwindowTitle
-{
-	return title_miniwindow;
-}
-
-
-+(NSFont *) terminalFont
-{
-	return [TerminalViewDisplayPrefs terminalFont];
-}
-
-
 -(void) ts_setTitle: (NSString *)new_title  type: (int)title_type
 {
 	NSDebugLLog(@"ts",@"setTitle: %@  type: %i",new_title,title_type);
@@ -1445,12 +649,860 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	return SCREEN(x,y);
 }
 
+-(void) ts_sendCString: (const char *)msg
+{
+	int len=strlen(msg);
+	write(master_fd,msg,len);
+}
+
+@end
+
+
+/**
+Scrolling
+**/
+
+@implementation TerminalView (scrolling)
+
+-(void) _scrollTo: (int)new_scroll  update: (BOOL)update
+{
+	if (new_scroll>0)
+		new_scroll=0;
+	if (new_scroll<-sb_length)
+		new_scroll=-sb_length;
+
+	if (new_scroll==current_scroll)
+		return;
+	current_scroll=new_scroll;
+
+	if (update)
+	{
+		if (sb_length)
+			[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+				knobProportion: sy/(float)(sy+sb_length)];
+		else
+			[scroller setFloatValue: 1.0 knobProportion: 1.0];
+	}
+
+	draw_all=YES;
+	[self setNeedsDisplay: YES];
+}
+
+-(void) scrollWheel: (NSEvent *)e
+{
+	float delta=[e deltaY];
+	int new_scroll;
+	int mult;
+
+	if ([e modifierFlags]&NSShiftKeyMask)
+		mult=1;
+	else if ([e modifierFlags]&NSControlKeyMask)
+		mult=sy;
+	else
+		mult=5;
+
+	new_scroll=current_scroll-delta*mult;
+	[self _scrollTo: new_scroll  update: YES];
+}
+
+-(void) _updateScroll: (id)sender
+{
+	int new_scroll;
+	int part=[scroller hitPart];
+	BOOL update=YES;
+
+	if (part==NSScrollerKnob ||
+	    part==NSScrollerKnobSlot)
+	{
+		float f=[scroller floatValue];
+		new_scroll=(f-1.0)*sb_length;
+		update=NO;
+	}
+	else if (part==NSScrollerDecrementLine)
+		new_scroll=current_scroll-1;
+	else if (part==NSScrollerDecrementPage)
+		new_scroll=current_scroll-sy/2;
+	else if (part==NSScrollerIncrementLine)
+		new_scroll=current_scroll+1;
+	else if (part==NSScrollerIncrementPage)
+		new_scroll=current_scroll+sy/2;
+	else
+		return;
+
+	[self _scrollTo: new_scroll  update: update];
+}
+
+-(void) setScroller: (NSScroller *)sc
+{
+	[scroller setTarget: nil];
+	ASSIGN(scroller,sc);
+	if (sb_length)
+		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+			knobProportion: sy/(float)(sy+sb_length)];
+	else
+		[scroller setFloatValue: 1.0 knobProportion: 1.0];
+	[scroller setTarget: self];
+	[scroller setAction: @selector(_updateScroll:)];
+}
+
+@end
+
+
+/**
+Keyboard events
+**/
+
+@implementation TerminalView (keyboard)
+
+-(void) _sendString: (NSString *)s
+{
+	int i;
+	unsigned char tmp;
+	unichar ch;
+	for (i=0;i<[s length];i++)
+	{
+		ch=[s characterAtIndex: i];
+		if (ch>256)
+			NSBeep();
+		else
+		{
+			tmp=ch;
+			write(master_fd,&tmp,1);
+		}
+	}
+}
+
+-(void) keyDown: (NSEvent *)e
+{
+/* TODO: what do we do with non-ascii characters? */
+	NSString *s=[e charactersIgnoringModifiers];
+	unsigned int mask=[e modifierFlags];
+	unichar ch,ch2;
+	unsigned char tmp;
+	const char *str;
+
+	NSDebugLLog(@"key",@"got key flags=%08x  repeat=%i '%@' '%@' %4i %04x %i %04x %i\n",
+		[e modifierFlags],[e isARepeat],[e characters],[e charactersIgnoringModifiers],[e keyCode],
+		[[e characters] characterAtIndex: 0],[[e characters] length],
+		[[e charactersIgnoringModifiers] characterAtIndex: 0],[[e charactersIgnoringModifiers] length]);
+
+	if ([s length]>1)
+	{
+		s=[e characters];
+		NSDebugLLog(@"key",@" writing '%@'\n",s);
+		[self _sendString: s];
+		return;
+	}
+
+	ch=[s characterAtIndex: 0];
+	str=NULL;
+	ch2=0;
+	switch (ch)
+	{
+	case NSUpArrowFunctionKey   : str="\e[A"; break;
+	case NSDownArrowFunctionKey : str="\e[B"; break;
+	case NSLeftArrowFunctionKey : str="\e[D"; break;
+	case NSRightArrowFunctionKey: str="\e[C"; break;
+
+	case NSF1FunctionKey : str="\e[[A"; break;
+	case NSF2FunctionKey : str="\e[[B"; break;
+	case NSF3FunctionKey : str="\e[[C"; break;
+	case NSF4FunctionKey : str="\e[[D"; break;
+	case NSF5FunctionKey : str="\e[[E"; break;
+
+	case NSF6FunctionKey : str="\e[17~"; break;
+	case NSF7FunctionKey : str="\e[18~"; break;
+	case NSF8FunctionKey : str="\e[19~"; break;
+	case NSF9FunctionKey : str="\e[20~"; break;
+	case NSF10FunctionKey: str="\e[21~"; break;
+	case NSF11FunctionKey: str="\e[23~"; break;
+	case NSF12FunctionKey: str="\e[24~"; break;
+
+	case NSF13FunctionKey: str="\e[25~"; break;
+	case NSF14FunctionKey: str="\e[26~"; break;
+	case NSF15FunctionKey: str="\e[28~"; break;
+	case NSF16FunctionKey: str="\e[29~"; break;
+	case NSF17FunctionKey: str="\e[31~"; break;
+	case NSF18FunctionKey: str="\e[32~"; break;
+	case NSF19FunctionKey: str="\e[33~"; break;
+	case NSF20FunctionKey: str="\e[34~"; break;
+
+	case NSHomeFunctionKey    : str="\e[1~"; break;
+	case NSInsertFunctionKey  : str="\e[2~"; break;
+	case NSDeleteFunctionKey  : str="\e[3~"; break;
+	case NSEndFunctionKey     : str="\e[4~"; break;
+	case NSPageUpFunctionKey  :
+		if (mask&NSShiftKeyMask)
+		{
+			[self _scrollTo: current_scroll-sy+1  update: YES];
+			return;
+		}
+		str="\e[5~";
+		break;
+	case NSPageDownFunctionKey:
+		if (mask&NSShiftKeyMask)
+		{
+			[self _scrollTo: current_scroll+sy-1  update: YES];
+			return;
+		}
+		str="\e[6~";
+		break;
+
+	case 8: ch2=0x7f; break;
+	case 3: ch2=0x0d; break;
+
+	default:
+	{
+		s=[e characters];
+		[self _sendString: s];
+		return;
+	}
+	}
+
+	if (mask&NSCommandKeyMask)
+	{
+		NSDebugLLog(@"key",@"  meta");
+		write(master_fd,"\e",1);
+	}
+
+	if (str)
+	{
+		NSDebugLLog(@"key",@"  send '%s'",str);
+		[self ts_sendCString: str];
+	}
+	else if (ch2>256)
+	{
+		NSDebugLLog(@"key",@"  couldn't send %04x",ch2);
+		NSBeep();
+	}
+	else if (ch2>0)
+	{
+		tmp=ch2;
+		NSDebugLLog(@"key",@"  send %02x",ch2);
+		write(master_fd,&tmp,1);
+	}
+}
+
+-(BOOL) acceptsFirstResponder
+{
+	return YES;
+}
+-(BOOL) becomeFirstResponder
+{
+	return YES;
+}
+-(BOOL) resignFirstResponder
+{
+	return YES;
+}
+
+@end
+
+
+/**
+Selection, copy/paste/services
+**/
+
+@implementation TerminalView (selection)
+
+-(NSString *) _selectionAsString
+{
+	int ofs=max_scrollback*sx;
+	NSMutableString *mstr;
+	NSString *tmp;
+	unichar buf[32];
+	unichar ch;
+	int len;
+	int i,j;
+
+	if (selection.length==0)
+		return nil;
+
+	mstr=[[NSMutableString alloc] init];
+	j=selection.location+selection.length;
+	len=0;
+	for (i=selection.location;i<j;i++)
+	{
+		if (i%sx==0 && i>selection.location)
+		{
+			buf[len++]='\n';
+			if (len==32)
+			{
+				tmp=[[NSString alloc] initWithCharacters: buf length: 32];
+				[mstr appendString: tmp];
+				DESTROY(tmp);
+				len=0;
+			}
+		}
+		if (i<0)
+			ch=sbuf[ofs+i].ch;
+		else
+			ch=screen[i].ch;
+		if (ch)
+		{
+			buf[len++]=ch;
+			if (len==32)
+			{
+				tmp=[[NSString alloc] initWithCharacters: buf length: 32];
+				[mstr appendString: tmp];
+				DESTROY(tmp);
+				len=0;
+			}
+		}
+	}
+
+	if (len)
+	{
+		tmp=[[NSString alloc] initWithCharacters: buf length: len];
+		[mstr appendString: tmp];
+		DESTROY(tmp);
+	}
+
+	return AUTORELEASE(mstr);
+}
+
+-(void) _setSelection: (struct selection_range)s
+{
+	int i,j,ofs2;
+	if (!s.length && !selection.length)
+		return;
+	if (s.length==selection.length && s.location==selection.location)
+		return;
+
+	if (s.location<-sb_length*sx)
+	{
+		s.length+=sb_length*sx+s.location;
+		s.location=-sb_length*sx;
+	}
+	if (s.location+s.length>sx*sy)
+	{
+		s.length=sx*sy-s.location;
+	}
+	if (s.length<0)
+		s.length=0;
+
+	ofs2=max_scrollback*sx;
+
+	j=selection.location+selection.length;
+	if (j>s.location)
+		j=s.location;
+
+	for (i=selection.location;i<j && i<0;i++)
+	{
+		sbuf[ofs2+i].attr&=0xbf;
+		sbuf[ofs2+i].attr|=0x80;
+	}
+	for (;i<j;i++)
+	{
+		screen[i].attr&=0xbf;
+		screen[i].attr|=0x80;
+	}
+
+	i=s.location+s.length;
+	if (i<selection.location)
+		i=selection.location;
+	j=selection.location+selection.length;
+	for (;i<j && i<0;i++)
+	{
+		sbuf[ofs2+i].attr&=0xbf;
+		sbuf[ofs2+i].attr|=0x80;
+	}
+	for (;i<j;i++)
+	{
+		screen[i].attr&=0xbf;
+		screen[i].attr|=0x80;
+	}
+
+	i=s.location;
+	j=s.location+s.length;
+	for (;i<j && i<0;i++)
+	{
+		if (!(sbuf[ofs2+i].attr&0x40))
+			sbuf[ofs2+i].attr|=0xc0;
+	}
+	for (;i<j;i++)
+	{
+		if (!(screen[i].attr&0x40))
+			screen[i].attr|=0xc0;
+	}
+
+	selection=s;
+	[self setNeedsDisplay: YES];
+}
+
+-(void) _clearSelection
+{
+	struct selection_range s;
+	s.location=s.length=0;
+	[self _setSelection: s];
+}
+
+
+-(void) copy: (id)sender
+{
+	NSPasteboard *pb=[NSPasteboard generalPasteboard];
+	NSString *s=[self _selectionAsString];
+	if (!s)
+	{
+		NSBeep();
+		return;
+	}
+	[pb declareTypes: [NSArray arrayWithObject: NSStringPboardType]
+		owner: self];
+	[pb setString: s forType: NSStringPboardType];
+}
+
+-(void) paste: (id)sender
+{
+	NSPasteboard *pb=[NSPasteboard generalPasteboard];
+	NSString *type;
+	NSString *str;
+
+	type=[pb availableTypeFromArray: [NSArray arrayWithObject: NSStringPboardType]];
+	if (!type)
+		return;
+	str=[pb stringForType: NSStringPboardType];
+	[self _sendString: str];
+}
+
+-(BOOL) writeSelectionToPasteboard: (NSPasteboard *)pb
+	types: (NSArray *)t
+{
+	int i;
+	[pb declareTypes: t  owner: self];
+	for (i=0;i<[t count];i++)
+	{
+		if ([[t objectAtIndex: i] isEqual: NSStringPboardType])
+		{
+			[pb setString: [self _selectionAsString]
+				forType: NSStringPboardType];
+			return YES;
+		}
+	}
+	return NO;
+}
+
+-(BOOL) readSelectionFromPasteboard: (NSPasteboard *)pb
+{ /* TODO: is it really necessary to implement this? */
+	return YES;
+}
+
+-(id) validRequestorForSendType: (NSString *)st
+	returnType: (NSString *)rt
+{
+	if (!selection.length)
+		return nil;
+	if (st!=nil && ![st isEqual: NSStringPboardType])
+		return nil;
+	if (rt!=nil)
+		return nil;
+	return self;
+}
+
+
+-(void) mouseDown: (NSEvent *)e
+{
+	int ofs0,ofs1,first;
+	NSPoint p;
+	struct selection_range s;
+
+	first=YES;
+	ofs0=0; /* get compiler to shut up */
+	while ([e type]!=NSLeftMouseUp)
+	{
+		p=[e locationInWindow];
+
+		p=[self convertPoint: p  fromView: nil];
+		p.x=floor(p.x/fx);
+		if (p.x<0) p.x=0;
+		if (p.x>=sx) p.x=sx-1;
+		p.y=ceil(p.y/fy);
+		if (p.y<0) p.y=0;
+		if (p.y>sy) p.y=sy;
+		p.y=sy-p.y+current_scroll;
+		ofs1=((int)p.x)+((int)p.y)*sx;
+
+		if (first)
+		{
+			ofs0=ofs1;
+			first=0;
+		}
+
+		if (ofs1>ofs0)
+		{
+			s.location=ofs0;
+			s.length=ofs1-ofs0;
+		}
+		else
+		{
+			s.location=ofs1;
+			s.length=ofs0-ofs1;
+		}
+
+		[self _setSelection: s];
+		[self displayIfNeeded];
+
+		e=[NSApp nextEventMatchingMask: NSLeftMouseDownMask|NSLeftMouseUpMask|
+		                                NSLeftMouseDraggedMask|NSMouseMovedMask
+			untilDate: [NSDate distantFuture]
+			inMode: NSEventTrackingRunLoopMode
+			dequeue: YES];
+	}
+}
+
+@end
+
+
+/**
+Handle master_fd
+**/
+
+@implementation TerminalView (input)
+
+-(NSDate *) timedOutEvent: (void *)data type: (RunLoopEventType)t
+	forMode: (NSString *)mode
+{
+	NSLog(@"timedOutEvent:type:forMode: ignored");
+	return nil;
+}
+
+-(void) receivedEvent: (void *)data
+	type: (RunLoopEventType)t
+	extra: (void *)extra
+	forMode: (NSString *)mode
+{
+	char buf[8];
+	int size,total;
+
+//	get_zombies();
+
+//	printf("got event %i %i\n",(int)data,t);
+	total=0;
+	num_scrolls=0;
+	dirty.x0=-1;
+
+	current_x=cursor_x;
+	current_y=cursor_y;
+
+	[self _clearSelection]; /* TODO? */
+
+	NSDebugLLog(@"term",@"receiving output");
+
+	while (1)
+	{
+		{
+			fd_set s;
+			struct timeval tv;
+			FD_ZERO(&s);
+			FD_SET(master_fd,&s);
+			tv.tv_sec=0;
+			tv.tv_usec=0;
+			if (!select(master_fd+1,&s,NULL,NULL,&tv)) break;
+		}
+
+		size=read(master_fd,buf,1);
+		if (size<=0)
+		{
+//			get_zombies();
+			[[NSNotificationCenter defaultCenter]
+				postNotificationName: TerminalViewEndOfInputNotification
+				object: self];
+			break;
+		}
+//		printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
+
+
+		[tp processByte: buf[0]];
+
+		total++;
+		if (total>=8192 || (num_scrolls+abs(pending_scroll))>10)
+			break; /* give other things a chance */
+	}
+
+	if (cursor_x!=current_x || cursor_y!=current_y)
+	{
+		ADD_DIRTY(current_x,current_y,1,1);
+		SCREEN(current_x,current_y).attr|=0x80;
+		ADD_DIRTY(cursor_x,cursor_y,1,1);
+		draw_cursor=YES;
+	}
+
+	NSDebugLLog(@"term",@"done (%i %i) (%i %i)\n",
+		dirty.x0,dirty.y0,dirty.x1,dirty.y1);
+
+	if (dirty.x0>=0)
+	{
+		NSRect dr;
+
+		if (sb_length)
+			[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+				knobProportion: sy/(float)(sy+sb_length)];
+		else
+			[scroller setFloatValue: 1.0 knobProportion: 1.0];
+
+//		NSLog(@"dirty=(%i %i)-(%i %i)\n",dirty.x0,dirty.y0,dirty.x1,dirty.y1);
+		dr.origin.x=dirty.x0*fx;
+		dr.origin.y=dirty.y0*fy;
+		dr.size.width=(dirty.x1-dirty.x0)*fx;
+		dr.size.height=(dirty.y1-dirty.y0)*fy;
+		dr.origin.y=fy*sy-(dr.origin.y+dr.size.height);
+//		NSLog(@"-> dirty=(%g %g)+(%g %g)\n",dirty.origin.x,dirty.origin.y,dirty.size.width,dirty.size.height);
+		[self setNeedsDisplayInRect: dr];
+
+		if (current_scroll!=0)
+		{ /* TODO */
+			current_scroll=0;
+			draw_all=YES;
+			[self setNeedsDisplay: YES];
+		}
+	}
+}
+
+@end
+
+
+/**
+misc. stuff
+**/
+
+@implementation TerminalView
+
+-(void) _resizeTerminalTo: (NSSize)size
+{
+	int nsx,nsy;
+	struct winsize ws;
+	screen_char_t *nscreen,*nsbuf;
+	int iy,ny;
+	int copy_sx;
+
+	nsx=size.width/fx;
+	nsy=size.height/fy;
+
+	NSDebugLLog(@"term",@"_resizeTerminalTo: (%g %g) %i %i (%g %g)\n",
+		size.width,size.height,
+		nsx,nsy,
+		nsx*fx,nsy*fy);
+
+	if (ignore_resize)
+	{
+		NSDebugLLog(@"term",@"ignored");
+		return;
+	}
+
+	if (nsx<1) nsx=1;
+	if (nsy<1) nsy=1;
+
+	if (nsx==sx && nsy==sy)
+	{
+		/* Do a complete redraw anyway. Even though we don't really need it,
+		the resize ight have caused other things to overwrite our part of the
+		window. */
+		draw_all=YES;
+		return;
+	}
+
+	[self _clearSelection]; /* TODO? */
+
+	nscreen=malloc(nsx*nsy*sizeof(screen_char_t));
+	nsbuf=malloc(nsx*max_scrollback*sizeof(screen_char_t));
+	if (!nscreen || !nsbuf)
+	{
+		NSLog(@"Failed to allocate screen buffer!");
+		return;
+	}
+	memset(nscreen,0,sizeof(screen_char_t)*nsx*nsy);
+	memset(nsbuf,0,sizeof(screen_char_t)*nsx*max_scrollback);
+
+	copy_sx=sx;
+	if (copy_sx>nsx)
+		copy_sx=nsx;
+
+//	NSLog(@"copy %i+%i %i  (%ix%i)-(%ix%i)\n",start,num,copy_sx,sx,sy,nsx,nsy);
+
+/* TODO: handle resizing and scrollback */
+	for (iy=-sb_length;iy<sy;iy++)
+	{
+		screen_char_t *src,*dst;
+		ny=iy-sy+nsy;
+		if (ny<-max_scrollback)
+			continue;
+
+		if (iy<0)
+			src=&sbuf[sx*(max_scrollback+iy)];
+		else
+			src=&screen[sx*iy];
+
+		if (ny<0)
+			dst=&nsbuf[nsx*(max_scrollback+ny)];
+		else
+			dst=&nscreen[nsx*ny];
+
+		memcpy(dst,src,copy_sx*sizeof(screen_char_t));
+	}
+
+	sb_length=sb_length+sy-nsy;
+	if (sb_length>max_scrollback)
+		sb_length=max_scrollback;
+	if (sb_length<0)
+		sb_length=0;
+
+	sx=nsx;
+	sy=nsy;
+	free(screen);
+	free(sbuf);
+	screen=nscreen;
+	sbuf=nsbuf;
+
+	if (cursor_x>sx) cursor_x=sx-1;
+	if (cursor_y>sy) cursor_y=sy-1;
+
+	if (sb_length)
+		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+			knobProportion: sy/(float)(sy+sb_length)];
+	else
+		[scroller setFloatValue: 1.0 knobProportion: 1.0];
+
+	[tp setTerminalScreenWidth: sx height: sy];
+
+	ws.ws_row=nsy;
+	ws.ws_col=nsx;
+	ioctl(master_fd,TIOCSWINSZ,&ws);
+
+	draw_all=YES;
+	[self setNeedsDisplay: YES];
+}
+
+-(void) setFrame: (NSRect)frame
+{
+	[super setFrame: frame];
+	[self _resizeTerminalTo: frame.size];
+}
+
+-(void) setFrameSize: (NSSize)size
+{
+	[super setFrameSize: size];
+	[self _resizeTerminalTo: size];
+}
+
+
+- initWithFrame: (NSRect)frame
+{
+	int ret;
+	NSRunLoop *rl;
+	struct winsize ws;
+
+	sx=80;
+	sy=25;
+
+	ws.ws_row=sy;
+	ws.ws_col=sx;
+	ret=forkpty(&master_fd,NULL,NULL,&ws);
+	if (ret<0)
+	{
+		NSLog(_(@"Unable to spawn process: %m."));
+		return nil;
+	}
+
+	if (ret==0)
+	{
+		const char *shell=getenv("SHELL");
+		if (!shell) shell="/bin/sh";
+		putenv("TERM=linux");
+		putenv("TERM_PROGRAM=GNUstep_Terminal");
+		execl(shell,shell,NULL);
+		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
+		exit(1);
+	}
+
+
+	if (!(self=[super initWithFrame: frame])) return nil;
+
+	{
+		NSRect r;
+		font=[TerminalView terminalFont];
+		boldFont=[TerminalViewDisplayPrefs boldTerminalFont];
+		r=[font boundingRectForFont];
+		fx=r.size.width;
+		fy=r.size.height;
+		/* TODO: clear up font metrics issues with xlib/backart */
+		fx0=fabs(r.origin.x);
+		if (r.origin.y<0)
+			fy0=fy+r.origin.y;
+		else
+			fy0=r.origin.y;
+		NSDebugLLog(@"term",@"Bounding (%g %g)+(%g %g)",fx0,fy0,fx,fy);
+	}
+
+	screen=malloc(sizeof(screen_char_t)*sx*sy);
+	memset(screen,0,sizeof(screen_char_t)*sx*sy);
+	draw_all=YES;
+
+	max_scrollback=256;
+	sbuf=malloc(sizeof(screen_char_t)*sx*max_scrollback);
+	memset(sbuf,0,sizeof(screen_char_t)*sx*max_scrollback);
+
+	tp=[[TerminalParser_Linux alloc] initWithTerminalScreen: self
+		width: sx  height: sy];
+
+//	NSLog(@"Got master fd=%i",master_fd);
+
+	rl=[NSRunLoop currentRunLoop];
+	[rl addEvent: (void *)master_fd
+		type: ET_RDESC
+		watcher: self
+		forMode: NSDefaultRunLoopMode];
+	return self;
+}
+
+-(void) dealloc
+{
+//	NSLog(@"closing master fd=%i\n",master_fd);
+	[[NSRunLoop currentRunLoop] removeEvent: (void *)master_fd
+		type: ET_RDESC
+		forMode: NSDefaultRunLoopMode
+		all: YES];
+
+	close(master_fd);
+//	get_zombies();
+
+	DESTROY(tp);
+
+	[scroller setTarget: nil];
+	DESTROY(scroller);
+
+	free(screen);
+	free(sbuf);
+	screen=NULL;
+	sbuf=NULL;
+
+	DESTROY(title_window);
+	DESTROY(title_miniwindow);
+
+	[super dealloc];
+}
+
+
+-(NSString *) windowTitle
+{
+	return title_window;
+}
+
+-(NSString *) miniwindowTitle
+{
+	return title_miniwindow;
+}
+
 
 -(void) setIgnoreResize: (BOOL)ignore
 {
 	ignore_resize=ignore;
 }
 
+
++(NSFont *) terminalFont
+{
+	return [TerminalViewDisplayPrefs terminalFont];
+}
 
 +(void) registerPasteboardTypes
 {

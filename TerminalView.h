@@ -26,7 +26,7 @@ struct selection_range
 	int location,length;
 };
 
-@interface TerminalView : NSView <TerminalScreen>
+@interface TerminalView : NSView
 {
 	NSScroller *scroller;
 
@@ -70,10 +70,13 @@ struct selection_range
 
 -(void) setIgnoreResize: (BOOL)ignore;
 
--(void) setScroller: (NSScroller *)sc;
-
 -(NSString *) windowTitle;
 -(NSString *) miniwindowTitle;
+
+-(void) runShell;
+-(void) runProgram: (NSString *)path
+	withArguments: (NSArray *)args
+	initialInput: (NSString *)d;
 
 +(NSFont *) terminalFont;
 
@@ -81,6 +84,12 @@ struct selection_range
 
 @end
 
+@interface TerminalView (display) <TerminalScreen>
+@end
+
+@interface TerminalView (scrolling_2)
+-(void) setScroller: (NSScroller *)sc;
+@end
 
 #endif
 
