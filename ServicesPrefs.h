@@ -20,6 +20,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	NSTableView *list;
 	NSPopUpButton *pb_input,*pb_output,*pb_type;
 	NSTextField *tf_name,*tf_cmdline,*tf_key;
+
+	NSButton *cb_string,*cb_filenames;
 }
 
 @end

@@ -11,6 +11,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <AppKit/NSTableColumn.h>
 #include <AppKit/NSScrollView.h>
 #include <AppKit/NSClipView.h>
+#include <AppKit/NSBox.h>
 #include <AppKit/GSVbox.h>
 #include <AppKit/GSHbox.h>
 
@@ -25,8 +26,11 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 {
 	NSString *name,*new_name;
 	NSMutableDictionary *d;
+	int i;
+
 	if (current<0)
 		return;
+
 	name=[service_list objectAtIndex: current];
 	new_name=[tf_name stringValue];
 	if (![new_name length])
@@ -36,15 +40,21 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		d=[[NSMutableDictionary alloc] init];
 
 	[d setObject: [tf_key stringValue]
-		forKey: @"Key"];
+		forKey: Key];
 	[d setObject: [tf_cmdline stringValue]
-		forKey: @"Commandline"];
+		forKey: Commandline];
 	[d setObject: [NSString stringWithFormat: @"%i",[pb_input indexOfSelectedItem]]
-		forKey: @"Input"];
+		forKey: Input];
 	[d setObject: [NSString stringWithFormat: @"%i",[pb_output indexOfSelectedItem]]
-		forKey: @"ReturnData"];
+		forKey: ReturnData];
 	[d setObject: [NSString stringWithFormat: @"%i",[pb_type indexOfSelectedItem]]
-		forKey: @"Type"];
+		forKey: Type];
+
+	i=0;
+	if ([cb_string state]) i|=1;
+	if ([cb_filenames state]) i|=2;
+	[d setObject: [NSString stringWithFormat: @"%i",i]
+		forKey: AcceptTypes];
 
 	if (![name isEqual: new_name])
 	{
@@ -85,9 +95,15 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		dictionaryForKey: @"TerminalServices"];
 	if (!d)
 	{
-		NSLog(@"TODO: set defaults");
+		NSDictionary *defaults;
+
+		defaults=[NSDictionary dictionaryWithContentsOfFile:
+			[[NSBundle mainBundle] pathForResource: @"DefaultTerminalServices"
+				ofType: @"plist"]];
+
+		d=defaults;
 	}
-	else
+
 	{
 		NSEnumerator *e=[d keyEnumerator];
 		NSString *key;
@@ -138,26 +154,40 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		[pb_input setEnabled: YES];
 		[pb_output setEnabled: YES];
 		[pb_type setEnabled: YES];
+		[cb_string setEnabled: YES];
+		[cb_filenames setEnabled: YES];
 
 		[tf_name setStringValue: name];
 
-		s=[d objectForKey: @"Key"];
+		s=[d objectForKey: Key];
 		[tf_key setStringValue: s?s:@""];
 
-		s=[d objectForKey: @"Commandline"];
+		s=[d objectForKey: Commandline];
 		[tf_cmdline setStringValue: s?s:@""];
 
-		i=[[d objectForKey: @"Type"] intValue];
+		i=[[d objectForKey: Type] intValue];
 		if (i<0 || i>0) i=0;
 		[pb_type selectItemAtIndex: i];
 
-		i=[[d objectForKey: @"Input"] intValue];
+		i=[[d objectForKey: Input] intValue];
 		if (i<0 || i>2) i=0;
 		[pb_input selectItemAtIndex: i];
 
-		i=[[d objectForKey: @"ReturnData"] intValue];
+		i=[[d objectForKey: ReturnData] intValue];
 		if (i<0 || i>1) i=0;
 		[pb_output selectItemAtIndex: i];
+
+		if ([d objectForKey: AcceptTypes])
+		{
+			i=[[d objectForKey: AcceptTypes] intValue];
+			[cb_string setState: !!(i&1)];
+			[cb_filenames setState: !!(i&2)];
+		}
+		else
+		{
+			[cb_string setState: 1];
+			[cb_filenames setState: 0];
+		}
 	}
 	else
 	{
@@ -167,6 +197,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		[pb_input setEnabled: NO];
 		[pb_output setEnabled: NO];
 		[pb_type setEnabled: NO];
+		[cb_string setEnabled: NO];
+		[cb_filenames setEnabled: NO];
 
 		[tf_name setStringValue: @""];
 		[tf_key setStringValue: @""];
@@ -225,6 +257,42 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	
 		top=[[GSVbox alloc] init];
 		[top setDefaultMinYMargin: 4];
+		
+		{
+			GSHbox *hb;
+			NSButton *b;
+
+			hb=[[GSHbox alloc] init];
+			[hb setDefaultMinXMargin: 4];
+			[hb setAutoresizingMask: NSViewMinXMargin];
+
+			b=[[NSButton alloc] init];
+			[b setTitle: _(@"Add")];
+			[b setTarget: self];
+			[b setAction: @selector(_addService:)];
+			[b sizeToFit];
+			[hb addView: b  enablingXResizing: NO];
+			DESTROY(b);
+
+			b=[[NSButton alloc] init];
+			[b setTitle: _(@"Remove")];
+			[b setTarget: self];
+			[b setAction: @selector(_removeService:)];
+			[b sizeToFit];
+			[hb addView: b  enablingXResizing: NO];
+			DESTROY(b);
+
+			b=[[NSButton alloc] init];
+			[b setTitle: _(@"Export...")];
+			[b setTarget: self];
+			[b setAction: @selector(_exportServices:)];
+			[b sizeToFit];
+			[hb addView: b  enablingXResizing: NO];
+			DESTROY(b);
+
+			[top addView: hb enablingYResizing: NO];
+			DESTROY(hb);
+		}
 
 		hb=[[GSHbox alloc] init];
 		[hb setDefaultMinXMargin: 4];
@@ -268,36 +336,44 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			[hb addView: vb enablingXResizing: YES];
 			DESTROY(vb);
 		}
-		
+
 		{
-			GSVbox *vb;
 			NSButton *b;
+			NSBox *box;
+			GSVbox *vb;
+
+			box=[[NSBox alloc] init];
+			[box setTitle: _(@"Accept types")];
+			[box setAutoresizingMask: NSViewMinXMargin|NSViewMinYMargin];
 
 			vb=[[GSVbox alloc] init];
 			[vb setDefaultMinYMargin: 4];
-			[vb setAutoresizingMask: NSViewMinXMargin];
 
-			b=[[NSButton alloc] init];
-			[b setTitle: _(@"Remove")];
-			[b setTarget: self];
-			[b setAction: @selector(_removeService:)];
-			[b sizeToFit];
+			b=cb_filenames=[[NSButton alloc] init];
 			[b setAutoresizingMask: NSViewWidthSizable];
-			[vb addView: b  enablingYResizing: NO];
-			DESTROY(b);
-
-			b=[[NSButton alloc] init];
-			[b setTitle: _(@"Add")];
-			[b setTarget: self];
-			[b setAction: @selector(_addService:)];
+			[b setButtonType: NSSwitchButton];
+			[b setTitle: _(@"Filenames")];
 			[b sizeToFit];
-			[b setAutoresizingMask: NSViewWidthSizable];
-			[vb addView: b  enablingYResizing: NO];
-			DESTROY(b);
+			[vb addView: b enablingYResizing: NO];
+			[b release];
 
-			[hb addView: vb enablingXResizing: YES];
+			b=cb_string=[[NSButton alloc] init];
+			[b setAutoresizingMask: NSViewWidthSizable];
+			[b setButtonType: NSSwitchButton];
+			[b setTitle: _(@"Plain text")];
+			[b sizeToFit];
+			[vb addView: b enablingYResizing: NO];
+			[b release];
+
+			[box setContentView: vb];
+			[box sizeToFit];
+			DESTROY(vb);
+			[hb addView: box enablingXResizing: YES];
+			DESTROY(box);
 		}
+
 		[top addView: hb enablingYResizing: NO];
+		DESTROY(hb);
 
 		{
 			GSTable *t;
@@ -370,6 +446,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 
 			[top addView: t enablingYResizing: NO];
+			DESTROY(t);
 		}
 
 		{

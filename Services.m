@@ -14,6 +14,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 #include "Services.h"
 
+#include "ServicesParameterWindowController.h"
+
 
 @implementation TerminalServices
 
@@ -36,9 +38,10 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 {
 	NSDictionary *info=[self _serviceInfoForName: name];
 
-	int type,input,ret_data;
+	int type,input,ret_data,accepttypes;
 	NSString *cmdline;
 	NSString *data;
+
 
 	NSDebugLLog(@"service",@"run service %@\n",name);
 	if (!info)
@@ -52,24 +55,47 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		return;
 	}
 
-	type=[[info objectForKey: @"Type"] intValue];
-	ret_data=[[info objectForKey: @"ReturnData"] intValue];
-	input=[[info objectForKey: @"Input"] intValue];
-	cmdline=[info objectForKey: @"Commandline"];
+	type=[[info objectForKey: Type] intValue];
+	ret_data=[[info objectForKey: ReturnData] intValue];
+	input=[[info objectForKey: Input] intValue];
+	cmdline=[info objectForKey: Commandline];
+	accepttypes=[[info objectForKey: AcceptTypes] intValue];
 
 	NSDebugLLog(@"service",@"cmdline='%@' %i %i %i",cmdline,type,ret_data,input);
 
 	data=nil;
+	if (input && accepttypes&1 &&
+	    (data=[pb stringForType: NSStringPboardType]))
+	{
+	}
+	else if (input && accepttypes&2 &&
+	    (data=[pb propertyListForType: NSFilenamesPboardType]))
+	{
+		/* TODO: investigate. sometimes we get an NSString here instaed of an
+		NSArray */
+		NSLog(@"got filenames '%@' '%@' %i",data,[data class],[data isProxy]);
+	}
+
+	NSDebugLLog(@"service",@"got data '%@'",data);
+
 	if (input==1)
 	{
-		data=[pb stringForType: NSStringPboardType];
+		if ([data isKindOfClass: [NSArray class]])
+			data=[(NSArray *)data componentsJoinedByString: @"\n"];
 	}
 	else if (input==2)
 	{
 		int i,c=[cmdline length];
+		BOOL add_args;
 		unichar ch;
 		NSMutableString *str=[cmdline mutableCopy];
+		int p_pos;
 
+		if (data && [data isKindOfClass: [NSArray class]])
+			data=[(NSArray *)data componentsJoinedByString: @" "];
+
+		add_args=YES;
+		p_pos=-1;
 		for (i=0;i<c-1;i++)
 		{
 			ch=[str characterAtIndex: i];
@@ -82,28 +108,46 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 					withString: @""];
 				continue;
 			}
-			if (ch=='s')
-				break;
+			if (ch=='s' && data)
+			{
+				add_args=NO;
+				[str replaceCharactersInRange: NSMakeRange(i,2)
+					withString: data];
+				i+=[data length];
+				continue;
+			}
+			if (ch=='p')
+			{
+				p_pos=i;
+				continue;
+			}
 		}
 
-		if (i==c-1)
+		if (data && add_args)
 		{
 			[str appendString: @" "];
-			[str appendString: [pb stringForType: NSStringPboardType]];
-		}
-		else
-		{
-			[str replaceCharactersInRange: NSMakeRange(i,2)
-				withString: [pb stringForType: NSStringPboardType]];
+			[str appendString: data];
 		}
 		cmdline=[str autorelease];
+
+		if (p_pos!=-1)
+		{
+			cmdline=[TerminalServicesParameterWindowController
+				getCommandlineFrom: cmdline  selectRange: NSMakeRange(p_pos,2)
+				service: name];
+			if (!cmdline)
+			{
+				*error=[_(@"Service aborted by user.") retain];
+				return;
+			}
+		}
 	}
 
 	switch (type)
 	{
 	case 0:
 	{
-		NSTask *t=[[NSTask alloc] init];
+		NSTask *t=[[[NSTask alloc] init] autorelease];
 		NSPipe *stdin,*stdout;
 		NSFileHandle *in,*out;
 
@@ -112,10 +156,10 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 		NSDebugLLog(@"service",@"t=%@",t);
 
-		stdin=[[NSPipe alloc] init];
+		stdin=[[[NSPipe alloc] init] autorelease];
 		[t setStandardInput: stdin];
 		in=[stdin fileHandleForWriting];
-		stdout=[[NSPipe alloc] init];
+		stdout=[[[NSPipe alloc] init] autorelease];
 		[t setStandardOutput: stdout];
 		out=[stdout fileHandleForReading];
 
@@ -129,8 +173,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		}
 		[in closeFile];
 
-		NSDebugLLog(@"service",@"waitUntilExit");
-		[t waitUntilExit];
+/*		NSDebugLLog(@"service",@"waitUntilExit");
+		[t waitUntilExit];*/
 
 		if (ret_data)
 		{
@@ -140,18 +184,56 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			result=[out readDataToEndOfFile];
 			NSDebugLLog(@"service",@"got data |%@|",result);
 			s=[[NSString alloc] initWithData: result encoding: NSUTF8StringEncoding];
+			s=[s autorelease];
 			NSDebugLLog(@"service",@"= '%@'",s);
 
-			[pb declareTypes: [NSArray arrayWithObject: NSStringPboardType]
-				owner: self];
-			[pb setString: s  forType: NSStringPboardType];
-			DESTROY(s);
+			if (accepttypes==3)
+				[pb declareTypes: [NSArray arrayWithObjects:
+						NSStringPboardType,NSFilenamesPboardType,nil]
+					owner: self];
+			else if (accepttypes==2)
+				[pb declareTypes: [NSArray arrayWithObjects:
+						NSFilenamesPboardType,nil]
+					owner: self];
+			else if (accepttypes==1)
+				[pb declareTypes: [NSArray arrayWithObjects:
+						NSStringPboardType,nil]
+					owner: self];
+
+			if (accepttypes&2)
+			{
+				NSMutableArray *ma=[[[NSMutableArray alloc] init] autorelease];
+				int i,c=[s length];
+				NSRange cur;
+
+				for (i=0;i<c;)
+				{
+					for (;i<c && [s characterAtIndex: i]<=32;i++) ;
+					if (i==c)
+						break;
+					cur.location=i;
+					for (;i<c && [s characterAtIndex: i]>32;i++) ;
+					cur.length=i-cur.location;
+					[ma addObject: [s substringWithRange: cur]];
+				}
+
+				NSDebugLLog(@"service",@"returning filenames: %@",ma);
+				[pb setPropertyList: ma forType: NSFilenamesPboardType];
+			}
+
+			if (accepttypes&1)
+				[pb setString: s  forType: NSStringPboardType];
+
+			NSDebugLLog(@"service",@"return is set");
+		}
+		else
+		{
+			NSDebugLLog(@"service",@"ignoring output");
+			[out closeFile];
+			[t waitUntilExit];
 		}
 
 		NSDebugLLog(@"service",@"clean up");
-		DESTROY(stdin);
-		DESTROY(stdout);
-		DESTROY(t);
 	}
 		break;
 
@@ -179,6 +261,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		NSString *key;
 		NSMutableDictionary *md;
 		NSDictionary *info;
+		NSArray *types;
 
 		info=[d objectForKey: name];
 
@@ -192,7 +275,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 				@"default",nil]
 			forKey: @"NSMenuItem"];
 
-		key=[info objectForKey: @"Key"];
+		key=[info objectForKey: Key];
 		if (key && [key length])
 		{
 			[md setObject: [NSDictionary dictionaryWithObjectsAndKeys:
@@ -200,14 +283,24 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 				forKey: @"NSKeyEquivalent"];
 		}
 
-		i=[[info objectForKey: @"Input"] intValue];
-		if (i==1 || i==2)
-			[md setObject: [NSArray arrayWithObject: NSStringPboardType]
+		i=[[info objectForKey: AcceptTypes] intValue];
+		if (i==3)
+			types=[NSArray arrayWithObjects: NSStringPboardType,NSFilenamesPboardType,nil];
+		else if (i==2)
+			types=[NSArray arrayWithObjects: NSFilenamesPboardType,nil];
+		else if (i==1)
+			types=[NSArray arrayWithObjects: NSStringPboardType,nil];
+		else
+			types=nil;
+
+		i=[[info objectForKey: Input] intValue];
+		if (types && (i==1 || i==2))
+			[md setObject: types
 				forKey: @"NSSendTypes"];
 
-		i=[[info objectForKey: @"ReturnData"] intValue];
-		if (i==1)
-			[md setObject: [NSArray arrayWithObject: NSStringPboardType]
+		i=[[info objectForKey: ReturnData] intValue];
+		if (types && i==1)
+			[md setObject: types
 				forKey: @"NSReturnTypes"];
 
 		[a addObject: md];

@@ -1,0 +1,60 @@
+{
+    TerminalServices = {
+	"Arithmetic Calculation" = {
+	    Commandline = "echo \"%s\" | bc";
+	    Input = 2;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+	"Line Count" = {
+	    Commandline = "wc -l";
+	    Input = 1;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+	"Reformat source" = {
+	    Commandline = "expand | unexpand -t4";
+	    Input = 1;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+	Sort = {
+	    Commandline = sort;
+	    Input = 1;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+	Time = {
+	    Commandline = date;
+	    Input = 0;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+	"Word Count" = {
+	    Commandline = wc;
+	    Input = 1;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+	"Wrap and Reply" = {
+	    Commandline = "fmt -w 70 | sed -e \"s/^/> /\"";
+	    Input = 1;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+	"Wrap to 72 Columns" = {
+	    Commandline = "fmt -w 72";
+	    Input = 1;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+    };
+}

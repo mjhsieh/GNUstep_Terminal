@@ -14,6 +14,7 @@ Terminal_OBJC_FILES = \
 	\
 	Services.m \
 	ServicesPrefs.m \
+	ServicesParameterWindowController.m \
 	\
 	TerminalView.m \
 	TerminalViewPrefs.m \
@@ -29,7 +30,7 @@ Terminal_LOCALIZED_RESOURCE_FILES = Localizable.strings
 Terminal_LANGUAGES = English Swedish German
 
 Terminal_APPLICATION_ICON = Terminal.tiff
-Terminal_RESOURCE_FILES = Terminal.tiff
+Terminal_RESOURCE_FILES = Terminal.tiff DefaultTerminalServices.plist
 
 MAKE_STRINGS_OPTIONS = --aggressive-match --aggressive-remove
 
