@@ -1477,8 +1477,12 @@ while (1)
 		r=[font boundingRectForFont];
 		fx=r.size.width;
 		fy=r.size.height;
-		fx0=r.origin.x;
-		fy0=fabs(r.origin.y);
+		/* TODO: clear up font metrics issues with xlib/backart */
+		fx0=fabs(r.origin.x);
+		if (r.origin.y<0)
+			fy0=fy+r.origin.y;
+		else
+			fy0=r.origin.y;
 		NSLog(@"Bounding (%g %g)+(%g %g)",fx0,fy0,fx,fy);
 	}
 
