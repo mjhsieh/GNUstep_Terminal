@@ -16,6 +16,9 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 #include "ServicesParameterWindowController.h"
 
+#include "TerminalWindow.h"
+#include "TerminalView.h"
+
 
 @implementation TerminalServices
 
@@ -240,6 +243,25 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	}
 		break;
 
+
+	case TYPE_WINDOW_IDLE:
+	case TYPE_WINDOW_NEW:
+	{
+		TerminalWindowController *twc=nil;
+
+		if (type==TYPE_WINDOW_IDLE)
+			twc=[TerminalWindowController idleTerminalWindow];
+		if (!twc)
+			twc=[TerminalWindowController newTerminalWindow];
+
+		[twc showWindow: self];
+
+		[[twc terminalView] runProgram: @"/bin/sh"
+			withArguments: [NSArray arrayWithObjects: @"-c",cmdline,nil]
+			initialInput: data];
+	}
+		break;
+
 	}
 	NSDebugLLog(@"service",@"return");
 }
@@ -303,10 +325,14 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			[md setObject: types
 				forKey: @"NSSendTypes"];
 
-		i=[[info objectForKey: ReturnData] intValue];
-		if (types && i==1)
-			[md setObject: types
-				forKey: @"NSReturnTypes"];
+		i=[[info objectForKey: Type] intValue];
+		if (i==TYPE_BACKGROUND)
+		{
+			i=[[info objectForKey: ReturnData] intValue];
+			if (types && i==1)
+				[md setObject: types
+					forKey: @"NSReturnTypes"];
+		}
 
 		[a addObject: md];
 		DESTROY(md);

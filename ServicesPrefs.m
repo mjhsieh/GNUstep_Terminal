@@ -159,8 +159,10 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		[tf_cmdline setStringValue: s?s:@""];
 
 		i=[[d objectForKey: Type] intValue];
-		if (i<0 || i>0) i=0;
+		if (i<0 || i>2) i=0;
 		[pb_type selectItemAtIndex: i];
+		if (i!=0)
+			[pb_output setEnabled: NO];
 
 		i=[[d objectForKey: Input] intValue];
 		if (i<0 || i>2) i=0;
@@ -547,6 +549,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			[b setAutoresizingMask: NSViewWidthSizable];
 			[b setAutoenablesItems: NO];
 			[b addItemWithTitle: _(@"Run in background")];
+			[b addItemWithTitle: _(@"Run in new window")];
+			[b addItemWithTitle: _(@"Run in idle window")];
 			[b sizeToFit];
 			[vb addView: b enablingYResizing: NO];
 			[b release];

@@ -1499,6 +1499,21 @@ misc. stuff
 }
 
 
+-(void) runShell
+{
+	NSLog(@"-runShell");
+}
+
+-(void) runProgram: (NSString *)path
+	withArguments: (NSArray *)args
+	initialInput: (NSString *)d
+{
+	NSLog(@"-runProgram: %@  withArguments: %@  initialInput: %@",
+		path,args,d);
+}
+
+
+
 +(NSFont *) terminalFont
 {
 	return [TerminalViewDisplayPrefs terminalFont];

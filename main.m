@@ -2,131 +2,17 @@
 copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 */
 
-#include <math.h>
-#include <sys/wait.h>
-
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSBundle.h>
-#include <Foundation/NSNotification.h>
 #include <Foundation/NSUserDefaults.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSView.h>
 #include <AppKit/NSMenu.h>
-#include <AppKit/NSWindow.h>
-#include <AppKit/NSWindowController.h>
-#include <AppKit/NSScroller.h>
-#include <AppKit/GSHbox.h>
 
 
+#include "TerminalWindow.h"
 #include "TerminalView.h"
 #include "PreferencesWindowController.h"
-
-
-static void get_zombies(void)
-{
-	int status,pid;
-	while ((pid=waitpid(-1,&status,WNOHANG))>0)
-	{
-//		printf("got %i\n",pid);
-	}
-}
-
-
-@interface TerminalWindowController : NSWindowController
-{
-	TerminalView *tv;
-}
-
-- init;
-@end
-
-@implementation TerminalWindowController
-- init
-{
-	NSWindow *win;
-	NSFont *font;
-	NSScroller *scroller;
-	GSHbox *hb;
-	float fx,fy;
-	int scroller_width;
-
-	font=[TerminalView terminalFont];
-	fx=[font boundingRectForFont].size.width;
-	fy=[font boundingRectForFont].size.height;
-
-	scroller_width=ceil([NSScroller scrollerWidth]/fx);
-
-	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*(80+scroller_width),fy*25)
-		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
-		backing: NSBackingStoreRetained
-		defer: YES];
-	if (!(self=[super initWithWindow: win])) return nil;
-
-	[win setTitle: @"Terminal"];
-	[win setDelegate: self];
-
-	[win setResizeIncrements: NSMakeSize(fx,fy)];
-	[win setContentSize: NSMakeSize(fx*(80+scroller_width),fy*25+1)];
-
-	hb=[[GSHbox alloc] init];
-
-	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,[NSScroller scrollerWidth]-1,fy)];
-	[scroller setArrowsPosition: NSScrollerArrowsMaxEnd];
-	[scroller setEnabled: YES];
-	[scroller setAutoresizingMask: NSViewHeightSizable];
-	[hb addView: scroller  enablingXResizing: NO];
-	[scroller release];
-
-	tv=[[TerminalView alloc] init];
-	[tv setIgnoreResize: YES];
-	[tv setAutoresizingMask: NSViewHeightSizable|NSViewWidthSizable];
-	[tv setScroller: scroller];
-	[hb addView: tv];
-	[tv release];
-	[win makeFirstResponder: tv];
-	[tv setIgnoreResize: NO];
-
-	[win setContentView: hb];
-	DESTROY(hb);
-
-	[win release];
-
-	[[NSNotificationCenter defaultCenter]
-		addObserver: self
-		selector: @selector(close)
-		name: TerminalViewEndOfInputNotification
-		object: tv];
-	[[NSNotificationCenter defaultCenter]
-		addObserver: self
-		selector: @selector(_updateTitle:)
-		name: TerminalViewTitleDidChangeNotification
-		object: tv];
-
-	return self;
-}
-
-
--(void) _updateTitle: (NSNotification *)n
-{
-	[[self window] setTitle: [tv windowTitle]];
-	[[self window] setMiniwindowTitle: [tv miniwindowTitle]];
-}
-
-
--(void) dealloc
-{
-	[[NSNotificationCenter defaultCenter]
-		removeObserver: self];
-	[super dealloc];
-}
-
--(void) windowWillClose: (NSNotification *)n
-{
-	get_zombies();
-	[self autorelease];
-}
-
-@end
 
 
 @interface NSMenu (helpers)
@@ -246,12 +132,12 @@ general
 
 	/* 'Edit' menu */
 	m=[[NSMenu alloc] init];
-	[m addItemWithTitle: _(@"Copy")
-		action: @selector(copy:)
-		keyEquivalent: @"c"];
 	[m addItemWithTitle: _(@"Cut")
 		action: @selector(cut:)
 		keyEquivalent: @"x"];
+	[m addItemWithTitle: _(@"Copy")
+		action: @selector(copy:)
+		keyEquivalent: @"c"];
 	[m addItemWithTitle: _(@"Paste")
 		action: @selector(paste:)
 		keyEquivalent: @"v"];
@@ -287,8 +173,9 @@ general
 -(void) openWindow: (id)sender
 {
 	TerminalWindowController *twc;
-	twc=[[TerminalWindowController alloc] init];
-	[twc showWindow: self];
+	twc=[TerminalWindowController newTerminalWindow];
+	[twc setShouldCloseOnEOF: YES];
+	[[twc terminalView] runShell];
 }
 
 

@@ -16,6 +16,8 @@ Terminal_OBJC_FILES = \
 	ServicesPrefs.m \
 	ServicesParameterWindowController.m \
 	\
+	TerminalWindow.m \
+	\
 	TerminalView.m \
 	TerminalViewPrefs.m \
 	\
