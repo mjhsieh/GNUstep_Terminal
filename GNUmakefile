@@ -10,7 +10,8 @@ VERSION = 0.1.3
 ADDITIONAL_OBJCFLAGS += -Wall -O2 -D$(subst -,_,$(GNUSTEP_HOST_OS))
 
 Terminal_OBJC_FILES = \
-	main.m
+	main.m \
+	TerminalView.m
 
 Terminal_LDFLAGS = -lutil
 
