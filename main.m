@@ -47,12 +47,15 @@ static void get_zombies(void)
 	NSScroller *scroller;
 	GSHbox *hb;
 	float fx,fy;
+	int scroller_width;
 
 	font=[TerminalView terminalFont];
 	fx=[font boundingRectForFont].size.width;
 	fy=[font boundingRectForFont].size.height;
 
-	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*82,fy*24)
+	scroller_width=ceil([NSScroller scrollerWidth]/fx);
+
+	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*(80+scroller_width),fy*24)
 		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
 		backing: NSBackingStoreRetained
 		defer: YES];
@@ -62,11 +65,11 @@ static void get_zombies(void)
 	[win setDelegate: self];
 
 	[win setResizeIncrements: NSMakeSize(fx,fy)];
-	[win setContentSize: NSMakeSize(fx*82+1,fy*24+1)];
+	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*24+1)];
 
 	hb=[[GSHbox alloc] init];
 
-	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,fx*2,fy*24)];
+	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,scroller_width*fx-1,fy*24)];
 	[scroller setArrowsPosition: NSScrollerArrowsMaxEnd];
 	[scroller setEnabled: YES];
 	[scroller setAutoresizingMask: NSViewHeightSizable];

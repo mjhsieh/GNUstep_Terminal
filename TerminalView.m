@@ -493,6 +493,15 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	nsx=size.width/fx;
 	nsy=size.height/fy;
+
+	NSDebugLLog(@"term",@"_resizeTerminalTo: (%g %g) %i %i (%g %g)\n",
+		size.width,size.height,
+		nsx,nsy,
+		nsx*fx,nsy*fy);
+
+	if (nsx<1) nsx=1;
+	if (nsy<1) nsy=1;
+
 	if (nsx==sx && nsy==sy) return;
 
 	nscreen=malloc(nsx*nsy*sizeof(screen_char_t));
@@ -731,6 +740,10 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	NSDebugLLog(@"ts",@"goto: %i:%i",x,y);
 	cursor_x=x;
 	cursor_y=y;
+	if (cursor_x>=sx) cursor_x=sx-1;
+	if (cursor_x<0) cursor_x=0;
+	if (cursor_y>=sy) cursor_y=sy-1;
+	if (cursor_y<0) cursor_y=0;
 }
 
 -(void) ts_putChar: (screen_char_t)ch  count: (int)c  at: (int)x:(int)y
