@@ -4,7 +4,7 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-13 02:04:25 +0200
+updated by make_strings 2002-06-13 02:32:39 +0200
 add comments above this one
 ***/
 
@@ -15,8 +15,8 @@ add comments above this one
 /* File: ServicesPrefs.m:657 */
 "Command line:" = "Befehlszeile:";
 
-/* File: TerminalView.m:1359 */
-/* File: TerminalView.m:1360 */
+/* File: TerminalView.m:1361 */
+/* File: TerminalView.m:1362 */
 /* File: main.m:130 */
 "Terminal" = "Terminal";
 
@@ -100,15 +100,15 @@ add comments above this one
 
 
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:1405 */
+/* File: TerminalView.m:1407 */
 "Unable to fork: %m." = "Kann keinen neuen Prozess starten: %m.";
-/* File: TerminalView.m:1393 */
+/* File: TerminalView.m:1395 */
 "Unable to open pipe for input: %m."
 = "Kann Pipe nicht zur Eingabe benutzen: %m.";
-/* File: TerminalView.m:1332 */
+/* File: TerminalView.m:1334 */
 "Unable to spawn process: %m." = "Kann keinen Prozess erzeugen: %m.";
 /* File: TerminalView.m:1242 */
-"[Process exited]\n" = "[Prozess beendet]\n";
+"[Process exited]" = "[Prozess beendet]";
 
 
 /*** Strings from TerminalViewPrefs.m ***/
@@ -139,8 +139,8 @@ add comments above this one
 
 
 /*** Strings from TerminalWindow.m ***/
-/* File: TerminalWindow.m:159 */
-/* File: TerminalWindow.m:155 */
+/* File: TerminalWindow.m:165 */
+/* File: TerminalWindow.m:161 */
 " (idle)" = " (unbenutzt)";
 
 
