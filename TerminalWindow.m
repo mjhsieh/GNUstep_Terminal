@@ -211,6 +211,7 @@ static NSMutableArray *idle_list;
 	TerminalWindowController *twc;
 
 	twc=[[self alloc] init];
+	[twc setShouldCloseWhenIdle: YES];
 	[twc showWindow: self];
 	return twc;
 }
@@ -220,7 +221,7 @@ static NSMutableArray *idle_list;
 	NSDebugLLog(@"idle",@"get idle window from idle list: %@",idle_list);
 	if ([idle_list count])
 		return [idle_list objectAtIndex: 0];
-	return [self newTerminalWindow];
+	return [[self alloc] init];
 }
 
 @end

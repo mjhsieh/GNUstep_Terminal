@@ -181,7 +181,6 @@ general
 {
 	TerminalWindowController *twc;
 	twc=[TerminalWindowController newTerminalWindow];
-	[twc setShouldCloseWhenIdle: YES];
 	[[twc terminalView] runShell];
 }
 
