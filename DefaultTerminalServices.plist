@@ -1,5 +1,4 @@
 {
-    TerminalServices = {
 	"Arithmetic Calculation" = {
 	    Commandline = "echo \"%s\" | bc";
 	    Input = 2;
@@ -56,5 +55,4 @@
 	    ReturnData = 1;
 	    Type = 0;
 	};
-    };
 }

@@ -91,18 +91,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	DESTROY(service_list);
 
 	services=[[NSMutableDictionary alloc] init];
-	d=[[NSUserDefaults standardUserDefaults]
-		dictionaryForKey: @"TerminalServices"];
-	if (!d)
-	{
-		NSDictionary *defaults;
-
-		defaults=[NSDictionary dictionaryWithContentsOfFile:
-			[[NSBundle mainBundle] pathForResource: @"DefaultTerminalServices"
-				ofType: @"plist"]];
-
-		d=defaults;
-	}
+	d=[TerminalServices terminalServicesDictionary];
 
 	{
 		NSEnumerator *e=[d keyEnumerator];

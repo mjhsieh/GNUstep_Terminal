@@ -18,6 +18,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 +(void) updateServicesPlist;
 
++(NSDictionary *) terminalServicesDictionary;
+
 @end
 
 #endif

@@ -22,9 +22,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 -(NSDictionary *) _serviceInfoForName: (NSString *)name
 {
-	NSUserDefaults *ud=[NSUserDefaults standardUserDefaults];
 	NSDictionary *d;
-	d=[ud dictionaryForKey: @"TerminalServices"];
+	d=[TerminalServices terminalServicesDictionary];
 	d=[d objectForKey: name];
 	if (!d || ![d isKindOfClass: [NSDictionary class]])
 		return nil;
@@ -85,14 +84,16 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	}
 	else if (input==2)
 	{
-		int i,c=[cmdline length];
-		BOOL add_args;
-		unichar ch;
-		NSMutableString *str=[cmdline mutableCopy];
-		int p_pos;
-
 		if (data && [data isKindOfClass: [NSArray class]])
 			data=[(NSArray *)data componentsJoinedByString: @" "];
+	}
+
+	{
+		int i,c=[cmdline length];
+		BOOL add_args;
+		NSMutableString *str=[cmdline mutableCopy];
+		unichar ch;
+		int p_pos;
 
 		add_args=YES;
 		p_pos=-1;
@@ -108,7 +109,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 					withString: @""];
 				continue;
 			}
-			if (ch=='s' && data)
+			if (ch=='s' && data && input==2)
 			{
 				add_args=NO;
 				[str replaceCharactersInRange: NSMakeRange(i,2)
@@ -123,7 +124,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			}
 		}
 
-		if (data && add_args)
+		if (input==2 && data && add_args)
 		{
 			[str appendString: @" "];
 			[str appendString: data];
@@ -249,8 +250,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	NSEnumerator *e;
 	NSString *name;
 
-	d=[[NSUserDefaults standardUserDefaults]
-		dictionaryForKey: @"TerminalServices"];
+	d=[TerminalServices terminalServicesDictionary];
 
 	a=[[NSMutableArray alloc] init];
 
@@ -318,6 +318,21 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		d=[NSDictionary dictionaryWithObject: a forKey: @"NSServices"];
 		[d writeToFile: path atomically: YES];
 	}
+}
+
+
++(NSDictionary *) terminalServicesDictionary
+{
+	NSDictionary *d;
+
+	d=[[NSUserDefaults standardUserDefaults]
+		dictionaryForKey: @"TerminalServices"];
+	if (d) return d;
+
+	d=[NSDictionary dictionaryWithContentsOfFile:
+		[[NSBundle mainBundle] pathForResource: @"DefaultTerminalServices"
+			ofType: @"plist"]];
+	return d;
 }
 
 @end
