@@ -8,12 +8,36 @@
 	    ReturnData = 1;
 	    Type = 0;
 	};
+	"Define word (dict)" = {
+	    AcceptTypes = 1;
+	    Commandline = "dict %s";
+	    Input = 2;
+	    Key = "";
+	    ReturnData = 0;
+	    Type = 2;
+	};
+	"Fetch URL" = {
+	    AcceptTypes = 1;
+	    Commandline = "cd ; wget %s";
+	    Input = 2;
+	    Key = "";
+	    ReturnData = 0;
+	    Type = 2;
+	};
 	"Line Count" = {
 	    Commandline = "wc -l";
 	    Input = 1;
 	    Key = "";
 	    ReturnData = 1;
 	    Type = 0;
+	};
+	"Open shell here" = {
+	    AcceptTypes = 3;
+	    Commandline = "cd %s; /bin/bash";
+	    Input = 2;
+	    Key = "";
+	    ReturnData = 0;
+	    Type = 1;
 	};
 	"Reformat source" = {
 	    Commandline = "expand | unexpand -t4";
@@ -55,6 +79,38 @@
 	    Input = 1;
 	    Key = "";
 	    ReturnData = 1;
+	    Type = 0;
+	};
+	bunzip2 = {
+	    AcceptTypes = 2;
+	    Commandline = "bunzip2 %s";
+	    Input = 2;
+	    Key = "";
+	    ReturnData = 0;
+	    Type = 0;
+	};
+	bzip2 = {
+	    AcceptTypes = 2;
+	    Commandline = "bzip2 %s";
+	    Input = 2;
+	    Key = "";
+	    ReturnData = 0;
+	    Type = 0;
+	};
+	gunzip = {
+	    AcceptTypes = 2;
+	    Commandline = "gunzip %s";
+	    Input = 2;
+	    Key = "";
+	    ReturnData = 0;
+	    Type = 0;
+	};
+	gzip = {
+	    AcceptTypes = 2;
+	    Commandline = "gzip %s";
+	    Input = 2;
+	    Key = "";
+	    ReturnData = 0;
 	    Type = 0;
 	};
     };
