@@ -356,6 +356,9 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		[d writeToFile: path atomically: YES];
 	}
 
+	/* TODO: if a submenu of services is 'held' open when services are
+	reloaded, -gui crashes */
+
 	[[NSWorkspace sharedWorkspace] findApplications];
 }
 
