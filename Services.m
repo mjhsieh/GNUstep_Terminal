@@ -286,6 +286,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		NSMutableDictionary *md;
 		NSDictionary *info;
 		NSArray *types;
+		NSString *menu_name;
 
 		info=[d objectForKey: name];
 
@@ -294,8 +295,12 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		[md setObject: @"terminalService" forKey: @"NSMessage"];
 		[md setObject: name forKey: @"NSUserData"];
 
+		if ([name characterAtIndex: 0]=='/')
+			menu_name=[name substringFromIndex: 1];
+		else
+			menu_name=[NSString stringWithFormat: @"%@/%@",@"Terminal",name];
 		[md setObject: [NSDictionary dictionaryWithObjectsAndKeys:
-				[NSString stringWithFormat: @"%@/%@",@"Terminal",name],
+				menu_name,
 				@"default",nil]
 			forKey: @"NSMenuItem"];
 
