@@ -76,14 +76,22 @@ static int scrollBackLines;
 		if (!s)
 			terminalFont=[[NSFont userFixedPitchFontOfSize: size] retain];
 		else
+		{
 			terminalFont=[[NSFont fontWithName: s  size: size] retain];
+			if (!terminalFont)
+				terminalFont=[[NSFont userFixedPitchFontOfSize: size] retain];
+		}
 
 		size=[ud floatForKey: BoldTerminalFontSizeKey];
 		s=[ud stringForKey: BoldTerminalFontKey];
 		if (!s)
 			boldTerminalFont=[[NSFont userFixedPitchFontOfSize: size] retain];
 		else
+		{
 			boldTerminalFont=[[NSFont fontWithName: s  size: size] retain];
+			if (!boldTerminalFont)
+				boldTerminalFont=[[NSFont userFixedPitchFontOfSize: size] retain];
+		}
 
 		useMultiCellGlyphs=[ud boolForKey: UseMultiCellGlyphsKey];
 
