@@ -196,7 +196,12 @@ static void set_foreground(NSGraphicsContext *gc,
 	}
 
 	if (fg==0)
-		b=0.0;
+	{
+		if (in==2)
+			b=0.4;
+		else
+			b=0.0;
+	}
 	else if (in==0)
 		b=0.6;
 	else if (in==1)
