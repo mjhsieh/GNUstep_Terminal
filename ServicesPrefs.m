@@ -105,7 +105,9 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		}
 	}
 
-	service_list=[[services allKeys] mutableCopy];
+	service_list=[[[services allKeys]
+		sortedArrayUsingSelector: @selector(compare:)]
+		mutableCopy];
 
 	[list reloadData];
 	current=-1;
