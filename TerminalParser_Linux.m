@@ -1326,14 +1326,35 @@ Translates '\n' to '\r' when sending.
 	case 3: ch2=0x0d; break;
 
 	default:
-		nstr=[e characters];;
+		nstr=[e characters];
 		break;
 	}
 
-	if (mask&(NSAlternateKeyMask|NSCommandKeyMask))
 	{
-		NSDebugLLog(@"key",@"  meta");
-		[ts ts_sendCString: "\e"];
+		BOOL commandAsMeta=[TerminalViewKeyboardPrefs commandAsMeta];
+
+		/*
+		Thanks to different keyboard layouts and dumb default key handling
+		in GNUstep, this is a bit complex. There seem to be two main cases:
+
+		a. GNUstep has been correctly configured. Command is really command,
+		alternate is really alternate, and is used as meta. AltGr isn't
+		anything at all. No special options necessary.
+
+		b. GNUstep is using the default settings. Left alt is command, right
+		alt (which might be AltGr) is alternate. Users seem to actually want
+		left alt to be meta, and, if right alt is AltGr, right alt not to be
+		meta. Thus, when command-as-meta option is active, we intercept
+		command presses and treat them as meta, and we ignore alternate.
+		
+		*/
+
+		if ((commandAsMeta && (mask&NSCommandKeyMask)) ||
+		    (!commandAsMeta && (mask&NSAlternateKeyMask)))
+		{
+			NSDebugLLog(@"key",@"  meta");
+			[ts ts_sendCString: "\e"];
+		}
 	}
 
 	if (nstr)
