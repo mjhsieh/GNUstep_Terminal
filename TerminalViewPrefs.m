@@ -453,16 +453,22 @@ static int scrollBackLines;
 	[self _pickFont];
 }
 
--(void) changeFont: (id)sender
+/*
+TODO: The return type here should be (void), but due to forwarding issues in
+-base, it has to be (id) to avoid a return type mismatch error
+*/
+-(id) changeFont: (id)sender
 {
 	NSFont *f;
 
-	if (!f_cur) return;
+	if (!f_cur) return nil;
 	f=[sender convertFont: [f_cur font]];
-	if (!f) return;
+	if (!f) return nil;
 
 	[f_cur setStringValue: [NSString stringWithFormat: @"%@ %0.1f",[f fontName],[f pointSize]]];
 	[f_cur setFont: f];
+
+	return nil;
 }
 
 @end
