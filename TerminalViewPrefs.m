@@ -478,3 +478,129 @@ static BOOL loginShell;
 
 @end
 
+
+static NSString
+	*CommandAsMetaKey=@"CommandAsMeta",
+	*DoubleEscapeKey=@"DoubleEscape";
+
+static BOOL commandAsMeta,doubleEscape;
+
+@implementation TerminalViewKeyboardPrefs
+
++(void) initialize
+{
+	if (!ud)
+		ud=[NSUserDefaults standardUserDefaults];
+
+	commandAsMeta=[ud boolForKey: CommandAsMetaKey];
+	doubleEscape=[ud boolForKey: DoubleEscapeKey];
+}
+
++(BOOL) commandAsMeta
+{
+	return commandAsMeta;
+}
+
++(BOOL) doubleEscape
+{
+	return doubleEscape;
+}
+
+
+-(void) save
+{
+	if (!top) return;
+
+	if ([b_commandAsMeta state])
+		commandAsMeta=YES;
+	else
+		commandAsMeta=NO;
+	[ud setBool: commandAsMeta forKey: CommandAsMetaKey];
+
+	if ([b_doubleEscape state])
+		doubleEscape=YES;
+	else
+		doubleEscape=NO;
+	[ud setBool: doubleEscape forKey: DoubleEscapeKey];
+}
+
+-(void) revert
+{
+	[b_commandAsMeta setState: commandAsMeta];
+	[b_doubleEscape setState: doubleEscape];
+}
+
+
+-(NSString *) name
+{
+	return _(@"Keyboard");
+}
+
+-(void) setupButton: (NSButton *)b
+{
+	[b setTitle: _(@"Keyboard")];
+	[b sizeToFit];
+}
+
+-(void) willHide
+{
+}
+
+-(NSView *) willShow
+{
+	if (!top)
+	{
+		top=[[GSVbox alloc] init];
+		[top setDefaultMinYMargin: 8];
+
+		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+
+		{
+			NSButton *b;
+
+			b=b_commandAsMeta=[[NSButton alloc] init];
+			[b setAutoresizingMask: NSViewWidthSizable];
+			[b setTitle:
+				_(@"Treat the command key as meta.\n"
+				  @"\n"
+				  @"Note that with this enabled, you won't be\n"
+				  @"able to access menu entries with the\n"
+				  @"keyboard.")];
+			[b setButtonType: NSSwitchButton];
+			[b sizeToFit];
+			[top addView: b enablingYResizing: NO];
+			DESTROY(b);
+
+			[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+			[top addSeparator];
+			[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+
+			b=b_doubleEscape=[[NSButton alloc] init];
+			[b setAutoresizingMask: NSViewWidthSizable];
+			[b setTitle:
+				_(@"Send a double escape for the escape key.\n"
+				  @"\n"
+				  @"This means that the escape key will be\n"
+				  @"recognized faster by many programs, but\n"
+				  @"you can't use it as a substitute for meta.")];
+			[b setButtonType: NSSwitchButton];
+			[b sizeToFit];
+			[top addView: b enablingYResizing: NO];
+			DESTROY(b);
+		}
+
+		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+
+		[self revert];
+	}
+	return top;
+}
+
+-(void) dealloc
+{
+	DESTROY(top);
+	[super dealloc];
+}
+
+@end
+

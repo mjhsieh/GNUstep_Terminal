@@ -52,5 +52,19 @@ extern NSString *TerminalViewDisplayPrefsDidChangeNotification;
 
 @end
 
+
+@interface TerminalViewKeyboardPrefs : NSObject <PrefBox>
+{
+	GSVbox *top;
+
+	NSButton *b_commandAsMeta;
+	NSButton *b_doubleEscape;
+}
+
++(BOOL) commandAsMeta;
++(BOOL) doubleEscape;
+
+@end
+
 #endif
 

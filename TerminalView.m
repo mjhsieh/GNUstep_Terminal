@@ -922,6 +922,8 @@ Keyboard events
 	int i;
 	unsigned char tmp;
 	unichar ch;
+	if (master_fd==-1)
+		return;
 	for (i=0;i<[s length];i++)
 	{
 		ch=[s characterAtIndex: i];
@@ -930,11 +932,11 @@ Keyboard events
 		else
 		{
 			tmp=ch;
-			if (master_fd!=-1)
-				write(master_fd,&tmp,1);
+			write(master_fd,&tmp,1);
 		}
 	}
 }
+
 
 -(void) keyDown: (NSEvent *)e
 {
@@ -943,10 +945,9 @@ Keyboard events
 	unsigned int mask=[e modifierFlags];
 	unichar ch,ch2;
 	unsigned char tmp;
-	const char *str;
 
-	if (master_fd==-1)
-		return;
+	const char *str;
+	NSString *nstr;
 
 	NSDebugLLog(@"key",@"got key flags=%08x  repeat=%i '%@' '%@' %4i %04x %i %04x %i\n",
 		[e modifierFlags],[e isARepeat],[e characters],[e charactersIgnoringModifiers],[e keyCode],
@@ -963,9 +964,15 @@ Keyboard events
 
 	ch=[s characterAtIndex: 0];
 	str=NULL;
+	nstr=nil;
 	ch2=0;
 	switch (ch)
 	{
+	case '\e':
+		if ([TerminalViewKeyboardPrefs doubleEscape])
+			str="\e\e";
+		break;
+
 	case NSUpArrowFunctionKey   : str="\e[A"; break;
 	case NSDownArrowFunctionKey : str="\e[B"; break;
 	case NSLeftArrowFunctionKey : str="\e[D"; break;
@@ -1019,20 +1026,27 @@ Keyboard events
 	case 3: ch2=0x0d; break;
 
 	default:
-	{
-		s=[e characters];
-		[self _sendString: s];
-		return;
-	}
+		nstr=[e characters];;
+		break;
 	}
 
-	if (mask&NSCommandKeyMask)
+	/* don't check until we get here so we handle scrollback page-up/down
+	even when the view's idle */
+	if (master_fd==-1)
+		return;
+
+	if (mask&(NSAlternateKeyMask|NSCommandKeyMask))
 	{
 		NSDebugLLog(@"key",@"  meta");
 		write(master_fd,"\e",1);
 	}
 
-	if (str)
+	if (nstr)
+	{
+		NSDebugLLog(@"key",@"  send NSString '%@'",nstr);
+		[self _sendString: nstr];
+	}
+	else if (str)
 	{
 		NSDebugLLog(@"key",@"  send '%s'",str);
 		[self ts_sendCString: str];

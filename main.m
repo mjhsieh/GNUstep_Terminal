@@ -5,6 +5,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSBundle.h>
 #include <Foundation/NSUserDefaults.h>
+#include <Foundation/NSDebug.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSView.h>
 #include <AppKit/NSMenu.h>
@@ -80,6 +81,7 @@ general
 
 @class TerminalViewDisplayPrefs;
 @class TerminalViewShellPrefs;
+@class TerminalViewKeyboardPrefs;
 @class TerminalServicesPrefs;
 @class TerminalWindowPrefs;
 
@@ -95,6 +97,10 @@ general
 		DESTROY(pb);
 
 		pb=[[TerminalViewShellPrefs alloc] init];
+		[pwc addPrefBox: pb];
+		DESTROY(pb);
+
+		pb=[[TerminalViewKeyboardPrefs alloc] init];
 		[pwc addPrefBox: pb];
 		DESTROY(pb);
 
@@ -201,12 +207,42 @@ general
 @end
 
 
+/* TODO */
+@interface TerminalViewKeyboardPrefs
+-(BOOL) commandAsMeta;
+@end
+
+#include <AppKit/NSWindow.h>
+#include <AppKit/NSEvent.h>
+
+@interface NSWindow (avoid_warnings)
+-(void) sendEvent: (NSEvent *)e;
+@end
+
+
+@interface TerminalApplication : NSApplication
+@end
+
+@implementation TerminalApplication
+-(void) sendEvent: (NSEvent *)e
+{
+	if ([e type]==NSKeyDown && [e modifierFlags]&NSCommandKeyMask &&
+	    [TerminalViewKeyboardPrefs commandAsMeta])
+	{
+		NSDebugLLog(@"key",@"intercepting key equivalent");
+		[[e window] sendEvent: e];
+		return;
+	}
+	[super sendEvent: e];
+}
+@end
+
 
 int main(int argc, char **argv)
 {
 	CREATE_AUTORELEASE_POOL(arp);
 
-	[NSApplication sharedApplication];
+	[TerminalApplication sharedApplication];
 
 	[NSApp setDelegate: [[Terminal alloc] init]];
 	[NSApp run];
