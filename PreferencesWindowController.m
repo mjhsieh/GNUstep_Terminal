@@ -233,5 +233,17 @@ of the License. See COPYING or main.m for more information.
 	[super forwardInvocation: i];
 }
 
+-(NSMethodSignature *) methodSignatureForSelector: (SEL)sel
+{
+	NSMethodSignature *ms;
+
+	ms=[super methodSignatureForSelector: sel];
+	if (ms)
+		return ms;
+
+	ms=[current methodSignatureForSelector: sel];
+	return ms;
+}
+
 @end
 
