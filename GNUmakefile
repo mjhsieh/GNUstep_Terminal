@@ -11,7 +11,8 @@ ADDITIONAL_OBJCFLAGS += -Wall -O2 -D$(subst -,_,$(GNUSTEP_HOST_OS))
 
 Terminal_OBJC_FILES = \
 	main.m \
-	TerminalView.m
+	TerminalView.m \
+	TerminalParser_Linux.m
 
 Terminal_LDFLAGS = -lutil
 
