@@ -45,7 +45,7 @@ of the License. See COPYING or main.m for more information.
 {
 	NSWindow *win;
 
-	win=[[NSPanel alloc] initWithContentRect: NSMakeRect(100,100,380,410)
+	win=[[NSPanel alloc] initWithContentRect: NSMakeRect(100,100,290,400)
 		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
 		backing: NSBackingStoreRetained
 		defer: YES];
@@ -121,7 +121,7 @@ of the License. See COPYING or main.m for more information.
 	[win setDelegate: self];
 	[win setTitle: _(@"Preferences")];
 
-	[win setMinSize: NSMakeSize(275,400)];
+	[win setMinSize: NSMakeSize(290,400)];
 	[win setFrameUsingName: @"Preferences"];
 	[win setFrameAutosaveName: @"Preferences"];
 

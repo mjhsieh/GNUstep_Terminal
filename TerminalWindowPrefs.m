@@ -129,13 +129,10 @@ static BOOL addYBorders;
 	if (!top)
 	{
 		top=[[GSVbox alloc] init];
-		[top setDefaultMinYMargin: 8];
-
-		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+		[top setDefaultMinYMargin: 1];
 
 		{
 			NSTextField *f;
-
 
 			{
 				NSMatrix *m;
@@ -149,7 +146,8 @@ static BOOL addYBorders;
 					prototype: b
 					numberOfRows: 2
 					numberOfColumns: 1];
-				[m setAutoresizingMask: NSViewMinXMargin|NSViewMaxXMargin];
+				[m setAutoresizingMask: NSViewMinXMargin|NSViewMaxXMargin|
+					NSViewMinYMargin|NSViewMaxYMargin];
 
 				[[m cellAtRow: 0 column: 0] setTitle: _(@"Close new windows when idle")];
 				[[m cellAtRow: 1 column: 0] setTitle: _(@"Don't close new windows")];
@@ -164,7 +162,7 @@ static BOOL addYBorders;
 				[m setIntercellSpacing: NSMakeSize(0,3)];
 				[m sizeToCells];
 
-				[top addView: m enablingYResizing: NO];
+				[top addView: m enablingYResizing: YES];
 				DESTROY(m);
 			}
 
@@ -173,7 +171,8 @@ static BOOL addYBorders;
 				GSTable *t;
 
 				b=[[NSBox alloc] init];
-				[b setAutoresizingMask: NSViewWidthSizable];
+				[b setAutoresizingMask:
+					NSViewWidthSizable|NSViewMinYMargin|NSViewMaxYMargin];
 				[b setTitle: _(@"Default size")];
 
 				t=[[GSTable alloc] initWithNumberOfRows: 2 numberOfColumns: 2];
@@ -200,7 +199,7 @@ static BOOL addYBorders;
 				[b sizeToFit];
 				DESTROY(t);
 
-				[top addView: b enablingYResizing: NO];
+				[top addView: b enablingYResizing: YES];
 				DESTROY(b);
 			}
 
@@ -208,11 +207,11 @@ static BOOL addYBorders;
 				NSButton *b;
 
 				b=b_addYBorders=[[NSButton alloc] init];
-				[b setAutoresizingMask: NSViewMinXMargin|NSViewMaxXMargin];
+				[b setAutoresizingMask: NSViewMinXMargin|NSViewMaxXMargin|NSViewMinYMargin|NSViewMaxYMargin];
 				[b setButtonType: NSSwitchButton];
 				[b setTitle: _(@"Add top and bottom border")];
 				[b sizeToFit];
-				[top addView: b enablingYResizing: NO];
+				[top addView: b enablingYResizing: YES];
 			}
 		}
 

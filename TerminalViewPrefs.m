@@ -248,7 +248,8 @@ static int scrollBackLines;
 	if (!top)
 	{
 		top=[[GSVbox alloc] init];
-		[top setDefaultMinYMargin: 4];
+		[top setDefaultMinYMargin: 2];
+
 		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
 
 		{
@@ -274,13 +275,15 @@ static int scrollBackLines;
 			[top addView: hb enablingYResizing: NO];
 			DESTROY(hb);
 
+			[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+
 			{
 				NSBox *b;
 				GSTable *t;
 				NSColorWell *w;
 
 				b=[[NSBox alloc] init];
-//				[b setAutoresizingMask: NSViewWidthSizable];
+				[b setAutoresizingMask: NSViewMinXMargin|NSViewMaxXMargin];
 				[b setTitle: _(@"Cursor")];
 
 				t=[[GSTable alloc] initWithNumberOfRows: 2 numberOfColumns: 2];
@@ -345,6 +348,8 @@ static int scrollBackLines;
 				DESTROY(b);
 			}
 
+			[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+
 
 			b=b_useMultiCellGlyphs=[[NSButton alloc] init];
 			[b setTitle: _(@"Handle wide (multi-cell) glyphs")];
@@ -406,6 +411,9 @@ static int scrollBackLines;
 
 			[top addView: hb enablingYResizing: NO];
 			DESTROY(hb);
+
+
+			[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
 		}
 
 		[self revert];
@@ -535,18 +543,16 @@ static BOOL loginShell;
 		top=[[GSVbox alloc] init];
 		[top setDefaultMinYMargin: 4];
 
-		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
-
 		{
 			NSTextField *f;
 			NSButton *b;
 
 			b=b_loginShell=[[NSButton alloc] init];
-			[b setAutoresizingMask: NSViewWidthSizable];
+			[b setAutoresizingMask: NSViewMinYMargin];
 			[b setTitle: _(@"Start as login-shell")];
 			[b setButtonType: NSSwitchButton];
 			[b sizeToFit];
-			[top addView: b enablingYResizing: NO];
+			[top addView: b enablingYResizing: YES];
 			DESTROY(b);
 
 			tf_shell=f=[[NSTextField alloc] init];
@@ -556,9 +562,9 @@ static BOOL loginShell;
 			DESTROY(f);
 
 			f=[NSTextField newLabel: _(@"Shell:")];
-			[f setAutoresizingMask: NSViewWidthSizable];
+			[f setAutoresizingMask: NSViewMaxYMargin];
 			[f sizeToFit];
-			[top addView: f enablingYResizing: NO];
+			[top addView: f enablingYResizing: YES];
 			DESTROY(f);
 		}
 
@@ -650,13 +656,11 @@ static BOOL commandAsMeta,doubleEscape;
 		top=[[GSVbox alloc] init];
 		[top setDefaultMinYMargin: 8];
 
-		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
-
 		{
 			NSButton *b;
 
 			b=b_commandAsMeta=[[NSButton alloc] init];
-			[b setAutoresizingMask: NSViewWidthSizable];
+			[b setAutoresizingMask: NSViewMinYMargin|NSViewMaxYMargin|NSViewWidthSizable];
 			[b setTitle:
 				_(@"Treat the command key as meta.\n"
 				  @"\n"
@@ -665,15 +669,13 @@ static BOOL commandAsMeta,doubleEscape;
 				  @"keyboard.")];
 			[b setButtonType: NSSwitchButton];
 			[b sizeToFit];
-			[top addView: b enablingYResizing: NO];
+			[top addView: b enablingYResizing: YES];
 			DESTROY(b);
 
-			[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
 			[top addSeparator];
-			[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
 
 			b=b_doubleEscape=[[NSButton alloc] init];
-			[b setAutoresizingMask: NSViewWidthSizable];
+			[b setAutoresizingMask: NSViewMinYMargin|NSViewMaxYMargin|NSViewWidthSizable];
 			[b setTitle:
 				_(@"Send a double escape for the escape key.\n"
 				  @"\n"
@@ -682,11 +684,9 @@ static BOOL commandAsMeta,doubleEscape;
 				  @"you can't use it as a substitute for meta.")];
 			[b setButtonType: NSSwitchButton];
 			[b sizeToFit];
-			[top addView: b enablingYResizing: NO];
+			[top addView: b enablingYResizing: YES];
 			DESTROY(b);
 		}
-
-		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
 
 		[self revert];
 	}
