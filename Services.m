@@ -356,7 +356,7 @@ of the License. See COPYING or main.m for more information.
 	{
 		NSString *path;
 
-		path=[NSSearchPathForDirectoriesInDomains(NSUserDirectory,NSUserDomainMask,YES)
+		path=[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory,NSUserDomainMask,YES)
 			lastObject];
 		path=[path stringByAppendingPathComponent: @"Services"];
 		path=[path stringByAppendingPathComponent: @"TerminalServices.plist"];
