@@ -125,7 +125,7 @@ static const float col[16][3]={
 -(void) drawRect: (NSRect)r
 {
 	int ix,iy;
-	char buf[8];
+	unsigned char buf[8];
 	char *pbuf=buf;
 	int dlen;
 	NSGraphicsContext *cur=GSCurrentContext();
@@ -250,7 +250,7 @@ static const float col[16][3]={
 	charset		= 0;
 //	need_wrap	= 0;
 //	report_mouse	= 0;
-	utf             = 1; /* TODO? */
+	utf             = 0;
 	utf_count       = 0;
 
 	disp_ctrl	= 0;
@@ -1321,7 +1321,7 @@ while (1)
 	fy=[font boundingRectForFont].size.height;
 
 	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*80,fy*24)
-		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
+		styleMask: /*NSClosableWindowMask|*/NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
 		backing: NSBackingStoreRetained
 		defer: YES];
 	if (!(self=[super initWithWindow: win])) return nil;
