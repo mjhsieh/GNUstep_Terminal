@@ -10,7 +10,7 @@
 	};
 	"Define word (dict)" = {
 	    AcceptTypes = 1;
-	    Commandline = "dict %s";
+	    Commandline = "dict \"%s\"";
 	    Input = 2;
 	    Key = "";
 	    ReturnData = 0;
@@ -18,7 +18,7 @@
 	};
 	"Fetch URL" = {
 	    AcceptTypes = 1;
-	    Commandline = "cd ; wget %s";
+	    Commandline = "cd ; wget \"%s\"";
 	    Input = 2;
 	    Key = "";
 	    ReturnData = 0;
@@ -33,7 +33,7 @@
 	};
 	"Open shell here" = {
 	    AcceptTypes = 3;
-	    Commandline = "cd %s; /bin/bash";
+	    Commandline = "cd \"%s\"; /bin/bash";
 	    Input = 2;
 	    Key = "";
 	    ReturnData = 0;
