@@ -5,7 +5,7 @@ APP_NAME = Terminal
 PACKAGE_NAME = Terminal
 CVS_MODULE_NAME = Terminal
 CVS_OPTIONS = -d/opt/cvsroot
-VERSION = 0.0.2
+VERSION = 0.0.3
 
 ADDITIONAL_OBJCFLAGS += -Wall -O2
 
