@@ -1221,11 +1221,73 @@ while (1)
 
 	[self setNeedsDisplay: YES];
 }
-//	if (needs_update)
 }
 
 
-- initWithFrame: (NSRect) frame
+-(void) _resizeTerminalTo: (NSSize)size
+{
+	int nsx,nsy;
+	struct winsize ws;
+	screen_char_t *nscreen;
+	int iy,start,num,copy_sx;
+
+	nsx=size.width/fx;
+	nsy=size.height/fy;
+	if (nsx==sx && nsy==sy) return;
+
+	nscreen=malloc(nsx*nsy*sizeof(screen_char_t));
+	if (!nscreen)
+	{
+		NSLog(@"Failed to allocate screen buffer!");
+		return;
+	}
+	memset(nscreen,0,sizeof(screen_char_t)*nsx*nsy);
+
+	num=nsy;
+	if (num>sy)
+		num=sy;
+	start=sy-num;
+
+	copy_sx=sx;
+	if (copy_sx>nsx)
+		copy_sx=nsx;
+
+	for (iy=start;iy<start+num;iy++)
+	{
+		memcpy(&nscreen[nsx*(iy-start)],&screen[sx*iy],copy_sx*sizeof(screen_char_t));
+	}
+
+	sx=nsx;
+	sy=nsy;
+	free(screen);
+	screen=nscreen;
+
+	if (x>sx) x=sx-1;
+	if (y>sy) y=sy-1;
+
+	top=0;
+	bottom=sy;
+
+	ws.ws_row=nsy;
+	ws.ws_col=nsx;
+	ioctl(master_fd,TIOCSWINSZ,&ws);
+}
+
+
+-(void) setFrame: (NSRect)frame
+{
+	[super setFrame: frame];
+	[self _resizeTerminalTo: frame.size];
+}
+
+-(void) setFrameSize: (NSSize)size
+{
+	[super setFrameSize: size];
+	[self _resizeTerminalTo: size];
+}
+
+
+- initWithFrame: (NSRect)frame
 {
 	int ret;
 	NSRunLoop *rl;
