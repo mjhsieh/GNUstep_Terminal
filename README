@@ -9,7 +9,7 @@ Installing
 You'll need gnustep-base and gnustep-gui (or possibly some other
 openstep-like system). Recent versions are good. If you want to be able
 to use terminal services, you'll need a version of -gui newer than
-2002-06-12. The pty code is known to work on Linux and FreeBSD. Reports
+2002-06-12. The pty code is known to work on GNU/Linux and FreeBSD. Reports
 and/or patches for other systems are welcome.
 
 To build, run 'make'.
