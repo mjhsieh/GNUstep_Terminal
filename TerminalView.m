@@ -41,6 +41,11 @@ lots borrowed from linux/drivers/char/console.c, GNU GPL:ed
 #include "TerminalView.h"
 
 
+@interface NSView (unlockfocus)
+-(void) unlockFocusNeedsFlush: (BOOL)flush;
+@end
+
+
 NSString
 	*TerminalViewEndOfInputNotification=@"TerminalViewEndOfInput",
 	*TerminalViewTitleDidChangeNotification=@"TerminalViewTitleDidChange";
@@ -454,8 +459,11 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	{
 		NSRect dr;
 
-		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length+0.1)
-			knobProportion: sy/(float)(sy+sb_length)];
+		if (sb_length)
+			[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+				knobProportion: sy/(float)(sy+sb_length)];
+		else
+			[scroller setFloatValue: 1.0 knobProportion: 1.0];
 
 //		NSLog(@"dirty=(%i %i)-(%i %i)\n",dirty.x0,dirty.y0,dirty.x1,dirty.y1);
 		dr.origin.x=dirty.x0*fx;
@@ -531,8 +539,11 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	[tp setTerminalScreenWidth: sx height: sy];
 
-	[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length+0.1)
-		knobProportion: sy/(float)(sy+sb_length)];
+	if (sb_length)
+		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+			knobProportion: sy/(float)(sy+sb_length)];
+	else
+		[scroller setFloatValue: 1.0 knobProportion: 1.0];
 
 	ws.ws_row=nsy;
 	ws.ws_col=nsx;
@@ -641,8 +652,11 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 {
 	[scroller setTarget: nil];
 	ASSIGN(scroller,sc);
-	[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length+0.1)
-		knobProportion: sy/(float)(sy+sb_length)];
+	if (sb_length)
+		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+			knobProportion: sy/(float)(sy+sb_length)];
+	else
+		[scroller setFloatValue: 1.0 knobProportion: 1.0];
 	[scroller setTarget: self];
 	[scroller setAction: @selector(_updateScroll:)];
 }
@@ -814,6 +828,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		SCREEN(current_x,current_y).attr|=0x80; /* TODO? */
 	}
 	memmove(d, s, (b-t-nr) * sx * sizeof(screen_char_t));
+	if (!current_scroll)
 	{
 		float x0,y0,w,h,dx,dy;
 		x0=0;
@@ -826,7 +841,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		dy=sy*fy-dy-h;
 		[self lockFocus];
 		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
-		[self unlockFocus];
+		[self unlockFocusNeedsFlush: NO];
 	}
 	ADD_DIRTY(0,t,sx,b-t); /* TODO */
 }
@@ -850,6 +865,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		SCREEN(current_x,current_y).attr|=0x80; /* TODO? */
 	}
 	memmove(s + step, s, (b-t-nr)*sx*sizeof(screen_char_t));
+	if (!current_scroll)
 	{
 		float x0,y0,w,h,dx,dy;
 		x0=0;
@@ -862,7 +878,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		dy=sy*fy-dy-h;
 		[self lockFocus];
 		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
-		[self unlockFocus];
+		[self unlockFocusNeedsFlush: NO];
 	}
 	ADD_DIRTY(0,t,sx,b-t); /* TODO */
 }
@@ -890,6 +906,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		c=sx-x1;
 	d=&SCREEN(x1,y);
 	memmove(d,s,sizeof(screen_char_t)*c);
+	if (!current_scroll)
 	{
 		float cx0,y0,w,h,dx,dy;
 
@@ -905,7 +922,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		dy=sy*fy-dy-h;
 		[self lockFocus];
 		DPScomposite(GSCurrentContext(),cx0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
-		[self unlockFocus];
+		[self unlockFocusNeedsFlush: NO];
 	}
 	ADD_DIRTY(0,y,sx,1);
 }
