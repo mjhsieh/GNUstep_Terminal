@@ -24,6 +24,7 @@ extern NSString *TerminalViewDisplayPrefsDidChangeNotification;
 	NSTextField *f_terminalFont,*f_boldTerminalFont;
 	NSColorWell *w_cursorColor;
 	NSPopUpButton *pb_cursorStyle;
+	NSTextField *f_scrollBackLines;
 
 	NSTextField *f_cur;
 }
@@ -40,6 +41,8 @@ extern NSString *TerminalViewDisplayPrefsDidChangeNotification;
 #define CURSOR_BLOCK_INVERT  3
 +(int) cursorStyle;
 +(NSColor *) cursorColor;
+
++(int) scrollBackLines;
 
 @end
 

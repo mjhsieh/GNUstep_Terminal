@@ -1956,7 +1956,7 @@ improve? */
 	memset(screen,0,sizeof(screen_char_t)*sx*sy);
 	draw_all=YES;
 
-	max_scrollback=256;
+	max_scrollback=[TerminalViewDisplayPrefs scrollBackLines];
 	sbuf=malloc(sizeof(screen_char_t)*sx*max_scrollback);
 	memset(sbuf,0,sizeof(screen_char_t)*sx*max_scrollback);
 

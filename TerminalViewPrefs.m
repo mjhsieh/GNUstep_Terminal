@@ -36,6 +36,7 @@ static NSString
 	*BoldTerminalFontKey=@"BoldTerminalFont",
 	*BoldTerminalFontSizeKey=@"BoldTerminalFontSize",
 	*CursorStyleKey=@"CursorStyle",
+	*ScrollBackLinesKey=@"ScrollBackLines",
 
 	*CursorColorRKey=@"CursorColorR",
 	*CursorColorGKey=@"CursorColorG",
@@ -50,6 +51,8 @@ static float saturation[3]={1.0,1.0,0.75};
 
 static int cursorStyle;
 static NSColor *cursorColor;
+
+static int scrollBackLines;
 
 
 @implementation TerminalViewDisplayPrefs
@@ -96,6 +99,8 @@ static NSColor *cursorColor;
 		{
 			cursorColor=[[NSColor whiteColor] retain];
 		}
+
+		scrollBackLines=[ud integerForKey: ScrollBackLinesKey];
 	}
 }
 
@@ -126,6 +131,11 @@ static NSColor *cursorColor;
 +(NSColor *) cursorColor
 {
 	return cursorColor;
+}
+
++(int) scrollBackLines
+{
+	return scrollBackLines;
 }
 
 
@@ -163,6 +173,10 @@ static NSColor *cursorColor;
 	[ud setObject: [boldTerminalFont fontName]
 		forKey: BoldTerminalFontKey];
 
+	scrollBackLines=[f_scrollBackLines intValue];
+	[ud setInteger: scrollBackLines
+		forKey: ScrollBackLinesKey];
+
 	/* TODO: actually use this somewhere */
 	[[NSNotificationCenter defaultCenter]
 		postNotificationName: TerminalViewDisplayPrefsDidChangeNotification
@@ -183,6 +197,8 @@ static NSColor *cursorColor;
 	f=[[self class] boldTerminalFont];
 	[f_boldTerminalFont setStringValue: [NSString stringWithFormat: @"%@ %0.1f",[f fontName],[f pointSize]]];
 	[f_boldTerminalFont setFont: f];
+
+	[f_scrollBackLines setIntValue: scrollBackLines];
 }
 
 
@@ -213,6 +229,24 @@ static NSColor *cursorColor;
 			NSTextField *f;
 			NSButton *b;
 			GSHbox *hb;
+
+			hb=[[GSHbox alloc] init];
+			[hb setDefaultMinXMargin: 4];
+			[hb setAutoresizingMask: NSViewWidthSizable];
+
+			f=[NSTextField newLabel: _(@"Scroll-back length in lines:")];
+			[f setAutoresizingMask: 0];
+			[hb addView: f  enablingXResizing: NO];
+			DESTROY(f);
+
+			f_scrollBackLines=f=[[NSTextField alloc] init];
+			[f setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
+			[f sizeToFit];
+			[hb addView: f  enablingXResizing: YES];
+			DESTROY(f);
+
+			[top addView: hb enablingYResizing: NO];
+			DESTROY(hb);
 
 			{
 				NSBox *b;
