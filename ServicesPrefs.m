@@ -253,11 +253,86 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	d=[d objectForKey: @"TerminalServices"];
 	if (!d)
 	{
-		NSRunAlertPanel(_(@"Error importing services"),
-			_(@"The file '%@' doesn't contain valid terminal services."),
-			nil,nil,nil,
-			[op filename]);
-		return;
+		NSString *s=[NSString stringWithContentsOfFile: [op filename]];
+		NSArray *lines=[s componentsSeparatedByString: @"\n"];
+		NSArray *parts;
+		int c=[lines count];
+		int i,j,k;
+		NSMutableDictionary *md=[[[NSMutableDictionary alloc] init] autorelease];
+		NSMutableDictionary *service;
+
+		for (i=0;i<c;i+=3)
+		{
+			if (i+3>=c)
+				break;
+		
+			parts=[[lines objectAtIndex: i] componentsSeparatedByString: @" "];
+			if ([parts count]!=11)
+				break;
+
+			service=[[NSMutableDictionary alloc] init];
+
+			[service setObject: [lines objectAtIndex: i+2]
+				forKey: Commandline];
+
+			j=[[parts objectAtIndex: 0] intValue];
+			if (j!=32)
+			{
+				unichar ch=j;
+				[service setObject: [NSString stringWithCharacters: &ch length: 1]
+					forKey: Key];
+			}
+
+			j=[[parts objectAtIndex: 2] intValue];
+			k=0;
+			if (j&2)
+				k|=ACCEPT_STRING;
+			if (j&8)
+				k|=ACCEPT_FILENAMES;
+			[service setObject: [NSString stringWithFormat: @"%i",k]
+				forKey: AcceptTypes];
+
+			if (j==1)
+			{
+				k=0;
+			}
+			else
+			{
+				j=[[parts objectAtIndex: 3] intValue];
+				if (j==2)
+					k=INPUT_CMDLINE;
+				else if (j==4)
+					k=INPUT_STDIN;
+				else
+					k=INPUT_NO;
+			}
+			[service setObject: [NSString stringWithFormat: @"%i",k]
+				forKey: Input];
+
+			j=[[parts objectAtIndex: 8] intValue];
+			if (j==3)
+				k=1;
+			else
+				k=0;
+			[service setObject: [NSString stringWithFormat: @"%i",k]
+				forKey: ReturnData];
+
+			[service setObject: [NSString stringWithFormat: @"%i",0]
+				forKey: Type];
+
+			[md setObject: service
+				forKey: [lines objectAtIndex: i+1]];
+		}
+
+		if (i<c && (i!=c-1 || [[lines objectAtIndex: i] length]!=0))
+		{
+			NSRunAlertPanel(_(@"Error importing services"),
+				_(@"The file '%@' doesn't contain valid terminal services."),
+				nil,nil,nil,
+				[op filename]);
+			return;
+		}
+		d=md;
 	}
 
 	e=[d keyEnumerator];

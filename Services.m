@@ -63,11 +63,11 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	NSDebugLLog(@"service",@"cmdline='%@' %i %i %i",cmdline,type,ret_data,input);
 
 	data=nil;
-	if (input && accepttypes&1 &&
+	if (input && accepttypes&ACCEPT_STRING &&
 	    (data=[pb stringForType: NSStringPboardType]))
 	{
 	}
-	else if (input && accepttypes&2 &&
+	else if (input && accepttypes&ACCEPT_FILENAMES &&
 	    (data=[pb propertyListForType: NSFilenamesPboardType]))
 	{
 		NSDebugLLog(@"service",@"got filenames '%@' '%@' %i",data,[data class],[data isProxy]);
@@ -75,12 +75,12 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 	NSDebugLLog(@"service",@"got data '%@'",data);
 
-	if (input==1)
+	if (input==INPUT_STDIN)
 	{
 		if ([data isKindOfClass: [NSArray class]])
 			data=[(NSArray *)data componentsJoinedByString: @"\n"];
 	}
-	else if (input==2)
+	else if (input==INPUT_CMDLINE)
 	{
 		if (data && [data isKindOfClass: [NSArray class]])
 			data=[(NSArray *)data componentsJoinedByString: @" "];
@@ -122,7 +122,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			}
 		}
 
-		if (input==2 && data && add_args)
+		if (input==INPUT_CMDLINE && data && add_args)
 		{
 			[str appendString: @" "];
 			[str appendString: data];
@@ -144,7 +144,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 	switch (type)
 	{
-	case 0:
+	case TYPE_BACKGROUND:
 	{
 		NSTask *t=[[[NSTask alloc] init] autorelease];
 		NSPipe *stdin,*stdout;
@@ -186,20 +186,20 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			s=[s autorelease];
 			NSDebugLLog(@"service",@"= '%@'",s);
 
-			if (accepttypes==3)
+			if (accepttypes==(ACCEPT_STRING|ACCEPT_FILENAMES))
 				[pb declareTypes: [NSArray arrayWithObjects:
 						NSStringPboardType,NSFilenamesPboardType,nil]
 					owner: self];
-			else if (accepttypes==2)
+			else if (accepttypes==ACCEPT_FILENAMES)
 				[pb declareTypes: [NSArray arrayWithObjects:
 						NSFilenamesPboardType,nil]
 					owner: self];
-			else if (accepttypes==1)
+			else if (accepttypes==ACCEPT_STRING)
 				[pb declareTypes: [NSArray arrayWithObjects:
 						NSStringPboardType,nil]
 					owner: self];
 
-			if (accepttypes&2)
+			if (accepttypes&ACCEPT_FILENAMES)
 			{
 				NSMutableArray *ma=[[[NSMutableArray alloc] init] autorelease];
 				int i,c=[s length];
@@ -220,7 +220,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 				[pb setPropertyList: ma forType: NSFilenamesPboardType];
 			}
 
-			if (accepttypes&1)
+			if (accepttypes&ACCEPT_STRING)
 				[pb setString: s  forType: NSStringPboardType];
 
 			NSDebugLLog(@"service",@"return is set");
@@ -282,17 +282,17 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		}
 
 		i=[[info objectForKey: AcceptTypes] intValue];
-		if (i==3)
+		if (i==(ACCEPT_STRING|ACCEPT_FILENAMES))
 			types=[NSArray arrayWithObjects: NSStringPboardType,NSFilenamesPboardType,nil];
-		else if (i==2)
+		else if (i==ACCEPT_FILENAMES)
 			types=[NSArray arrayWithObjects: NSFilenamesPboardType,nil];
-		else if (i==1)
+		else if (i==ACCEPT_STRING)
 			types=[NSArray arrayWithObjects: NSStringPboardType,nil];
 		else
 			types=nil;
 
 		i=[[info objectForKey: Input] intValue];
-		if (types && (i==1 || i==2))
+		if (types && (i==INPUT_STDIN || i==INPUT_CMDLINE))
 			[md setObject: types
 				forKey: @"NSSendTypes"];
 
