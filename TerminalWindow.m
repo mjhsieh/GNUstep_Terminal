@@ -60,14 +60,7 @@ static void get_zombies(void)
 	[win setResizeIncrements: NSMakeSize(fx,fy)];
 	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*25+1)];
 
-	[win setBackgroundColor: [NSColor blackColor]];
-
 	hb=[[GSHbox alloc] init];
-	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"])
-	{
-		[hb setMinYBorder: floor(fy/2-0.5)];
-		[hb setMaxYBorder: floor(fy/2-0.5)];
-	}
 
 	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,[NSScroller scrollerWidth],fy)];
 	[scroller setArrowsPosition: NSScrollerArrowsMaxEnd];
@@ -75,13 +68,6 @@ static void get_zombies(void)
 	[scroller setAutoresizingMask: NSViewHeightSizable];
 	[hb addView: scroller  enablingXResizing: NO];
 	[scroller release];
-
-	{
-		NSView *v=[[NSView alloc] initWithFrame: NSMakeRect(0,0,(scroller_width*fx-[NSScroller scrollerWidth])/2,fy)];
-		[v setAutoresizingMask: NSViewHeightSizable];
-		[hb addView: v  enablingXResizing: NO];
-		DESTROY(v);
-	}
 
 	tv=[[TerminalView alloc] init];
 	[tv setIgnoreResize: YES];
@@ -91,6 +77,11 @@ static void get_zombies(void)
 	[tv release];
 	[win makeFirstResponder: tv];
 	[tv setIgnoreResize: NO];
+
+	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"])
+		[tv setBorder: floor(fx/2) : floor(fy/2-0.5)];
+	else
+		[tv setBorder: floor(fx/2) : 0];
 
 	[win setContentView: hb];
 	DESTROY(hb);
