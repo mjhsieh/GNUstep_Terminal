@@ -196,6 +196,7 @@ general
 */
 
 @class TerminalViewDisplayPrefs;
+@class TerminalServicesPrefs;
 
 -(void) openPreferences: (id)sender
 {
@@ -205,6 +206,10 @@ general
 		pwc=[[PreferencesWindowController alloc] init];
 
 		pb=[[TerminalViewDisplayPrefs alloc] init];
+		[pwc addPrefBox: pb];
+		DESTROY(pb);
+
+		pb=[[TerminalServicesPrefs alloc] init];
 		[pwc addPrefBox: pb];
 		DESTROY(pb);
 	}

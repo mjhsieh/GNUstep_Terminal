@@ -9,6 +9,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <Foundation/NSUserDefaults.h>
 #include <Foundation/NSTask.h>
 #include <Foundation/NSData.h>
+#include <Foundation/NSPathUtilities.h>
 #include <AppKit/NSPasteboard.h>
 
 #include "Services.h"
@@ -127,6 +128,74 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 	}
 	NSDebugLLog(@"service",@"return");
+}
+
+
++(void) updateServicesPlist
+{
+	NSMutableArray *a;
+	NSDictionary *d;
+	NSEnumerator *e;
+	NSString *name;
+
+	d=[[NSUserDefaults standardUserDefaults]
+		dictionaryForKey: @"TerminalServices"];
+
+	a=[[NSMutableArray alloc] init];
+
+	e=[d keyEnumerator];
+	while ((name=[e nextObject]))
+	{
+		int i;
+		NSString *key;
+		NSMutableDictionary *md;
+		NSDictionary *info;
+
+		info=[d objectForKey: name];
+
+		md=[[NSMutableDictionary alloc] init];
+		[md setObject: @"Terminal" forKey: @"NSPortName"];
+		[md setObject: @"terminalService" forKey: @"NSMessage"];
+		[md setObject: name forKey: @"NSUserData"];
+
+		[md setObject: [NSDictionary dictionaryWithObjectsAndKeys:
+				[NSString stringWithFormat: @"%@-%@",@"Terminal",name],
+				@"default",nil]
+			forKey: @"NSMenuItem"];
+
+		key=[info objectForKey: @"Key"];
+		if (key && [key length])
+		{
+			[md setObject: [NSDictionary dictionaryWithObjectsAndKeys:
+					key,@"default",nil]
+				forKey: @"NSKeyEquivalent"];
+		}
+
+		i=[[info objectForKey: @"Input"] intValue];
+		if (i==1 || i==2)
+			[md setObject: [NSArray arrayWithObject: NSStringPboardType]
+				forKey: @"NSSendTypes"];
+
+		i=[[info objectForKey: @"ReturnData"] intValue];
+		if (i==1)
+			[md setObject: [NSArray arrayWithObject: NSStringPboardType]
+				forKey: @"NSReturnTypes"];
+
+		[a addObject: md];
+		DESTROY(md);
+	}
+
+	{
+		NSString *path;
+
+		path=[NSSearchPathForDirectoriesInDomains(NSUserDirectory,NSUserDomainMask,YES)
+			lastObject];
+		path=[path stringByAppendingPathComponent: @"Services"];
+		path=[path stringByAppendingPathComponent: @"TerminalServices.plist"];
+
+		d=[NSDictionary dictionaryWithObject: a forKey: @"NSServices"];
+		[d writeToFile: path atomically: YES];
+	}
 }
 
 @end

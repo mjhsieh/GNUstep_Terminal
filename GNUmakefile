@@ -13,6 +13,7 @@ Terminal_OBJC_FILES = \
 	main.m \
 	\
 	Services.m \
+	ServicesPrefs.m \
 	\
 	TerminalView.m \
 	TerminalViewPrefs.m \

@@ -9,6 +9,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 {
 }
 
++(void) updateServicesPlist;
+
 @end
 
 #endif
