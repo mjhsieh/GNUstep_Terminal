@@ -67,7 +67,10 @@ typedef struct
 } screen_char_t;
 
 
-static NSString *TerminalViewEndOfInput=@"TerminalViewEndOfInput";
+static NSString
+	*TerminalViewEndOfInput=@"TerminalViewEndOfInput",
+	*TerminalViewTitleDidChange=@"TerminalViewTitleDidChange";
+
 
 @interface TerminalView : NSView <RunLoopEvents>
 {
@@ -86,9 +89,17 @@ static NSString *TerminalViewEndOfInput=@"TerminalViewEndOfInput";
 
 	unsigned int unich;
 
+	NSString *title;
+
+#define TITLE_BUF_SIZE 255
+	char title_buf[TITLE_BUF_SIZE+1];
+	int title_len, title_type;
+
+	NSString *title_window,*title_miniwindow;
+
 enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 	EShash, ESsetG0, ESsetG1, ESpercent, ESignore, ESnonstd,
-	ESpalette } ESstate;
+	ESpalette, EStitle_semi, EStitle_buf } ESstate;
 	int vc_state;
 
 	unsigned char decscnm,decom,decawm,deccm,decim;
@@ -133,6 +144,10 @@ enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 -(void) _default_attr;
 
 -(void) sendCString: (const char *)msg;
+
+
+-(NSString *) windowTitle;
+-(NSString *) miniwindowTitle;
 
 @end
 
@@ -922,6 +937,23 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	case 0:
 		return;
 	case 7:
+		if (vc_state==EStitle_buf)
+		{
+			NSString *new_title;
+			title_buf[title_len]=0;
+			new_title=[NSString stringWithCString: title_buf];
+			if (title_type==1)
+				ASSIGN(title_miniwindow,new_title);
+			else if (title_type==2)
+				ASSIGN(title_window,new_title);
+			vc_state=ESnormal;
+
+			[[NSNotificationCenter defaultCenter]
+				postNotificationName: TerminalViewTitleDidChange
+				object: self];
+
+			return;
+		}
 		NSBeep();
 		return;
 	case 8:
@@ -1026,20 +1058,54 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		}
 		return;
 	case ESnonstd:
-		NSLog(@"ignore palette sequence");
+		switch (c)
+		{
+		case '1':
+			vc_state=EStitle_semi;
+			title_type=1;
+			return;
+
+		case '2':
+			vc_state=EStitle_semi;
+			title_type=2;
+			return;
+
+		case 'P':
+			NSLog(@"ignore ESnonstd P");
 #if 0
-		if (c=='P') {   /* palette escape sequence */
 			for (npar=0; npar<NPAR; npar++)
 				par[npar] = 0 ;
 			npar = 0 ;
+#endif
 			vc_state = ESpalette;
 			return;
-		} else if (c=='R') {   /* reset palette */
+		case 'R':
+			NSLog(@"ignore ESnonstd R");
+#if 0
 			reset_palette(currcons);
-			vc_state = ESnormal;
-		} else
 #endif
 			vc_state = ESnormal;
+		}
+		vc_state = ESnormal;
+		return;
+	case EStitle_semi:
+		if (c==';')
+		{
+			vc_state=EStitle_buf;
+			title_len=0;
+		}
+		else
+			vc_state=ESnormal;
+		return;
+	case EStitle_buf:
+		if (title_len==TITLE_BUF_SIZE)
+		{
+			vc_state=ESnormal;
+		}
+		else
+		{
+			title_buf[title_len++]=c;
+		}
 		return;
 	case ESpalette:
 		NSLog(@"ignore palette sequence (2)");
@@ -1545,7 +1611,21 @@ while (1)
 	free(screen);
 	screen=NULL;
 
+	DESTROY(title_window);
+	DESTROY(title_miniwindow);
+
 	[super dealloc];
+}
+
+
+-(NSString *) windowTitle
+{
+	return title_window;
+}
+
+-(NSString *) miniwindowTitle
+{
+	return title_miniwindow;
 }
 
 @end
@@ -1591,9 +1671,22 @@ while (1)
 		selector: @selector(close)
 		name: TerminalViewEndOfInput
 		object: tv];
+	[[NSNotificationCenter defaultCenter]
+		addObserver: self
+		selector: @selector(_updateTitle:)
+		name: TerminalViewTitleDidChange
+		object: tv];
 
 	return self;
 }
+
+
+-(void) _updateTitle: (NSNotification *)n
+{
+	[[self window] setTitle: [tv windowTitle]];
+	[[self window] setMiniwindowTitle: [tv miniwindowTitle]];
+}
+
 
 -(void) dealloc
 {
