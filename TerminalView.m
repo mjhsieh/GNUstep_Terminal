@@ -446,9 +446,7 @@ static void set_foreground(NSGraphicsContext *gc,
 					if (encoding==NSUTF8StringEncoding)
 					{
 						unichar uch=ch->ch;
-						if (uch>=0x10000)
-							buf[0]=0;
-						else if (uch>=0x800)
+						if (uch>=0x800)
 						{
 							buf[2]=(uch&0x3f)|0x80;
 							uch>>=6;
