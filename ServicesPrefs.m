@@ -317,7 +317,14 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			[service setObject: [NSString stringWithFormat: @"%i",k]
 				forKey: ReturnData];
 
-			[service setObject: [NSString stringWithFormat: @"%i",0]
+			j=[[parts objectAtIndex: 5] intValue];
+			if (j==2)
+				k=TYPE_WINDOW_IDLE;
+			else if (j==4)
+				k=TYPE_WINDOW_NEW;
+			else
+				k=TYPE_BACKGROUND;
+			[service setObject: [NSString stringWithFormat: @"%i",k]
 				forKey: Type];
 
 			[md setObject: service
