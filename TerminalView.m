@@ -141,7 +141,8 @@ TerminalScreen protocol implementation and rendering methods
 
 	if (lockFocus)
 		[self lockFocus];
-	DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
+	DPScomposite(GSCurrentContext(),border_x+x0,border_y+y0,w,h,
+		[self gState],border_x+dx,border_y+dy,NSCompositeCopy);
 	if (lockFocus)
 		[self unlockFocusNeedsFlush: NO];
 
@@ -222,6 +223,27 @@ static void set_foreground(NSGraphicsContext *gc,
 	if (pending_scroll)
 		[self _handlePendingScroll: NO];
 
+	{
+		float a,b;
+		DPSsetgray(cur,0.0);
+		if (r.origin.x<border_x)
+			DPSrectfill(cur,r.origin.x,r.origin.y,border_x-r.origin.x,r.size.height);
+		if (r.origin.y<border_y)
+			DPSrectfill(cur,r.origin.x,r.origin.y,r.size.width,border_y-r.origin.y);
+
+		a=border_x+sx*fx;
+		b=r.origin.x+r.size.width;
+		if (b>a)
+			DPSrectfill(cur,a,r.origin.y,b-a,r.size.height);
+		a=border_y+sy*fy;
+		b=r.origin.y+r.size.height;
+		if (b>a)
+			DPSrectfill(cur,r.origin.x,a,r.size.width,b-a);
+	}
+
+	r.origin.x-=border_x;
+	r.origin.y-=border_y;
+
 	x0=floor(r.origin.x/fx);
 	x1=ceil((r.origin.x+r.size.width)/fx);
 	if (x0<0) x0=0;
@@ -257,7 +279,7 @@ static void set_foreground(NSGraphicsContext *gc,
 			else
 				ch=&sbuf[x0+(max_scrollback+ry)*sx];
 
-			scr_y=(sy-1-iy)*fy;
+			scr_y=(sy-1-iy)*fy+border_y;
 /*
 #define R(scr_x,scr_y,fx,fy) \
 				DPSgsave(cur); \
@@ -276,14 +298,14 @@ static void set_foreground(NSGraphicsContext *gc,
 				{
 					if (start_x!=-1)
 					{
-						scr_x=ix*fx;
+						scr_x=ix*fx+border_x;
 						R(start_x,scr_y,scr_x-start_x,fy);
 						start_x=-1;
 					}
 					continue;
 				}
 
-				scr_x=ix*fx;
+				scr_x=ix*fx+border_x;
 
 				if (ch->attr&0x8)
 				{
@@ -324,7 +346,7 @@ static void set_foreground(NSGraphicsContext *gc,
 
 			if (start_x!=-1)
 			{
-				scr_x=ix*fx;
+				scr_x=ix*fx+border_x;
 				R(start_x,scr_y,scr_x-start_x,fy);
 			}
 		}
@@ -336,7 +358,7 @@ static void set_foreground(NSGraphicsContext *gc,
 			else
 				ch=&sbuf[x0+(max_scrollback+ry)*sx];
 
-			scr_y=(sy-1-iy)*fy;
+			scr_y=(sy-1-iy)*fy+border_y;
 
 			for (ix=x0;ix<x1;ix++,ch++)
 			{
@@ -345,7 +367,7 @@ static void set_foreground(NSGraphicsContext *gc,
 
 				ch->attr&=0x7f;
 
-				scr_x=ix*fx;
+				scr_x=ix*fx+border_x;
 
 				/* ~1700 cycles/change */
 				if (ch->attr&0x02 || (ch->ch!=0 && ch->ch!=32))
@@ -453,8 +475,8 @@ static void set_foreground(NSGraphicsContext *gc,
 		float x,y;
 		[[TerminalViewDisplayPrefs cursorColor] set];
 
-		x=cursor_x*fx;
-		y=(sy-1-cursor_y+current_scroll)*fy;
+		x=cursor_x*fx+border_x;
+		y=(sy-1-cursor_y+current_scroll)*fy+border_y;
 
 		switch ([TerminalViewDisplayPrefs cursorStyle])
 		{
@@ -652,7 +674,8 @@ static void set_foreground(NSGraphicsContext *gc,
 			y0=sy*fy-y0-h;
 			dy=sy*fy-dy-h;
 			[self lockFocus];
-			DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
+			DPScomposite(GSCurrentContext(),border_x+x0,border_y+y0,w,h,
+				[self gState],border_x+dx,border_y+dy,NSCompositeCopy);
 			[self unlockFocusNeedsFlush: NO];
 			num_scrolls++;
 		}
@@ -702,7 +725,8 @@ static void set_foreground(NSGraphicsContext *gc,
 			y0=sy*fy-y0-h;
 			dy=sy*fy-dy-h;
 			[self lockFocus];
-			DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
+			DPScomposite(GSCurrentContext(),border_x+x0,border_y+y0,w,h,
+				[self gState],border_x+dx,border_y+dy,NSCompositeCopy);
 			[self unlockFocusNeedsFlush: NO];
 			num_scrolls++;
 		}
@@ -757,7 +781,8 @@ static void set_foreground(NSGraphicsContext *gc,
 		y0=sy*fy-y0-h;
 		dy=sy*fy-dy-h;
 		[self lockFocus];
-		DPScomposite(GSCurrentContext(),cx0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
+		DPScomposite(GSCurrentContext(),border_x+cx0,border_y+y0,w,h,
+			[self gState],border_x+dx,border_y+dy,NSCompositeCopy);
 		[self unlockFocusNeedsFlush: NO];
 		num_scrolls++;
 	}
@@ -1239,11 +1264,11 @@ Selection, copy/paste/services
 		p=[e locationInWindow];
 
 		p=[self convertPoint: p  fromView: nil];
-		p.x=floor(p.x/fx);
+		p.x=floor((p.x-border_x)/fx);
 		if (p.x<0) p.x=0;
 		if (p.x>=sx) p.x=sx-1;
-		p.y=ceil(p.y/fy);
-		if (p.y<0) p.y=0;
+		p.y=ceil((p.y-border_y)/fy);
+		if (p.y<-1) p.y=-1;
 		if (p.y>sy) p.y=sy;
 		p.y=sy-p.y+current_scroll;
 		ofs1=((int)p.x)+((int)p.y)*sx;
@@ -1390,6 +1415,8 @@ Handle master_fd
 		dr.size.height=(dirty.y1-dirty.y0)*fy;
 		dr.origin.y=fy*sy-(dr.origin.y+dr.size.height);
 //		NSLog(@"-> dirty=(%g %g)+(%g %g)\n",dirty.origin.x,dirty.origin.y,dirty.size.width,dirty.size.height);
+		dr.origin.x+=border_x;
+		dr.origin.y+=border_y;
 		[self setNeedsDisplayInRect: dr];
 
 		if (current_scroll!=0)
@@ -1569,8 +1596,8 @@ misc. stuff
 	int iy,ny;
 	int copy_sx;
 
-	nsx=size.width/fx;
-	nsy=size.height/fy;
+	nsx=(size.width-border_x)/fx;
+	nsy=(size.height-border_y)/fy;
 
 	NSDebugLLog(@"term",@"_resizeTerminalTo: (%g %g) %i %i (%g %g)\n",
 		size.width,size.height,
@@ -1589,7 +1616,7 @@ misc. stuff
 	if (nsx==sx && nsy==sy)
 	{
 		/* Do a complete redraw anyway. Even though we don't really need it,
-		the resize ight have caused other things to overwrite our part of the
+		the resize might have caused other things to overwrite our part of the
 		window. */
 		draw_all=YES;
 		return;
@@ -1762,6 +1789,11 @@ misc. stuff
 	ignore_resize=ignore;
 }
 
+-(void) setBorder: (float)x : (float)y
+{
+	border_x=x;
+	border_y=y;
+}
 
 
 +(NSFont *) terminalFont

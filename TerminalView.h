@@ -69,9 +69,13 @@ struct selection_range
 	int pending_scroll;
 
 	BOOL ignore_resize;
+
+	float border_x,border_y;
 }
 
 -(void) setIgnoreResize: (BOOL)ignore;
+
+-(void) setBorder: (float)x : (float)y;
 
 -(NSString *) windowTitle;
 -(NSString *) miniwindowTitle;
