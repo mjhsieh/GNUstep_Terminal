@@ -285,7 +285,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 			j=[[parts objectAtIndex: 2] intValue];
 			k=0;
-			if (j&2)
+			if (j&3) /* TODO? why 1 and 2? */
 				k|=ACCEPT_STRING;
 			if (j&8)
 				k|=ACCEPT_FILENAMES;
