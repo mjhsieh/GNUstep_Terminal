@@ -392,6 +392,7 @@ copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 
 	NSDebugLLog(@"Application",@"openFile: '%@'",filename);
 
+	/* TODO: shouldn't ignore other apps */
 	[NSApp activateIgnoringOtherApps: YES];
 
 	twc=[TerminalWindowController newTerminalWindow];
@@ -400,6 +401,59 @@ copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 		initialInput: nil];
 
 	return YES;
+}
+
+
+
+-(BOOL) terminalRunProgram: (NSString *)path
+	withArguments: (NSArray *)args
+	inDirectory: (NSString *)directory
+	properties: (NSDictionary *)properties
+{
+	TerminalWindowController *twc;
+
+	NSDebugLLog(@"Application",
+		@"terminalRunProgram: %@ withArguments: %@ inDirectory: %@ properties: %@",
+		path,args,directory,properties);
+
+	/* TODO: shouldn't ignore other apps */
+	[NSApp activateIgnoringOtherApps: YES];
+
+	{
+		id o;
+		o=[properties objectForKey: @"CloseOnExit"];
+		if (o && [o respondsToSelector: @selector(boolValue)] &&
+		    ![o boolValue])
+		{
+			twc=[TerminalWindowController idleTerminalWindow];
+		}
+		else
+		{
+			twc=[TerminalWindowController newTerminalWindow];
+		}
+	}
+
+	[[twc terminalView] runProgram: path
+		withArguments: args
+		inDirectory: directory
+		initialInput: nil
+		arg0: nil];
+
+	return YES;
+}
+
+-(BOOL) terminalRunCommand: (NSString *)cmdline
+	inDirectory: (NSString *)directory
+	properties: (NSDictionary *)properties
+{
+	NSDebugLLog(@"Application",
+		@"terminalRunCommand: %@ inDirectory: %@ properties: %@",
+		cmdline,directory,properties);
+
+	return [self terminalRunProgram: @"/bin/sh"
+		withArguments: [NSArray arrayWithObjects: @"-c",cmdline,nil]
+		inDirectory: directory
+		properties: properties];
 }
 
 

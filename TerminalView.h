@@ -110,6 +110,7 @@ struct selection_range
 	initialInput: (NSString *)d;
 -(void) runProgram: (NSString *)path
 	withArguments: (NSArray *)args
+	inDirectory: (NSString *)directory
 	initialInput: (NSString *)d
 	arg0: (NSString *)arg0;
 @end

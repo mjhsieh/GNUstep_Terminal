@@ -1603,6 +1603,7 @@ Handle master_fd
 
 -(void) runProgram: (NSString *)path
 	withArguments: (NSArray *)args
+	inDirectory: (NSString *)directory
 	initialInput: (NSString *)d
 	arg0: (NSString *)arg0
 {
@@ -1611,6 +1612,7 @@ Handle master_fd
 	NSRunLoop *rl;
 	const char *cpath;
 	const char *cargs[[args count]+2];
+	const char *cdirectory;
 	int i;
 
 	int pipefd[2];
@@ -1621,7 +1623,11 @@ Handle master_fd
 	[self closeProgram];
 
 	cpath=[path cString];
-	cargs[0]=[arg0 cString];
+	if (arg0)
+		cargs[0]=[arg0 cString];
+	else
+		cargs[0]=cpath;
+	cdirectory=[directory cString];
 	for (i=0;i<[args count];i++)
 	{
 		cargs[i+1]=[[args objectAtIndex: i] cString];
@@ -1656,6 +1662,8 @@ Handle master_fd
 			dup2(pipefd[0],0);
 		}
 
+		if (cdirectory)
+			chdir(cdirectory);
 		putenv("TERM=linux");
 		putenv("TERM_PROGRAM=GNUstep_Terminal");
 		execv(cpath,(char *const*)cargs);
@@ -1702,6 +1710,7 @@ Handle master_fd
 {
 	[self runProgram: path
 		withArguments: args
+		inDirectory: nil
 		initialInput: d
 		arg0: path];
 }
@@ -1718,6 +1727,7 @@ Handle master_fd
 		arg0=path;
 	[self runProgram: path
 		withArguments: nil
+		inDirectory: nil
 		initialInput: nil
 		arg0: arg0];
 }
