@@ -1341,6 +1341,9 @@ Handle master_fd
 	[[NSNotificationCenter defaultCenter]
 		postNotificationName: TerminalViewBecameNonIdleNotification
 		object: self];
+
+	ASSIGN(title_window,_(@"Terminal"));
+	ASSIGN(title_miniwindow,_(@"Terminal"));
 }
 
 -(void) runProgram: (NSString *)path
@@ -1423,6 +1426,14 @@ Handle master_fd
 		write(pipefd[1],s,strlen(s));
 		close(pipefd[1]);
 	}
+
+	DESTROY(title_window);
+	title_window=[[NSString stringWithFormat: @"%@ %@",
+		path,[args componentsJoinedByString: @" "]] retain];
+	ASSIGN(title_miniwindow,path);
+	[[NSNotificationCenter defaultCenter]
+		postNotificationName: TerminalViewTitleDidChangeNotification
+		object: self];
 }
 
 @end

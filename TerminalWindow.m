@@ -137,6 +137,18 @@ static NSMutableArray *idle_list;
 
 	[idle_list addObject: self];
 	NSDebugLLog(@"idle",@"idle list: %@",idle_list);
+
+	{
+		NSString *t;
+
+		t=[[self window] title];
+		t=[t stringByAppendingString: _(@" (idle)")];
+		[[self window] setTitle: t];
+
+		t=[[self window] miniwindowTitle];
+		t=[t stringByAppendingString: _(@" (idle)")];
+		[[self window] setMiniwindowTitle: t];
+	}
 }
 
 -(void) _becameNonIdle
