@@ -58,9 +58,13 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	ret_data=[[info objectForKey: ReturnData] intValue];
 	input=[[info objectForKey: Input] intValue];
 	cmdline=[info objectForKey: Commandline];
-	accepttypes=[[info objectForKey: AcceptTypes] intValue];
+	if ([info objectForKey: AcceptTypes])
+		accepttypes=[[info objectForKey: AcceptTypes] intValue];
+	else
+		accepttypes=ACCEPT_STRING;
 
-	NSDebugLLog(@"service",@"cmdline='%@' %i %i %i",cmdline,type,ret_data,input);
+	NSDebugLLog(@"service",@"cmdline='%@' %i %i %i %i",
+		cmdline,type,ret_data,input,accepttypes);
 
 	data=nil;
 	if (input && accepttypes&ACCEPT_STRING &&
@@ -269,7 +273,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		[md setObject: name forKey: @"NSUserData"];
 
 		[md setObject: [NSDictionary dictionaryWithObjectsAndKeys:
-				[NSString stringWithFormat: @"%@-%@",@"Terminal",name],
+				[NSString stringWithFormat: @"%@/%@",@"Terminal",name],
 				@"default",nil]
 			forKey: @"NSMenuItem"];
 
