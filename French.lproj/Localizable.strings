@@ -122,15 +122,15 @@ add comments above this one
 /* File: PreferencesWindowController.m:78 */
 "Apply and save" = "Appliquer et sauvegarder";
 /* File: PreferencesWindowController.m:122 */
-"Preferences" = "Panneau des Préférences";
+"Preferences" = "Panneau des Pr\u00e9f\u00e9rences";
 
 
 /*** Strings from Services.m ***/
 /* File: Services.m:152 */
-"Service aborted by user." = "Service annulée par l'utilisateur.";
+"Service aborted by user." = "Service annul\u00e9e par l'utilisateur.";
 /* File: Services.m:60 */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
-= "Il n'y a aucun service de terminal appelée '%@'.\nVotre liste de services n'est probabement pas à jout.\nLancer 'make_services' pour la mettre à jour.";
+= "Il n'y a aucun service de terminal appel\u00e9e '%@'.\nVotre liste de services n'est probabement pas \u00e0 jout.\nLancer 'make_services' pour la mettre \u00e0 jour.";
 
 
 /*** Strings from ServicesParameterWindowController.m ***/
@@ -139,7 +139,7 @@ add comments above this one
 /* File: ServicesParameterWindowController.m:74 */
 "OK" = "OK";
 /* File: ServicesParameterWindowController.m:118 */
-"Parameter for service %@" = "Paramètre pour le service %@";
+"Parameter for service %@" = "Param\u00e8tre pour le service %@";
 
 
 /*** Strings from ServicesPrefs.m ***/
@@ -162,7 +162,7 @@ add comments above this one
 /* File: ServicesPrefs.m:515 */
 "Import..." = "Importer...";
 /* File: ServicesPrefs.m:560 */
-"Input on command line" = "Entrée standard sur la ligne de commande";
+"Input on command line" = "Entr\u00e9e standard sur la ligne de commande";
 /* File: ServicesPrefs.m:640 */
 "Key:" = "Touche:";
 /* File: ServicesPrefs.m:627 */
@@ -172,11 +172,11 @@ add comments above this one
 /* File: ServicesPrefs.m:550 */
 "Return output" = "Retourer la sortie standard";
 /* File: ServicesPrefs.m:568 */
-"Run in background" = "Exécuter en arrière plan";
+"Run in background" = "Ex\u00e9cuter en arri\u00e8re plan";
 /* File: ServicesPrefs.m:570 */
-"Run in idle window" = "Exécuter en idle fenêtre";
+"Run in idle window" = "Ex\u00e9cuter en idle fen\u00eatre";
 /* File: ServicesPrefs.m:569 */
-"Run in new window" = "Exécuter dans une nouvell fenêtre";
+"Run in new window" = "Ex\u00e9cuter dans une nouvell fen\u00eatre";
 /* File: ServicesPrefs.m:468 */
 "Terminal services" = "services de Terminal";
 /* File: ServicesPrefs.m:473 */
@@ -190,10 +190,10 @@ add comments above this one
 
 /*** Strings from TerminalView.m ***/
 /* File: TerminalView.m:1623 */
-"Unable to fork: %m." = "Impossible de créer forker: %m.";
+"Unable to fork: %m." = "Impossible de cr\u00e9er forker: %m.";
 /* File: TerminalView.m:1611 */
 "Unable to open pipe for input: %m."
-= "Impossible d'ouvrire un pipe pour l'entrée standard: %m.";
+= "Impossible d'ouvrire un pipe pour l'entr\u00e9e standard: %m.";
 /* File: TerminalView.m:1476 */
 "[Process exited]" = "[Fin de processus]";
 
@@ -217,15 +217,15 @@ add comments above this one
 "Normal font:" = "Texte normal:";
 /* File: TerminalViewPrefs.m:369 */
 /* File: TerminalViewPrefs.m:342 */
-"Pick font..." = "Définir la police...";
+"Pick font..." = "D\u00e9finir la police...";
 /* File: TerminalViewPrefs.m:492 */
 /* File: TerminalViewPrefs.m:487 */
-"Shell" = "Shell par défaut";
+"Shell" = "Shell par d\u00e9faut";
 /* File: TerminalViewPrefs.m:515 */
-"Start as login-shell" = "Démarrer comme login-shell";
+"Start as login-shell" = "D\u00e9marrer comme login-shell";
 /* File: TerminalViewPrefs.m:634 */
 "Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard."
-= "Traiter la touche command comme meta.\n\nNotez qu'avec cette touche activée,vous\nn'aurez plus accés au menu.";
+= "Traiter la touche command comme meta.\n\nNotez qu'avec cette touche activ\u00e9e,vous\nn'aurez plus acc\u00e9s au menu.";
 
 
 /*** Strings from TerminalWindowPrefs.m ***/
@@ -233,17 +233,17 @@ add comments above this one
 "Add top and bottom border" = "Ajouter une bordure en haut et en bas";
 /* File: TerminalWindowPrefs.m:143 */
 "Close new windows when idle"
-= "Fermer les nouvelles fenêtre lorsque lorsque le shell se termine";
+= "Fermer les nouvelles fen\u00eatre lorsque lorsque le shell se termine";
 /* File: TerminalWindowPrefs.m:156 */
-"Default size" = "Taille par défaut";
+"Default size" = "Taille par d\u00e9faut";
 /* File: TerminalWindowPrefs.m:144 */
-"Don't close new windows" = "Ne pas fermer les nouvelles fenêtre";
+"Don't close new windows" = "Ne pas fermer les nouvelles fen\u00eatre";
 /* File: TerminalWindowPrefs.m:169 */
 "Height:" = "Hauteur:";
 /* File: TerminalWindowPrefs.m:112 */
-"Terminal Window" = "Fenêtre Terminal";
+"Terminal Window" = "Fen\u00eatre Terminal";
 /* File: TerminalWindowPrefs.m:117 */
-"Terminal\nWindow" = "Fenêtre\nTerminal";
+"Terminal\nWindow" = "Fen\u00eatre\nTerminal";
 /* File: TerminalWindowPrefs.m:160 */
 "Width:" = "Largeur:";
 
@@ -266,8 +266,8 @@ add comments above this one
 /* File: main.m:183 */
 "Paste" = "Coller";
 /* File: main.m:155 */
-"Preferences..." = "Préférences...";
+"Preferences..." = "Pr\u00e9f\u00e9rences...";
 /* File: main.m:207 */
 "Quit" = "Quitter";
 /* File: main.m:194 */
-"Windows" = "Fenêtres";
+"Windows" = "Fen\u00eatres";

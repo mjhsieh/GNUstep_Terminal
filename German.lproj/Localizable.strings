@@ -1,5 +1,6 @@
 /*
 German translation by Chris B. Vetter
+Additions and modifications by Axel Katerbau
 */
 
 /***
@@ -22,10 +23,8 @@ add comments above this one
 "Shell" = "Shell";
 
 /* File: TerminalViewPrefs.m:602 */
-/* Flag: untranslated */
 /* File: TerminalViewPrefs.m:607 */
-/* Flag: untranslated */
-"Keyboard" = "Keyboard";
+"Keyboard" = "Tastatur";
 
 
 /*** Unmatched/untranslated keys ***/
@@ -35,97 +34,76 @@ add comments above this one
 "UTF-8" = "UTF-8";
 
 /* File: TerminalParser_LinuxPrefs.m:41 */
-/* Flag: untranslated */
-"West Europe, latin1" = "West Europe, latin1";
+"West Europe, latin1" = "Westeurop\u00e4isch, latin-1";
 
 /* File: TerminalParser_LinuxPrefs.m:42 */
-/* Flag: untranslated */
-"East Europe, latin2" = "East Europe, latin2";
+"East Europe, latin2" = "Osteurop\u00e4isch, latin-2";
 
 /* File: TerminalParser_LinuxPrefs.m:43 */
-/* Flag: untranslated */
-"Chinese" = "Chinese";
+"Chinese" = "Chinesisch";
 
 /* File: TerminalParser_LinuxPrefs.m:44 */
-/* Flag: untranslated */
-"Custom, leave unchanged" = "Custom, leave unchanged";
+"Custom, leave unchanged" = "Benutzerdefiniert, unver\u00e4ndert lassen";
 
 /* File: TerminalParser_LinuxPrefs.m:103 */
-/* Flag: untranslated */
-"'linux' terminal parser" = "'linux' terminal parser";
+"'linux' terminal parser" = "'Linux' Terminal Parser";
 
 /* File: TerminalParser_LinuxPrefs.m:108 */
-/* Flag: untranslated */
-"'linux'\nparser" = "'linux'\nparser";
+"'linux'\nparser" = "'Linux'\nParser";
 
 /* File: TerminalParser_LinuxPrefs.m:151 */
-/* Flag: untranslated */
-"Character set:" = "Character set:";
+"Character set:" = "Zeichensatz:";
 
 /* File: TerminalViewPrefs.m:255 */
-/* Flag: untranslated */
-"Scroll-back length in lines:" = "Scroll-back length in lines:";
+"Scroll-back length in lines:" = "Anzahl zur\u00fcckrollbarer Zeilen:";
 
 /* File: TerminalViewPrefs.m:319 */
-/* Flag: untranslated */
-"Handle wide (multi-cell) glyphs" = "Handle wide (multi-cell) glyphs";
+"Handle wide (multi-cell) glyphs" = "Behandle breite (multi-cell) Glyphen";
 
 /* File: TerminalViewPrefs.m:515 */
-/* Flag: untranslated */
-"Start as login-shell" = "Start as login-shell";
+"Start as login-shell" = "Als Login-Shell starten";
 
 /* File: TerminalViewPrefs.m:527 */
 /* Flag: untranslated */
 "Shell:" = "Shell:";
 
 /* File: TerminalViewPrefs.m:634 */
-/* Flag: untranslated */
 "Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard."
-= "Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard.";
+= "Behandle die 'Command'-Taste als 'Meta'-Taste.\n\nWenn dies gew\u00e4hlt ist, dann k\u00f6nnen Men\u00fceintr\u00e4ge nicht mehr per\nTastatur bedient werden.";
 
 /* File: TerminalViewPrefs.m:651 */
-/* Flag: untranslated */
 "Send a double escape for the escape key.\n\nThis means that the escape key will be\nrecognized faster by many programs, but\nyou can't use it as a substitute for meta."
-= "Send a double escape for the escape key.\n\nThis means that the escape key will be\nrecognized faster by many programs, but\nyou can't use it as a substitute for meta.";
+= "F\u00fcr jedes 'Escape' ein doppeltes 'Escape' senden.\n\nDas bewirkt, dass 'Escape' von vielen Programmen schneller\nerkannt wird, aber nicht mehr als Ersatz f\u00fcr die\n'Meta'-Taste benutzt werden kann.";
 
 /* File: TerminalWindowPrefs.m:112 */
-/* Flag: untranslated */
-"Terminal Window" = "Terminal Window";
+"Terminal Window" = "Terminal-Fenster";
 
 /* File: TerminalWindowPrefs.m:117 */
-/* Flag: untranslated */
-"Terminal\nWindow" = "Terminal\nWindow";
+"Terminal\nWindow" = "Terminal-\nFenster";
 
 /* File: TerminalWindowPrefs.m:143 */
-/* Flag: untranslated */
-"Close new windows when idle" = "Close new windows when idle";
+"Close new windows when idle" = "Neue unbenutzte Fenster schlie\u00dfen";
 
 /* File: TerminalWindowPrefs.m:144 */
-/* Flag: untranslated */
-"Don't close new windows" = "Don't close new windows";
+"Don't close new windows" = "Neue Fenster nicht schlie\u00dfen";
 
 /* File: TerminalWindowPrefs.m:156 */
-/* Flag: untranslated */
-"Default size" = "Default size";
+"Default size" = "Standardgr\u00f6\u00dfe";
 
 /* File: TerminalWindowPrefs.m:160 */
-/* Flag: untranslated */
-"Width:" = "Width:";
+"Width:" = "Breite:";
 
 /* File: TerminalWindowPrefs.m:169 */
-/* Flag: untranslated */
-"Height:" = "Height:";
+"Height:" = "H\u00f6he:";
 
 /* File: TerminalWindowPrefs.m:192 */
-/* Flag: untranslated */
-"Add top and bottom border" = "Add top and bottom border";
+"Add top and bottom border" = "F\u00fcge oberen und unteren Rand hinzu";
 
 /* File: main.m:157 */
 /* Flag: untranslated */
 "Benchmark" = "Benchmark";
 
 /* File: main.m:164 */
-/* Flag: unmatched */
 "New window" = "Neues Fenster";
 
 /* File: main.m:167 */
@@ -133,17 +111,16 @@ add comments above this one
 "Terminal" = "Terminal";
 
 /* File: main.m:171 */
-/* Flag: untranslated */
-"New terminal" = "New terminal";
+"New terminal" = "Neues Fenster";
 
 
 /*** Strings from PreferencesWindowController.m ***/
 /* File: PreferencesWindowController.m:78 */
-"Apply and save" = "Anwenden und Speichern";
+"Apply and save" = "\u00dcbernehmen und Speichern";
 /* File: PreferencesWindowController.m:122 */
-"Preferences" = "Grundeinstellungen";
+"Preferences" = "Einstellungen";
 /* File: PreferencesWindowController.m:70 */
-"Revert" = "Zurücksetzen";
+"Revert" = "Zur\u00fccksetzen";
 
 
 /*** Strings from Services.m ***/
@@ -151,7 +128,7 @@ add comments above this one
 "Service aborted by user." = "Dienst vom Benutzer unterbrochen.";
 /* File: Services.m:60 */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
-= "Es gibt keinen Terminal-Dienst namens '%@.\nDie Dienste sind vermutlich nicht auf neuestem Stand.\nStarte 'make_services' zum Aktualisieren";
+= "Es gibt keinen Terminal-Dienst namens '%@.\nDie Dienste sind vermutlich nicht auf neuestem Stand.\nStarte zum Aktualisieren 'make_services'";
 
 
 /*** Strings from ServicesParameterWindowController.m ***/
@@ -160,20 +137,20 @@ add comments above this one
 /* File: ServicesParameterWindowController.m:74 */
 "OK" = "OK";
 /* File: ServicesParameterWindowController.m:118 */
-"Parameter for service %@" = "Parameter für Dienst %@";
+"Parameter for service %@" = "Parameter f\u00fcr Dienst %@";
 
 
 /*** Strings from ServicesPrefs.m ***/
 /* File: ServicesPrefs.m:585 */
-"Accept types" = "Typen akzeptieren";
+"Accept types" = "Akzeptierte Typen";
 /* File: ServicesPrefs.m:499 */
-"Add" = "Hinzufügen";
+"Add" = "Hinzuf\u00fcgen";
 /* File: ServicesPrefs.m:348 */
 "Error importing services" = "Fehler beim Importieren von Diensten";
 /* File: ServicesPrefs.m:401 */
 "Export services" = "Dienste exportieren";
 /* File: ServicesPrefs.m:523 */
-"Export..." = "Export...";
+"Export..." = "Exportieren...";
 /* File: ServicesPrefs.m:594 */
 "Filenames" = "Dateinamen";
 /* File: ServicesPrefs.m:549 */
@@ -181,13 +158,13 @@ add comments above this one
 /* File: ServicesPrefs.m:254 */
 "Import services" = "Dienste importieren";
 /* File: ServicesPrefs.m:515 */
-"Import..." = "Import...";
+"Import..." = "Importieren...";
 /* File: ServicesPrefs.m:559 */
 "Input in stdin" = "Eingabe in 'stdin'";
 /* File: ServicesPrefs.m:560 */
 "Input on command line" = "Eingabe in Befehlszeile";
 /* File: ServicesPrefs.m:640 */
-"Key:" = "Schlüssel:";
+"Key:" = "Schl\u00fcssel:";
 /* File: ServicesPrefs.m:627 */
 "Name:" = "Name:";
 /* File: ServicesPrefs.m:558 */
@@ -197,7 +174,7 @@ add comments above this one
 /* File: ServicesPrefs.m:507 */
 "Remove" = "Entfernen";
 /* File: ServicesPrefs.m:550 */
-"Return output" = "Ausgabe zurückgeben";
+"Return output" = "Ausgabe zur\u00fcckgeben";
 /* File: ServicesPrefs.m:568 */
 "Run in background" = "Im Hintergrund laufen";
 /* File: ServicesPrefs.m:570 */
@@ -207,20 +184,20 @@ add comments above this one
 /* File: ServicesPrefs.m:468 */
 "Terminal services" = "Terminal-Dienste";
 /* File: ServicesPrefs.m:473 */
-"Terminal\nservices" = "Terminal\nDienste";
+"Terminal\nservices" = "Terminal-\nDienste";
 /* File: ServicesPrefs.m:349 */
 "The file '%@' doesn't contain valid terminal services."
-= "Die Datei '%@' beinhaltet keine gültigen Terminal-Dienste.";
+= "Die Datei '%@' enth\u00e4lt keine g\u00fcltigen Terminal-Dienste.";
 /* File: ServicesPrefs.m:235 */
-"Unnamed service" = "Ungenannter Dienst";
+"Unnamed service" = "Unbenannter Dienst";
 
 
 /*** Strings from TerminalView.m ***/
 /* File: TerminalView.m:1623 */
-"Unable to fork: %m." = "Kann keinen neuen Prozess starten: %m.";
+"Unable to fork: %m." = "Prozess kann nicht gestartet werden: %m.";
 /* File: TerminalView.m:1611 */
 "Unable to open pipe for input: %m."
-= "Kann Pipe nicht zur Eingabe benutzen: %m.";
+= "Kann 'Pipe' nicht zur Eingabe benutzen: %m.";
 /* File: TerminalView.m:1476 */
 "[Process exited]" = "[Prozess beendet]";
 
@@ -236,7 +213,7 @@ add comments above this one
 /* File: TerminalViewPrefs.m:225 */
 "Display" = "Darstellung";
 /* File: TerminalViewPrefs.m:291 */
-"Filled block" = "Gefüllter Block";
+"Filled block" = "Gef\u00fcllter Block";
 /* File: TerminalViewPrefs.m:292 */
 "Inverted block" = "Invertierter Block";
 /* File: TerminalViewPrefs.m:289 */
@@ -245,7 +222,7 @@ add comments above this one
 "Normal font:" = "Normalschrift:";
 /* File: TerminalViewPrefs.m:369 */
 /* File: TerminalViewPrefs.m:342 */
-"Pick font..." = "Fontauswahl...";
+"Pick font..." = "Schriftauswahl...";
 /* File: TerminalViewPrefs.m:290 */
 "Stroked block" = "Hohler Block";
 /* File: TerminalViewPrefs.m:282 */
@@ -260,7 +237,7 @@ add comments above this one
 
 /*** Strings from main.m ***/
 /* File: main.m:191 */
-"Close" = "Schließen";
+"Close" = "Schlie\u00dfen";
 /* File: main.m:180 */
 "Copy" = "Kopieren";
 /* File: main.m:177 */
@@ -272,11 +249,11 @@ add comments above this one
 /* File: main.m:159 */
 "Info" = "Info";
 /* File: main.m:153 */
-"Info..." = "Info...";
+"Info..." = "\u00dcber...";
 /* File: main.m:183 */
-"Paste" = "Einfügen";
+"Paste" = "Einf\u00fcgen";
 /* File: main.m:155 */
-"Preferences..." = "Grundeinstellungen...";
+"Preferences..." = "Einstellungen...";
 /* File: main.m:207 */
 "Quit" = "Beenden";
 /* File: main.m:199 */
