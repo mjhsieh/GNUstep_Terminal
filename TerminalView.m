@@ -1243,14 +1243,6 @@ Selection, copy/paste/services
 
 	selection=s;
 	[self setNeedsDisplay: YES];
-
-	if (selection.length)
-	{
-		NSString *str=[self _selectionAsString];
-		if (str && [str length])
-			[self writeSelectionToPasteboard: [NSPasteboard pasteboardWithName: @"Selection"]
-				types: [NSArray arrayWithObject: NSStringPboardType]];
-	}
 }
 
 -(void) _clearSelection
@@ -1454,6 +1446,14 @@ Selection, copy/paste/services
 			untilDate: [NSDate distantFuture]
 			inMode: NSEventTrackingRunLoopMode
 			dequeue: YES];
+	}
+
+	if (selection.length)
+	{
+		NSString *str=[self _selectionAsString];
+		if (str && [str length])
+			[self writeSelectionToPasteboard: [NSPasteboard pasteboardWithName: @"Selection"]
+				types: [NSArray arrayWithObject: NSStringPboardType]];
 	}
 }
 
