@@ -83,6 +83,8 @@ static NSString
 	int sx,sy;
 	screen_char_t *screen;
 
+	NSRect dirty;
+
 	int x,y;
 	unsigned int tab_stop[8];
 
@@ -158,7 +160,7 @@ enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 
 #define SCREEN(x,y) (screen[(y)*sx+(x)])
 
--(void) _setAttrs: (screen_char_t)sch : (float)x0 : (float)y0
+-(void) _setAttrs: (screen_char_t)sch : (float)x0 : (float)y0 : (NSGraphicsContext *)gc
 {
 	int fg,bg;
 	float h,s,b;
@@ -237,13 +239,13 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 #undef SWAP
 	}
 
-	PSsethsbcolor(bh,bs,bb);
-	PSrectfill(x0,y0,fx,fy);
+	DPSsethsbcolor(gc,bh,bs,bb);
+	DPSrectfill(gc,x0,y0,fx,fy);
 
-	PSsethsbcolor(h,s,b);
+	DPSsethsbcolor(gc,h,s,b);
 
 	if (ul)
-		PSrectfill(x0,y0,fx,1);
+		DPSrectfill(gc,x0,y0,fx,1);
 }
 
 -(void) drawRect: (NSRect)r
@@ -253,19 +255,34 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	unsigned char *pbuf=buf;
 	int dlen;
 	NSGraphicsContext *cur=GSCurrentContext();
+	int x0,y0,x1,y1;
+
+//	NSLog(@"drawRect: (%g %g)+(%g %g)\n",r.origin.x,r.origin.y,r.size.width,r.size.height);
+	x0=floor(r.origin.x/fx);
+	x1=ceil((r.origin.x+r.size.width)/fx);
+	if (x0<0) x0=0;
+	if (x1>=sx) x1=sx;
+
+	y1=floor(r.origin.y/fy);
+	y0=ceil((r.origin.y+r.size.height)/fy);
+	y0=sy-y0;
+	y1=sy-y1;
+	if (y0<0) y0=0;
+	if (y1>=sy) y1=sy;
+
+//	NSLog(@"dirty (%i %i)-(%i %i)\n",x0,y0,x1,y1);
 
 	DPSsetgray(cur,0.0);
 	DPSrectfill(cur,r.origin.x,r.origin.y,r.size.width,r.size.height);
 
-//	DPSsetgray(cur,1.0);
 	[font set];
 
-	for (ix=0;ix<sx;ix++)
-		for (iy=0;iy<sy;iy++)
+	for (ix=x0;ix<x1;ix++)
+		for (iy=y0;iy<y1;iy++)
 		{
 			if (SCREEN(ix,iy).ch)
 			{
-				[self _setAttrs: SCREEN(ix,iy) : ix*fx:(sy-1-iy)*fy];
+				[self _setAttrs: SCREEN(ix,iy) : ix*fx:(sy-1-iy)*fy : cur];
 
 				dlen=sizeof(buf)-1;
 				GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
@@ -276,6 +293,11 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	DPSsetrgbcolor(cur,0.2,0.2,1.0);
 	DPSrectstroke(cur,x*fx,(sy-1-y)*fy,fx,fy);
+}
+
+-(BOOL) isOpaque
+{
+	return YES;
 }
 
 
@@ -396,6 +418,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 #define gotoxy(foo,new_x,new_y) do { \
 	int min_y, max_y; \
  \
+	dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
+ \
 	if (new_x < 0) \
 		x = 0; \
 	else \
@@ -416,6 +440,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		y = max_y - 1; \
 	else \
 		y = new_y; \
+ \
+	dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
 } while (0)
 
 #define gotoxay(foo,nx,ny) gotoxy(foo,nx,decom?top+ny:ny)
@@ -509,14 +535,17 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		case 0:	/* erase from cursor to end of display */
 			count = sx*sy-(x+y*sx);
 			start = &SCREEN(x,y);
+			dirty=NSUnionRect(dirty,NSMakeRect(0,y,sx,sy-y));
 			break;
 		case 1:	/* erase from start to cursor */
-			count = x+y*sx;
+			count = x+y*sx+1;
 			start = &SCREEN(0,0);
+			dirty=NSUnionRect(dirty,NSMakeRect(0,0,sx,y+1));
 			break;
 		case 2: /* erase whole display */
 			count = sx*sy;
 			start = &SCREEN(0,0);
+			dirty=NSUnionRect(dirty,NSMakeRect(0,0,sx,sy));
 			break;
 		default:
 			return;
@@ -534,14 +563,17 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		case 0:	/* erase from cursor to end of line */
 			count = sx-x;
 			start = &SCREEN(x,y);
+			dirty=NSUnionRect(dirty,NSMakeRect(x,y,sx-x,1));
 			break;
 		case 1:	/* erase from start of line to cursor */
 			count = x+1;
 			start = &SCREEN(0,y);
+			dirty=NSUnionRect(dirty,NSMakeRect(0,y,x+1,1));
 			break;
 		case 2: /* erase whole line */
 			count = sx;
 			start = &SCREEN(0,y);
+			dirty=NSUnionRect(dirty,NSMakeRect(0,y,sx,1));
 			break;
 		default:
 			return;
@@ -557,6 +589,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		vpar++;
 	count = (vpar > video_num_columns-x) ? (video_num_columns-x) : vpar;
 
+	dirty=NSUnionRect(dirty,NSMakeRect(x,y,count,1));
 	memset(&SCREEN(x,y), video_erase_char, sizeof(screen_char_t) * count);
 }
 
@@ -675,6 +708,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		scrup_nr = b - t - 1; \
 	if (b > video_num_lines || t >= b || scrup_nr < 1) \
 		return; \
+	dirty=NSUnionRect(dirty,NSMakeRect(0,t,sx,b-t)); \
 	d = &SCREEN(0,t); \
 	s = &SCREEN(0,t+scrup_nr); \
 	memmove(d, s, (b-t-scrup_nr) * sx*sizeof(screen_char_t)); \
@@ -690,6 +724,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		scrdown_nr = b - t - 1; \
 	if (b > video_num_lines || t >= b || scrdown_nr < 1) \
 		return; \
+	dirty=NSUnionRect(dirty,NSMakeRect(0,t,sx,b-t)); \
 	s = &SCREEN(0,t); \
 	step = video_num_columns * scrdown_nr; \
 	memmove(s + step, s, (b-t-scrdown_nr)*sx*sizeof(screen_char_t)); \
@@ -703,6 +738,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	p = q + video_num_columns - nr - x; \
 	while (--p >= q) \
 		p[nr]=*p; \
+	dirty=NSUnionRect(dirty,NSMakeRect(0,y,sx,1)); /* FIX */ \
 	memset(q, video_erase_char, nr*sizeof(screen_char_t)); \
 } while (0)
 
@@ -714,6 +750,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		*p=p[nr]; \
 		p++; \
 	} \
+	dirty=NSUnionRect(dirty,NSMakeRect(0,y,sx,1)); /* FIX */ \
 	memset(p, video_erase_char, nr*sizeof(screen_char_t)); \
 } while (0)
 
@@ -905,7 +942,11 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		scrup(foo,top,bottom,1); \
 	} \
 	else if (y<sy-1) \
+	{ \
+		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
 		y++; \
+		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
+	} \
 } while (0)
 
 #define ri() do { \
@@ -914,10 +955,14 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		scrdown(foo,top,bottom,1); \
 	} \
 	else if (y>0) \
+	{ \
+		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
 		y--; \
+		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
+	} \
 } while (0)
 
-#define cr() do { x=0; } while (0)
+#define cr() do { dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); x=0; dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); } while (0)
 
 
 #define cursor_report(foo,bar) do { \
@@ -960,14 +1005,21 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		NSBeep();
 		return;
 	case 8:
-		if (x>0) x--;
+		if (x>0)
+		{
+			dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
+			x--;
+			dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
+		}
 		return;
 	case 9:
+		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
 		while (x < sx - 1) {
 			x++;
 			if (tab_stop[x >> 5] & (1 << (x & 31)))
 				break;
 		}
+		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
 		return;
 	case 10: case 11: case 12:
 		lf();
@@ -1412,7 +1464,12 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		SCREEN(x,y).color=color;
 		SCREEN(x,y).attr=(intensity)|(underline<<2)|(reverse<<3)|(blink<<4);
 		if (x<sx)
+		{
+			dirty=NSUnionRect(dirty,NSMakeRect(x,y,2,1));
 			x++;
+		}
+		else
+			dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
 		return;
 	}
 }
@@ -1438,6 +1495,8 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 
 //	printf("got event %i %i\n",(int)data,t);
 	total=0;
+	dirty.size.width=dirty.size.height=-1;
+
 while (1)
 {
 {
@@ -1447,29 +1506,40 @@ while (1)
 	FD_SET(master_fd,&s);
 	tv.tv_sec=0;
 	tv.tv_usec=0;
-	if (!select(master_fd+1,&s,NULL,NULL,&tv)) return;
+	if (!select(master_fd+1,&s,NULL,NULL,&tv)) break;
 }
 
 	size=read(master_fd,buf,1);
-	if (size==0) return;
+	if (size==0) break;
 	if (size<0)
 	{
 		get_zombies();
 		[[NSNotificationCenter defaultCenter]
 			postNotificationName: TerminalViewEndOfInput
 			object: self];
-		return;
+		break;
 	}
 //	printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
 
-	[self processChar: buf[0]];
 
-	[self setNeedsDisplay: YES];
+	[self processChar: buf[0]];
 
 	total++;
 	if (total>=4096)
-		return; /* give other things a chance */
+		break; /* give other things a chance */
 }
+
+	if (dirty.size.width>0)
+	{
+//		NSLog(@"dirty=(%g %g)+(%g %g)\n",dirty.origin.x,dirty.origin.y,dirty.size.width,dirty.size.height);
+		dirty.origin.x*=fx;
+		dirty.origin.y*=fy;
+		dirty.size.width*=fx;
+		dirty.size.height*=fy;
+		dirty.origin.y=fy*sy-(dirty.origin.y+dirty.size.height);
+//		NSLog(@"-> dirty=(%g %g)+(%g %g)\n",dirty.origin.x,dirty.origin.y,dirty.size.width,dirty.size.height);
+		[self setNeedsDisplayInRect: dirty];
+	}
 }
 
 
@@ -1673,6 +1743,9 @@ while (1)
 
 	[win setTitle: @"Terminal"];
 	[win setDelegate: self];
+
+	[win setResizeIncrements: NSMakeSize(fx,fy)];
+	[win setContentSize: NSMakeSize(fx*80+1,fy*24+1)];
 
 	tv=[[TerminalView alloc] init];
 	[win setContentView: tv];
