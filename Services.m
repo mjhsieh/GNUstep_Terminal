@@ -11,6 +11,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <Foundation/NSData.h>
 #include <Foundation/NSPathUtilities.h>
 #include <AppKit/NSPasteboard.h>
+#include <AppKit/NSWorkspace.h>
 
 #include "Services.h"
 
@@ -354,6 +355,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		d=[NSDictionary dictionaryWithObject: a forKey: @"NSServices"];
 		[d writeToFile: path atomically: YES];
 	}
+
+	[[NSWorkspace sharedWorkspace] findApplications];
 }
 
 
