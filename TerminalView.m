@@ -844,6 +844,11 @@ static void set_foreground(NSGraphicsContext *gc,
 	if (master_fd!=-1)
 		write(master_fd,msg,len);
 }
+-(void) ts_sendCString: (const char *)msg  length: (int)len
+{
+	if (master_fd!=-1)
+		write(master_fd,msg,len);
+}
 
 
 -(BOOL) useMultiCellGlyphs

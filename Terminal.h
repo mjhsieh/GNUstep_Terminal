@@ -35,6 +35,8 @@ bits
 
 @protocol TerminalScreen
 -(void) ts_sendCString: (const char *)str;
+-(void) ts_sendCString: (const char *)msg  length: (int)len;
+
 -(void) ts_goto: (int)x:(int)y;
 -(void) ts_putChar: (screen_char_t)ch  count: (int)c  at: (int)x:(int)y;
 -(void) ts_putChar: (screen_char_t)ch  count: (int)c  offset: (int)ofs;

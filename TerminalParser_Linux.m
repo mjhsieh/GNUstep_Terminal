@@ -1219,7 +1219,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 			if (outsize!=sizeof(buf)-1)
 			{
 				*outp=0;
-				[ts ts_sendCString: buf];
+				[ts ts_sendCString: buf  length: outsize];
 			}
 			else
 				NSBeep();
@@ -1227,15 +1227,14 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	}
 	else
 	{
-		unsigned char buf[2];
-		buf[1]=0;
+		unsigned char buf;
 		for (i=0;i<l;i++)
 		{
 			ucs=[s characterAtIndex: i];
 			if (ucs<256)
 			{
-				buf[0]=ucs;
-				[ts ts_sendCString: buf];
+				buf=ucs;
+				[ts ts_sendCString: &buf  length: 1];
 			}
 			else
 				NSBeep();
@@ -1343,11 +1342,10 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	}
 	else if (ch2>0)
 	{
-		unsigned char tmp[2];
-		tmp[0]=ch2;
-		tmp[1]=0;
+		unsigned char tmp;
+		tmp=ch2;
 		NSDebugLLog(@"key",@"  send %02x",ch2);
-		[ts ts_sendCString: tmp];
+		[ts ts_sendCString: &tmp  length: 1];
 	}
 }
 
