@@ -414,7 +414,7 @@ static void set_foreground(NSGraphicsContext *gc,
 					}
 				}
 
-				if (ch->ch!=0 && ch->ch!=32)
+				if (ch->ch!=0 && ch->ch!=32 && ch->ch!=MULTI_CELL_GLYPH)
 				{
 					total_draw++;
 					if ((ch->attr&3)==2)
