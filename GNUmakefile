@@ -14,8 +14,8 @@ Terminal_OBJC_FILES = \
 
 Terminal_LDFLAGS = -lutil
 
-#Terminal_LOCALIZED_RESOURCE_FILES = Localizable.strings
-#Terminal_LANGUAGES = English Swedish
+Terminal_LOCALIZED_RESOURCE_FILES = Localizable.strings
+Terminal_LANGUAGES = English Swedish
 
 MAKE_STRINGS_OPTIONS = --aggressive-match --aggressive-remove
 

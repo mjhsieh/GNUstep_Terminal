@@ -1,0 +1,37 @@
+/***
+English.lproj/Localizable.strings
+updated by make_strings 2002-06-05 01:26:04 +0200
+add comments above this one
+***/
+
+
+/*** Strings from main.m ***/
+/* File: main.m:1675 */
+"Close" = "Close";
+/* File: main.m:1661 */
+"Copy" = "Copy";
+/* File: main.m:1664 */
+"Cut" = "Cut";
+/* File: main.m:1670 */
+"Edit" = "Edit";
+/* File: main.m:1687 */
+"Hide" = "Hide";
+/* File: main.m:1648 */
+/* File: main.m:1646 */
+"Info" = "Info";
+/* File: main.m:1653 */
+"New window" = "New window";
+/* File: main.m:1667 */
+"Paste" = "Paste";
+/* File: main.m:1644 */
+"Preferences..." = "Preferences...";
+/* File: main.m:1691 */
+"Quit" = "Quit";
+/* File: main.m:1683 */
+"Services" = "Services";
+/* File: main.m:1656 */
+"Terminal" = "Terminal";
+/* File: main.m:1468 */
+"Unable to spawn process: %m." = "Unable to spawn process: %m.";
+/* File: main.m:1678 */
+"Windows" = "Windows";
