@@ -1,0 +1,1462 @@
+/*
+copyright 2002 Alexander Malmberg <alexander@malmberg.org>
+*/
+
+#include <math.h>
+#include <termio.h>
+#include <unistd.h>
+#include <pty.h>
+
+#include <Foundation/NSRunLoop.h>
+#include <Foundation/NSBundle.h>
+#include <gnustep/base/Unicode.h>
+#include <AppKit/NSApplication.h>
+#include <AppKit/NSView.h>
+#include <AppKit/NSMenu.h>
+#include <AppKit/NSWindow.h>
+#include <AppKit/NSWindowController.h>
+#include <AppKit/PSOperators.h>
+
+
+/*
+lots borrowed from linux/drivers/char/console.c, GNU GPL'ed
+*/
+
+
+typedef struct
+{
+	unichar ch;
+	unsigned char color;
+	unsigned char attr;
+} screen_char_t;
+
+@interface TerminalView : NSView <RunLoopEvents>
+{
+	NSFont *font;
+	float fx,fy,fx0,fy0;
+
+	int master_fd;
+
+	int sx,sy;
+	screen_char_t *screen;
+
+	int x,y;
+	unsigned int tab_stop[8];
+
+	int top,bottom;
+
+	unsigned int unich;
+
+enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
+	EShash, ESsetG0, ESsetG1, ESpercent, ESignore, ESnonstd,
+	ESpalette } ESstate;
+	int vc_state;
+
+	unsigned char decscnm,decom,decawm,deccm,decim;
+	unsigned char ques;
+	unsigned char charset,/*need_wrap,*/utf,utf_count,disp_ctrl,toggle_meta;
+
+	unsigned int intensity,underline,reverse,blink; /* 2 1 1 1 */
+	unsigned int color,def_color;
+#define foreground (color & 0x0f)
+#define background (color & 0xf0)
+
+#define NPAR 16
+	int npar;
+	int par[NPAR];
+
+	int saved_x,saved_y;
+	unsigned int s_intensity,s_underline,s_blink,s_reverse,s_charset,s_color;
+}
+
+#define csi_J(foo,vpar) [self _csi_J: vpar]
+#define csi_K(foo,vpar) [self _csi_K: vpar]
+#define csi_L(foo,vpar) [self _csi_L: vpar]
+#define csi_M(foo,vpar) [self _csi_M: vpar]
+#define csi_P(foo,vpar) [self _csi_P: vpar]
+#define csi_X(foo,vpar) [self _csi_X: vpar]
+#define csi_at(foo,vpar) [self _csi_at: vpar]
+#define csi_m(foo) [self _csi_m]
+
+-(void) _csi_J: (int)vpar;
+-(void) _csi_K: (int)vpar;
+-(void) _csi_L: (unsigned int)vpar;
+-(void) _csi_M: (unsigned int)vpar;
+-(void) _csi_P: (unsigned int)vpar;
+-(void) _csi_X: (int)vpar;
+-(void) _csi_at: (unsigned int)vpar;
+-(void) _csi_m;
+
+-(void) _default_attr;
+
+@end
+
+@implementation TerminalView
+
+#define SCREEN(x,y) (screen[(y)*sx+(x)])
+
+-(void) _setAttrs: (screen_char_t)sch
+{
+static const float col[16][3]={
+{0.00, 0.00, 0.00},
+{0.00, 0.00, 0.66},
+{0.00, 0.66, 0.00},
+{0.00, 0.66, 0.66},
+
+{0.66, 0.00, 0.00},
+{0.66, 0.00, 0.66},
+{0.66, 0.66, 0.00},
+{0.66, 0.66, 0.66},
+
+{0.33, 0.33, 0.33},
+{0.00, 0.00, 1.00},
+{0.00, 1.00, 0.00},
+{0.00, 1.00, 1.00},
+
+{1.00, 0.00, 0.00},
+{1.00, 0.00, 1.00},
+{1.00, 1.00, 0.00},
+{1.00, 1.00, 1.00},
+};
+	if (sch.attr&3 && sch.color<8) sch.color+=8;
+	PSsetrgbcolor(col[sch.color][0],col[sch.color][1],col[sch.color][2]);
+}
+
+-(void) drawRect: (NSRect)r
+{
+	int ix,iy;
+	char buf[8];
+	char *pbuf=buf;
+	int dlen;
+	NSGraphicsContext *cur=GSCurrentContext();
+
+	DPSsetgray(cur,0.0);
+	DPSrectfill(cur,r.origin.x,r.origin.y,r.size.width,r.size.height);
+
+	[font set];
+	buf[1]=0;
+	for (ix=0;ix<sx;ix++)
+		for (iy=0;iy<sy;iy++)
+		{
+			if (SCREEN(ix,iy).ch)
+			{
+				[self _setAttrs: SCREEN(ix,iy)];
+
+				dlen=sizeof(buf)-1;
+				GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
+				DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
+				DPSshow(cur,buf);
+			}
+		}
+
+	DPSsetrgbcolor(cur,0.2,0.2,1.0);
+	DPSrectstroke(cur,x*fx+fx0,(sy-1-y)*fy+fy0,fx,fy);
+}
+
+
+-(void) keyDown: (NSEvent *)e
+{
+	NSString *s=[e characters];
+	unichar uc=[s characterAtIndex: 0];
+	write(master_fd,&uc,1);
+//	printf("got key '%@'\n",e);
+
+}
+
+-(BOOL) acceptsFirstResponder
+{
+	return YES;
+}
+
+
+-(void) sendCString: (const char *)msg
+{
+	int len=strlen(msg);
+	write(master_fd,msg,len);
+}
+
+#define video_num_columns sx
+#define video_num_lines sy
+#define video_erase_char 0
+
+#define gotoxy(foo,new_x,new_y) do { \
+	int min_y, max_y; \
+ \
+	if (new_x < 0) \
+		x = 0; \
+	else \
+		if (new_x >= video_num_columns) \
+			x = video_num_columns - 1; \
+		else \
+			x = new_x; \
+	if (decom) { \
+		min_y = top; \
+		max_y = bottom; \
+	} else { \
+		min_y = 0; \
+		max_y = video_num_lines; \
+	} \
+	if (new_y < min_y) \
+		y = min_y; \
+	else if (new_y >= max_y) \
+		y = max_y - 1; \
+	else \
+		y = new_y; \
+} while (0)
+
+#define gotoxay(foo,nx,ny) gotoxy(foo,nx,decom?top+ny:ny)
+
+
+#define save_cur(foo) do { \
+	saved_x		= x; \
+	saved_y		= y; \
+	s_intensity	= intensity; \
+	s_underline	= underline; \
+	s_blink		= blink; \
+	s_reverse	= reverse; \
+	s_charset	= charset; \
+	s_color		= color; \
+/*	saved_G0	= G0_charset; \
+	saved_G1	= G1_charset;*/ \
+} while (0)
+
+#define restore_cur(foo) do { \
+	gotoxy(currcons,saved_x,saved_y); \
+	intensity	= s_intensity; \
+	underline	= s_underline; \
+	blink		= s_blink; \
+	reverse		= s_reverse; \
+	charset		= s_charset; \
+	color		= s_color; \
+/*	G0_charset	= saved_G0; \
+	G1_charset	= saved_G1; \
+	translate	= set_translate(charset ? G1_charset : G0_charset,currcons); \
+	update_attr(currcons); \
+	need_wrap = 0;*/ \
+} while (0)
+
+
+-(void) _reset_terminal
+{
+	top		= 0;
+	bottom		= sy;
+	vc_state	= ESnormal;
+	ques		= 0;
+#if 0
+	translate	= set_translate(LAT1_MAP,currcons);
+	G0_charset	= LAT1_MAP;
+	G1_charset	= GRAF_MAP;
+#endif
+	charset		= 0;
+//	need_wrap	= 0;
+//	report_mouse	= 0;
+	utf             = 1; /* TODO? */
+	utf_count       = 0;
+
+	disp_ctrl	= 0;
+	toggle_meta	= 0;
+
+	decscnm		= 0;
+	decom		= 0;
+	decawm		= 1;
+	deccm		= 1;
+	decim		= 0;
+
+#if 0
+	set_kbd(decarm);
+	clr_kbd(decckm);
+	clr_kbd(kbdapplic);
+	clr_kbd(lnm);
+	kbd_table[currcons].lockstate = 0;
+	kbd_table[currcons].slockstate = 0;
+	kbd_table[currcons].ledmode = LED_SHOW_FLAGS;
+	kbd_table[currcons].ledflagstate = kbd_table[currcons].default_ledflagstate;
+	set_leds();
+
+	cursor_type = CUR_DEFAULT;
+	complement_mask = s_complement_mask;
+#endif
+
+	[self _default_attr];
+#if 0
+	update_attr(currcons);
+#endif
+
+	tab_stop[0]= 0x01010100;
+	tab_stop[1]=tab_stop[2]=tab_stop[3]=tab_stop[4]=
+		tab_stop[5]=tab_stop[6]=tab_stop[7]=0x01010101;
+
+	gotoxy(currcons,0,0);
+	save_cur(currcons);
+	[self _csi_J: 2];
+}
+
+
+-(void) _csi_J: (int) vpar
+{
+	unsigned int count;
+	screen_char_t *start;
+
+	switch (vpar) {
+		case 0:	/* erase from cursor to end of display */
+			count = sx*sy-(x+y*sx);
+			start = &SCREEN(x,y);
+			break;
+		case 1:	/* erase from start to cursor */
+			count = x+y*sx;
+			start = &SCREEN(0,0);
+			break;
+		case 2: /* erase whole display */
+			count = sx*sy;
+			start = &SCREEN(0,0);
+			break;
+		default:
+			return;
+	}
+	memset(start,0,sizeof(screen_char_t)*count);
+}
+
+
+-(void) _csi_K: (int)vpar
+{
+	unsigned int count;
+	screen_char_t *start;
+
+	switch (vpar) {
+		case 0:	/* erase from cursor to end of line */
+			count = sx-x;
+			start = &SCREEN(x,y);
+			break;
+		case 1:	/* erase from start of line to cursor */
+			count = x+1;
+			start = &SCREEN(0,y);
+			break;
+		case 2: /* erase whole line */
+			count = sx;
+			start = &SCREEN(0,y);
+			break;
+		default:
+			return;
+	}
+	memset(start, 0, sizeof(screen_char_t) * count);
+}
+
+-(void) _csi_X: (int)vpar /* erase the following vpar positions */
+{					  /* not vt100? */
+	int count;
+
+	if (!vpar)
+		vpar++;
+	count = (vpar > video_num_columns-x) ? (video_num_columns-x) : vpar;
+
+	memset(&SCREEN(x,y), video_erase_char, 2 * count);
+}
+
+
+-(void) _default_attr
+{
+	intensity = 1;
+	underline = 0;
+	reverse = 0;
+	blink = 0;
+	color = def_color;
+}
+
+static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
+				       8,12,10,14, 9,13,11,15 };
+
+-(void) _csi_m
+{
+	int i;
+
+	for (i=0;i<=npar;i++)
+		switch (par[i]) {
+			case 0:	/* all attributes off */
+				[self _default_attr];
+				break;
+			case 1:
+				intensity = 2;
+				break;
+			case 2:
+				intensity = 0;
+				break;
+			case 4:
+				underline = 1;
+				break;
+			case 5:
+				blink = 1;
+				break;
+			case 7:
+				reverse = 1;
+				break;
+			case 10: /* ANSI X3.64-1979 (SCO-ish?)
+				  * Select primary font, don't display
+				  * control chars if defined, don't set
+				  * bit 8 on output.
+				  */
+				NSLog(@"ignore _csi_m 10");
+#if 0
+				translate = set_translate(charset == 0
+						? G0_charset
+						: G1_charset,currcons);
+				disp_ctrl = 0;
+				toggle_meta = 0;
+#endif
+				break;
+			case 11: /* ANSI X3.64-1979 (SCO-ish?)
+				  * Select first alternate font, lets
+				  * chars < 32 be displayed as ROM chars.
+				  */
+				NSLog(@"ignore _csi_m 11");
+#if 0
+				translate = set_translate(IBMPC_MAP,currcons);
+				disp_ctrl = 1;
+				toggle_meta = 0;
+#endif
+				break;
+			case 12: /* ANSI X3.64-1979 (SCO-ish?)
+				  * Select second alternate font, toggle
+				  * high bit before displaying as ROM char.
+				  */
+				NSLog(@"ignore _csi_m 12");
+#if 0
+				translate = set_translate(IBMPC_MAP,currcons);
+				disp_ctrl = 1;
+				toggle_meta = 1;
+#endif
+				break;
+			case 21:
+			case 22:
+				intensity = 1;
+				break;
+			case 24:
+				underline = 0;
+				break;
+			case 25:
+				blink = 0;
+				break;
+			case 27:
+				reverse = 0;
+				break;
+			case 38: /* ANSI X3.64-1979 (SCO-ish?)
+				  * Enables underscore, white foreground
+				  * with white underscore (Linux - use
+				  * default foreground).
+				  */
+				color = (def_color & 0x0f) | background;
+				underline = 1;
+				break;
+			case 39: /* ANSI X3.64-1979 (SCO-ish?)
+				  * Disable underline option.
+				  * Reset colour to default? It did this
+				  * before...
+				  */
+				color = (def_color & 0x0f) | background;
+				underline = 0;
+				break;
+			case 49:
+				color = (def_color & 0xf0) | foreground;
+				break;
+			default:
+				if (par[i] >= 30 && par[i] <= 37)
+					color = color_table[par[i]-30]
+						| background;
+				else if (par[i] >= 40 && par[i] <= 47)
+					color = (color_table[par[i]-40]<<4)
+						| foreground;
+				break;
+		}
+}
+
+#define scrup(foo,t,b,nr) do { \
+	screen_char_t *d, *s; \
+ \
+	if (t+nr >= b) \
+		nr = b - t - 1; \
+	if (b > video_num_lines || t >= b || nr < 1) \
+		return; \
+	d = &SCREEN(0,t); \
+	s = &SCREEN(0,t+nr); \
+	memmove(d, s, (b-t-nr) * sx*sizeof(screen_char_t)); \
+	memset(d + (b-t-nr) * video_num_columns, video_erase_char, sizeof(screen_char_t)*sx*nr); \
+} while (0)
+
+#define scrdown(foo,t,b,nr) do { \
+	screen_char_t *s; \
+	unsigned int step; \
+ \
+	if (t+nr >= b) \
+		nr = b - t - 1; \
+	if (b > video_num_lines || t >= b || nr < 1) \
+		return; \
+	s = &SCREEN(0,t); \
+	step = video_num_columns * nr; \
+	memmove(s + step, s, (b-t-nr)*sx*sizeof(screen_char_t)); \
+	memset(s, video_erase_char, sizeof(screen_char_t)*step); \
+} while (0)
+
+
+#define insert_char(foo,nr) do { \
+	screen_char_t *p, *q = &SCREEN(x,y); \
+ \
+	p = q + video_num_columns - nr - x; \
+	while (--p >= q) \
+		p[nr]=*p; \
+	memset(q, video_erase_char, nr*sizeof(screen_char_t)); \
+} while (0)
+
+#define delete_char(foo,nr) do { \
+	unsigned int i = x; \
+	screen_char_t *p = &SCREEN(x,y); \
+ \
+	while (++i <= video_num_columns - nr) { \
+		*p=p[nr]; \
+		p++; \
+	} \
+	memset(p, video_erase_char, nr*sizeof(screen_char_t)); \
+} while (0)
+
+#define insert_line(foo,nr) do { scrdown(foo,y,bottom,nr); } while (0)
+#define delete_line(foo,nr) do { scrup(foo,y,bottom,nr); } while (0)
+
+
+-(void) _csi_at: (unsigned int)nr
+{
+	if (nr > video_num_columns - x)
+		nr = video_num_columns - x;
+	else if (!nr)
+		nr = 1;
+	insert_char(currcons, nr);
+}
+
+-(void) _csi_L: (unsigned int)nr
+{
+	if (nr > video_num_lines - y)
+		nr = video_num_lines - y;
+	else if (!nr)
+		nr = 1;
+	insert_line(currcons, nr);
+}
+
+-(void) _csi_P: (unsigned int)nr
+{
+	if (nr > video_num_columns - x)
+		nr = video_num_columns - x;
+	else if (!nr)
+		nr = 1;
+	delete_char(currcons, nr);
+}
+
+-(void) _csi_M: (unsigned int)nr
+{
+	if (nr > video_num_lines - y)
+		nr = video_num_lines - y;
+	else if (!nr)
+		nr=1;
+	delete_line(currcons, nr);
+}
+
+#define set_kbd(foo)
+#define clr_kbd(foo)
+
+
+#define set_mode(foo,on_off) [self _set_mode: on_off]
+-(void) _set_mode: (int) on_off
+{
+	int i;
+
+	for (i=0; i<=npar; i++)
+		if (ques) switch(par[i]) {	/* DEC private modes set/reset */
+			case 1:			/* Cursor keys send ^[Ox/^[[x */
+				if (on_off)
+					set_kbd(decckm);
+				else
+					clr_kbd(decckm);
+				break;
+			case 3:	/* 80/132 mode switch unimplemented */
+				NSLog(@"ignore _set_mode 3");
+#if 0
+				deccolm = on_off;
+				(void) vc_resize(video_num_lines, deccolm ? 132 : 80);
+				/* this alone does not suffice; some user mode
+				   utility has to change the hardware regs */
+#endif
+				break;
+			case 5:			/* Inverted screen on/off */
+				NSLog(@"ignore _set_mode 5");
+#if 0
+				if (decscnm != on_off) {
+					decscnm = on_off;
+					invert_screen(currcons, 0, screenbuf_size, 0);
+					update_attr(currcons);
+				}
+#endif
+				break;
+			case 6:			/* Origin relative/absolute */
+				decom = on_off;
+				gotoxay(currcons,0,0);
+				break;
+			case 7:			/* Autowrap on/off */
+				decawm = on_off;
+				break;
+			case 8:			/* Autorepeat on/off */
+				NSLog(@"ignore _set_mode 8");
+#if 0
+				if (on_off)
+					set_kbd(decarm);
+				else
+					clr_kbd(decarm);
+#endif
+				break;
+			case 9:
+				NSLog(@"ignore _set_mode 9");
+#if 0
+				report_mouse = on_off ? 1 : 0;
+#endif
+				break;
+			case 25:		/* Cursor on/off */
+				deccm = on_off;
+				break;
+			case 1000:
+				NSLog(@"ignore _set_mode 1000");
+#if 0
+				report_mouse = on_off ? 2 : 0;
+#endif
+				break;
+		} else switch(par[i]) {		/* ANSI modes set/reset */
+			case 3:			/* Monitor (display ctrls) */
+				disp_ctrl = on_off;
+				break;
+			case 4:			/* Insert Mode on/off */
+				decim = on_off;
+				break;
+			case 20:		/* Lf, Enter == CrLf/Lf */
+				NSLog(@"ignore _set_mode 20");
+#if 0
+				if (on_off)
+					set_kbd(lnm);
+				else
+					clr_kbd(lnm);
+#endif
+				break;
+		}
+}
+
+
+#define setterm_command(foo) [self _setterm_command]
+-(void) _setterm_command
+{
+	NSLog(@"ignore _setterm_command %i\n",par[0]);
+	switch(par[0]) {
+#if 0
+		case 1:	/* set color for underline mode */
+			if (can_do_color && par[1] < 16) {
+				ulcolor = color_table[par[1]];
+				if (underline)
+					update_attr(currcons);
+			}
+			break;
+		case 2:	/* set color for half intensity mode */
+			if (can_do_color && par[1] < 16) {
+				halfcolor = color_table[par[1]];
+				if (intensity == 0)
+					update_attr(currcons);
+			}
+			break;
+		case 8:	/* store colors as defaults */
+			def_color = attr;
+			if (hi_font_mask == 0x100)
+				def_color >>= 1;
+			default_attr(currcons);
+			update_attr(currcons);
+			break;
+		case 9:	/* set blanking interval */
+			blankinterval = ((par[1] < 60) ? par[1] : 60) * 60 * HZ;
+			poke_blanked_console();
+			break;
+		case 10: /* set bell frequency in Hz */
+			if (npar >= 1)
+				bell_pitch = par[1];
+			else
+				bell_pitch = DEFAULT_BELL_PITCH;
+			break;
+		case 11: /* set bell duration in msec */
+			if (npar >= 1)
+				bell_duration = (par[1] < 2000) ?
+					par[1]*HZ/1000 : 0;
+			else
+				bell_duration = DEFAULT_BELL_DURATION;
+			break;
+		case 12: /* bring specified console to the front */
+			if (par[1] >= 1 && vc_cons_allocated(par[1]-1))
+				set_console(par[1] - 1);
+			break;
+		case 13: /* unblank the screen */
+			poke_blanked_console();
+			break;
+		case 14: /* set vesa powerdown interval */
+			vesa_off_interval = ((par[1] < 60) ? par[1] : 60) * 60 * HZ;
+			break;
+#endif
+	}
+}
+
+
+-(void) processChar: (unsigned char)c
+{
+#define lf() do { \
+	if (y+1==bottom) \
+	{ \
+		memmove(&SCREEN(0,top),&SCREEN(0,top+1),sizeof(screen_char_t)*sx*(bottom-top-1)); \
+		memset(&SCREEN(0,bottom-1),0,sizeof(screen_char_t)*sx); \
+	} \
+	else if (y<sy-1) \
+		y++; \
+} while (0)
+
+#define ri() do { \
+	if (y==top) \
+	{ \
+		memmove(&SCREEN(0,top+1),&SCREEN(0,top),sizeof(screen_char_t)*sx*(bottom-top-1)); \
+		memset(&SCREEN(0,top),0,sizeof(screen_char_t)*sx); \
+	} \
+	else if (y>0) \
+		y--; \
+} while (0)
+
+#define cr() do { x=0; } while (0)
+
+
+#define cursor_report(foo,bar) do { \
+	char buf[40]; \
+ \
+	sprintf(buf, "\033[%d;%dR", y + (decom ? top+1 : 1), x+1); \
+	[self sendCString: buf]; \
+} while (0)
+
+#define status_report(foo) do { \
+	[self sendCString: "\033[0n"]; \
+} while (0)
+
+#define VT102ID "\033[?6c"
+#define respond_ID(foo) do { [self sendCString: VT102ID]; } while (0)
+
+
+	switch (c)
+	{
+	case 0:
+		return;
+	case 7:
+		NSBeep();
+		return;
+	case 8:
+		if (x>0) x--;
+		return;
+	case 9:
+		while (x < sx - 1) {
+			x++;
+			if (tab_stop[x >> 5] & (1 << (x & 31)))
+				break;
+		}
+		return;
+	case 10: case 11: case 12:
+		lf();
+/*		if (!is_kbd(lnm))*/
+			return;
+	case 13:
+		cr();
+		return;
+	case 14:
+		NSLog(@"ignore control 14\n");
+#if 0
+		charset = 1;
+		translate = set_translate(G1_charset,currcons);
+		disp_ctrl = 1;
+#endif
+		return;
+	case 15:
+		NSLog(@"ignore control 15\n");
+#if 0
+		charset = 0;
+		translate = set_translate(G0_charset,currcons);
+		disp_ctrl = 0;
+#endif
+		return;
+	case 24: case 26:
+		vc_state = ESnormal;
+		return;
+	case 27:
+		vc_state = ESesc;
+		return;
+	case 127:
+//		del(currcons);
+		return;
+	case 128+27:
+		vc_state = ESsquare;
+		return;
+	}
+	switch(vc_state) {
+	case ESesc:
+		vc_state = ESnormal;
+		switch (c) {
+		case '[':
+			vc_state = ESsquare;
+			return;
+		case ']':
+			vc_state = ESnonstd;
+			return;
+		case '%':
+			vc_state = ESpercent;
+			return;
+		case 'E':
+			cr();
+			lf();
+			return;
+		case 'M':
+			ri();
+			return;
+		case 'D':
+			lf();
+			return;
+		case 'H':
+			tab_stop[x >> 5] |= (1 << (x & 31));
+			return;
+		case 'Z':
+			respond_ID(foo);
+			return;
+		case '7':
+			save_cur(currcons);
+			return;
+		case '8':
+			restore_cur(currcons);
+			return;
+		case '(':
+			vc_state = ESsetG0;
+			return;
+		case ')':
+			vc_state = ESsetG1;
+			return;
+		case '#':
+			vc_state = EShash;
+			return;
+		case 'c':
+			[self _reset_terminal];
+			return;
+		case '>':  /* Numeric keypad */
+			NSLog(@"ignore	ESesc >  keypad");
+#if 0
+			clr_kbd(kbdapplic);
+#endif
+			return;
+		case '=':  /* Appl. keypad */
+			NSLog(@"ignore	ESesc =  keypad");
+#if 0
+			set_kbd(kbdapplic);
+#endif
+			return;
+		}
+		return;
+	case ESnonstd:
+		NSLog(@"ignore palette sequence");
+#if 0
+		if (c=='P') {   /* palette escape sequence */
+			for (npar=0; npar<NPAR; npar++)
+				par[npar] = 0 ;
+			npar = 0 ;
+			vc_state = ESpalette;
+			return;
+		} else if (c=='R') {   /* reset palette */
+			reset_palette(currcons);
+			vc_state = ESnormal;
+		} else
+#endif
+			vc_state = ESnormal;
+		return;
+	case ESpalette:
+		NSLog(@"ignore palette sequence (2)");
+#if 0
+		if ( (c>='0'&&c<='9') || (c>='A'&&c<='F') || (c>='a'&&c<='f') ) {
+			par[npar++] = (c>'9' ? (c&0xDF)-'A'+10 : c-'0') ;
+			if (npar==7) {
+				int i = par[0]*3, j = 1;
+				palette[i] = 16*par[j++];
+				palette[i++] += par[j++];
+				palette[i] = 16*par[j++];
+				palette[i++] += par[j++];
+				palette[i] = 16*par[j++];
+				palette[i] += par[j];
+				set_palette(currcons);
+				vc_state = ESnormal;
+			}
+		} else
+#endif
+			vc_state = ESnormal;
+		return;
+	case ESsquare:
+		for(npar = 0 ; npar < NPAR ; npar++)
+			par[npar] = 0;
+		npar = 0;
+		vc_state = ESgetpars;
+		if (c == '[') { /* Function key */
+			vc_state=ESfunckey;
+			return;
+		}
+		ques = (c=='?');
+		if (ques)
+			return;
+	case ESgetpars:
+		if (c==';' && npar<NPAR-1) {
+			npar++;
+			return;
+		} else if (c>='0' && c<='9') {
+			par[npar] *= 10;
+			par[npar] += c-'0';
+			return;
+		} else vc_state=ESgotpars;
+	case ESgotpars:
+		vc_state = ESnormal;
+		switch(c) {
+		case 'h':
+			set_mode(currcons,1);
+			return;
+		case 'l':
+			set_mode(currcons,0);
+			return;
+		case 'c':
+			NSLog(@"ignore ESgotpars c");
+#if 0
+			if (ques) {
+				if (par[0])
+					cursor_type = par[0] | (par[1]<<8) | (par[2]<<16);
+				else
+					cursor_type = CUR_DEFAULT;
+				return;
+			}
+#endif
+			break;
+		case 'm':
+//			NSLog(@"ignore ESgotpars m"); nothing?
+			break;
+		case 'n':
+			if (!ques) {
+				if (par[0] == 5)
+					status_report(tty);
+				else if (par[0] == 6)
+					cursor_report(currcons,tty);
+			}
+			return;
+		}
+		if (ques) {
+			ques = 0;
+			return;
+		}
+		switch(c) {
+		case 'G': case '`':
+			if (par[0]) par[0]--;
+			gotoxy(currcons,par[0],y);
+			return;
+		case 'A':
+			if (!par[0]) par[0]++;
+			gotoxy(currcons,x,y-par[0]);
+			return;
+		case 'B': case 'e':
+			if (!par[0]) par[0]++;
+			gotoxy(currcons,x,y+par[0]);
+			return;
+		case 'C': case 'a':
+			if (!par[0]) par[0]++;
+			gotoxy(currcons,x+par[0],y);
+			return;
+		case 'D':
+			if (!par[0]) par[0]++;
+			gotoxy(currcons,x-par[0],y);
+			return;
+		case 'E':
+			if (!par[0]) par[0]++;
+			gotoxy(currcons,0,y+par[0]);
+			return;
+		case 'F':
+			if (!par[0]) par[0]++;
+			gotoxy(currcons,0,y-par[0]);
+			return;
+		case 'd':
+			if (par[0]) par[0]--;
+			gotoxay(currcons,x,par[0]);
+			return;
+		case 'H': case 'f':
+			if (par[0]) par[0]--;
+			if (par[1]) par[1]--;
+			gotoxay(currcons,par[1],par[0]);
+			return;
+		case 'J':
+			csi_J(currcons,par[0]);
+			return;
+		case 'K':
+			csi_K(currcons,par[0]);
+			return;
+		case 'L':
+			csi_L(currcons,par[0]);
+			return;
+		case 'M':
+			csi_M(currcons,par[0]);
+			return;
+		case 'P':
+			csi_P(currcons,par[0]);
+			return;
+		case 'c':
+			if (!par[0])
+				respond_ID(tty);
+			return;
+		case 'g':
+			if (!par[0])
+				tab_stop[x >> 5] &= ~(1 << (x & 31));
+			else if (par[0] == 3) {
+				tab_stop[0] =
+					tab_stop[1] =
+					tab_stop[2] =
+					tab_stop[3] =
+					tab_stop[4] = 0;
+			}
+			return;
+		case 'm':
+			csi_m(currcons);
+			return;
+		case 'q': /* DECLL - but only 3 leds */
+			/* map 0,1,2,3 to 0,1,2,4 */
+			NSLog(@"ignore ESgotpars q");
+#if 0
+			if (par[0] < 4)
+				setledstate(kbd_table + currcons,
+					    (par[0] < 3) ? par[0] : 4);
+#endif
+			return;
+		case 'r':
+			if (!par[0])
+				par[0]++;
+			if (!par[1])
+				par[1] = video_num_lines;
+			/* Minimum allowed region is 2 lines */
+			if (par[0] < par[1] &&
+			    par[1] <= video_num_lines) {
+				top=par[0]-1;
+				bottom=par[1];
+				gotoxay(currcons,0,0);
+			}
+			return;
+		case 's':
+			save_cur(currcons);
+			return;
+		case 'u':
+			restore_cur(currcons);
+			return;
+		case 'X':
+			csi_X(currcons, par[0]);
+			return;
+		case '@':
+			csi_at(currcons,par[0]);
+			return;
+		case ']': /* setterm functions */
+			setterm_command(currcons);
+			return;
+		}
+		return;
+	case ESpercent:
+		vc_state = ESnormal;
+		switch (c) {
+		case '@':  /* defined in ISO 2022 */
+			utf = 0;
+			return;
+		case 'G':  /* prelim official escape code */
+		case '8':  /* retained for compatibility */
+			utf = 1;
+			return;
+		}
+		return;
+	case ESfunckey:
+		vc_state = ESnormal;
+		return;
+	case EShash:
+		vc_state = ESnormal;
+		NSLog(@"ignore EShash");
+#if 0
+		if (c == '8') {
+			/* DEC screen alignment test. kludge :-) */
+			video_erase_char =
+				(video_erase_char & 0xff00) | 'E';
+			csi_J(currcons, 2);
+			video_erase_char =
+				(video_erase_char & 0xff00) | ' ';
+			do_update_region(currcons, origin, screenbuf_size/2);
+		}
+#endif
+		return;
+	case ESsetG0:
+		NSLog(@"ignore ESsetG0");
+#if 0
+		if (c == '0')
+			G0_charset = GRAF_MAP;
+		else if (c == 'B')
+			G0_charset = LAT1_MAP;
+		else if (c == 'U')
+			G0_charset = IBMPC_MAP;
+		else if (c == 'K')
+			G0_charset = USER_MAP;
+		if (charset == 0)
+			translate = set_translate(G0_charset,currcons);
+#endif
+		vc_state = ESnormal;
+		return;
+	case ESsetG1:
+		NSLog(@"ignore ESsetG1");
+#if 0
+		if (c == '0')
+			G1_charset = GRAF_MAP;
+		else if (c == 'B')
+			G1_charset = LAT1_MAP;
+		else if (c == 'U')
+			G1_charset = IBMPC_MAP;
+		else if (c == 'K')
+			G1_charset = USER_MAP;
+		if (charset == 1)
+			translate = set_translate(G1_charset,currcons);
+#endif
+		vc_state = ESnormal;
+		return;
+	default:
+		vc_state = ESnormal;
+
+		if (utf && c>0x7f)
+		{
+			if (utf_count && (c&0xc0)==0x80)
+			{
+				unich=(unich<<6)|(c&0x3f);
+				utf_count--;
+				if (utf_count)
+					return;
+			}
+			else
+			{
+				if ((c & 0xe0) == 0xc0)
+				{
+					utf_count = 1;
+					unich = (c & 0x1f);
+				}
+				else if ((c & 0xf0) == 0xe0)
+				{
+					utf_count = 2;
+					unich = (c & 0x0f);
+				}
+				else if ((c & 0xf8) == 0xf0)
+				{
+					utf_count = 3;
+					unich = (c & 0x07);
+				}
+				else if ((c & 0xfc) == 0xf8)
+				{
+					utf_count = 4;
+					unich = (c & 0x03);
+				}
+				else if ((c & 0xfe) == 0xfc)
+				{
+					utf_count = 5;
+					unich = (c & 0x01);
+				}
+				else
+					utf_count = 0;
+				return;
+			}
+		}
+		else
+			unich=c;
+
+		if (x>=sx && decawm)
+		{
+			cr();
+			lf();
+		}
+		SCREEN(x,y).ch=unich;
+		SCREEN(x,y).color=color;
+		SCREEN(x,y).attr=(intensity)|(underline<<2)|(reverse<<3)|(blink<<4);
+		if (x<sx)
+			x++;
+		return;
+	}
+}
+
+
+-(NSDate *) timedOutEvent: (void *)data type: (RunLoopEventType)t
+	forMode: (NSString *)mode
+{
+	NSLog(@"timedOutEvent:type:forMode: ignored");
+	return nil;
+}
+
+-(void) receivedEvent: (void *)data
+	type: (RunLoopEventType)t
+	extra: (void *)extra
+	forMode: (NSString *)mode
+{
+	char buf[8];
+	int size;
+//	BOOL needs_update=NO;
+
+//	printf("got event %i %i\n",(int)data,t);
+while (1)
+{
+{
+	fd_set s;
+	struct timeval tv;
+	FD_ZERO(&s);
+	FD_SET(master_fd,&s);
+	tv.tv_sec=0;
+	tv.tv_usec=0;
+	if (!select(master_fd+1,&s,NULL,NULL,&tv)) return;
+}
+
+	size=read(master_fd,buf,1);
+	if (size<=0) return;
+//	printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
+
+	[self processChar: buf[0]];
+
+	[self setNeedsDisplay: YES];
+}
+//	if (needs_update)
+}
+
+
+- initWithFrame: (NSRect) frame
+{
+	int ret;
+	NSRunLoop *rl;
+	struct winsize ws;
+
+	sx=80;
+	sy=24;
+
+	ws.ws_row=sy;
+	ws.ws_col=sx;
+	ret=forkpty(&master_fd,NULL,NULL,&ws);
+	if (ret<0)
+	{
+		NSLog(_(@"Unable to spawn process: %m."));
+		return nil;
+	}
+
+	if (ret==0)
+	{
+		const char *shell=getenv("SHELL");
+		if (!shell) shell="/bin/sh";
+		execl(shell,shell);
+		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
+		exit(1);
+	}
+
+
+	if (!(self=[super initWithFrame: frame])) return nil;
+
+	{
+		NSRect r;
+		font=[NSFont userFixedPitchFontOfSize: 12];
+		r=[font boundingRectForFont];
+		fx=r.size.width;
+		fy=r.size.height;
+		fx0=r.origin.x;
+		fy0=fabs(r.origin.y);
+		NSLog(@"Bounding (%g %g)+(%g %g)",fx0,fy0,fx,fy);
+	}
+
+	screen=malloc(sizeof(screen_char_t)*sx*sy);
+
+	memset(screen,0,sizeof(screen_char_t)*sx*sy);
+	color=def_color=0x07;
+	[self _reset_terminal];
+
+//	NSLog(@"Got master fd=%i",master_fd);
+
+	rl=[NSRunLoop currentRunLoop];
+	[rl addEvent: (void *)master_fd
+		type: ET_RDESC
+		watcher: self
+		forMode: NSDefaultRunLoopMode];
+	return self;
+}
+
+-(void) dealloc
+{
+	NSLog(@"closing master fd=%i\n",master_fd);
+	[[NSRunLoop currentRunLoop] removeEvent: (void *)master_fd
+		type: ET_RDESC
+		forMode: NSDefaultRunLoopMode
+		all: YES];
+
+	close(master_fd);
+
+	free(screen);
+	screen=NULL;
+
+	[super dealloc];
+}
+
+@end
+
+
+@interface TerminalWindowController : NSWindowController
+{
+	TerminalView *tv;
+}
+
+- init;
+@end
+
+@implementation TerminalWindowController
+- init
+{
+	NSWindow *win;
+	NSFont *font;
+	float fx,fy;
+
+	font=[NSFont userFixedPitchFontOfSize: 12];
+	fx=[font boundingRectForFont].size.width;
+	fy=[font boundingRectForFont].size.height;
+
+	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*80,fy*24)
+		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
+		backing: NSBackingStoreRetained
+		defer: YES];
+	if (!(self=[super initWithWindow: win])) return nil;
+
+	[win setTitle: @"Terminal"];
+
+	tv=[[TerminalView alloc] init];
+	[win setContentView: tv];
+	[tv release];
+
+	[win release];
+
+	return self;
+}
+@end
+
+
+@interface NSMenu (helpers)
+-(id <NSMenuItem>) addItemWithTitle: (NSString *)s;
+-(id <NSMenuItem>) addItemWithTitle: (NSString *)s  action: (SEL)sel;
+@end
+@implementation NSMenu (im_lazy)
+-(id <NSMenuItem>) addItemWithTitle: (NSString *)s
+{
+	return [self addItemWithTitle: s  action: NULL  keyEquivalent: nil];
+}
+
+-(id <NSMenuItem>) addItemWithTitle: (NSString *)s  action: (SEL)sel
+{
+	return [self addItemWithTitle: s  action: sel  keyEquivalent: nil];
+}
+@end
+
+
+@interface Terminal : NSObject
+{
+	TerminalWindowController *twc;
+}
+
+@end
+
+@implementation Terminal
+
+- init
+{
+	if (!(self=[super init])) return nil;
+	return self;
+}
+
+-(void) dealloc
+{
+	[super dealloc];
+}
+
+
+-(void) applicationWillTerminate: (NSNotification *)n
+{
+	DESTROY(twc);
+}
+
+
+-(void) applicationWillFinishLaunching: (NSNotification *)n
+{
+	NSMenu *menu,*m/*,*m2*/;
+
+	menu=[[NSMenu alloc] init];
+
+	/* 'Info' menu */
+	m=[[NSMenu alloc] init];
+	[m addItemWithTitle: _(@"Preferences...")
+		action: @selector(openPreferences:)];
+	[m addItemWithTitle: _(@"Info")
+		action: @selector(orderFrontStandardInfoPanel:)];
+	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Info")]];
+	[m release];
+
+	/* 'Edit' menu */
+	m=[[NSMenu alloc] init];
+	[m addItemWithTitle: _(@"Copy")
+		action: @selector(copy:)
+		keyEquivalent: @"c"];
+	[m addItemWithTitle: _(@"Cut")
+		action: @selector(cut:)
+		keyEquivalent: @"x"];
+	[m addItemWithTitle: _(@"Paste")
+		action: @selector(paste:)
+		keyEquivalent: @"v"];
+	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Edit")]];
+	[m release];
+
+	/* 'Windows' menu */
+	m=[[NSMenu alloc] init];
+	[m addItemWithTitle: _(@"Close")
+		action: @selector(performClose:)
+		keyEquivalent: @"w"];
+	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Windows")]];
+	[NSApp setWindowsMenu: m];
+	[m release];
+
+	m=[[NSMenu alloc] init];
+	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Services")]];
+	[NSApp setServicesMenu: m];
+	[m release];
+
+	[menu addItemWithTitle: _(@"Hide")
+		action: @selector(hide:)
+		keyEquivalent: @"h"];
+
+	[menu addItemWithTitle: _(@"Quit")
+		action: @selector(terminate:)
+		keyEquivalent: @"q"];
+
+	[NSApp setMainMenu: menu];
+	[menu release];
+}
+
+-(void) applicationDidFinishLaunching: (NSNotification *)n
+{
+	twc=[[TerminalWindowController alloc] init];
+	[twc showWindow: self];
+}
+
+@end
+
+
+int main(int argc, char **argv)
+{
+	CREATE_AUTORELEASE_POOL(arp);
+
+	[NSApplication sharedApplication];
+
+	[NSApp setDelegate: [[Terminal alloc] init]];
+	[NSApp run];
+
+	DESTROY(arp);
+	return 0;
+}
+
