@@ -1,6 +1,6 @@
 /***
 Swedish.lproj/Localizable.strings
-updated by make_strings 2002-09-19 19:16:42 +0200
+updated by make_strings 2002-12-09 18:39:09 +0100
 add comments above this one
 ***/
 
@@ -14,9 +14,17 @@ add comments above this one
 
 /*** Unmatched/untranslated keys ***/
 
-/* File: TerminalView.m:1707 */
+/* File: TerminalView.m:1611 */
 /* Flag: untranslated */
 "Unable to open pipe for input: %m." = "Unable to open pipe for input: %m.";
+
+/* File: TerminalViewPrefs.m:319 */
+/* Flag: untranslated */
+"Handle wide (multi-cell) glyphs" = "Hantera breda (fler-celliga) tecken.";
+
+/* File: main.m:167 */
+/* Flag: unmatched */
+"Terminal" = "Terminal";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -102,14 +110,14 @@ add comments above this one
 "'linux' terminal parser" = "'linux' terminal-emulator";
 /* File: TerminalParser_LinuxPrefs.m:108 */
 "'linux'\nparser" = "'linux'\nemulator";
+/* File: TerminalParser_LinuxPrefs.m:151 */
+"Character set:" = "Teckenuppsättning:";
 /* File: TerminalParser_LinuxPrefs.m:43 */
 "Chinese" = "Kinesiska";
 /* File: TerminalParser_LinuxPrefs.m:44 */
 "Custom, leave unchanged" = "Egen, lämna oförändrad";
 /* File: TerminalParser_LinuxPrefs.m:42 */
 "East Europe, latin2" = "Östra europa, latin2";
-/* File: TerminalParser_LinuxPrefs.m:151 */
-"Input character set:" = "Input-teckenuppsättning:";
 /* File: TerminalParser_LinuxPrefs.m:40 */
 "UTF-8" = "UTF-8";
 /* File: TerminalParser_LinuxPrefs.m:41 */
@@ -117,60 +125,60 @@ add comments above this one
 
 
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:1719 */
+/* File: TerminalView.m:1623 */
 "Unable to fork: %m." = "Kunde inte starta ny process: %m.";
-/* File: TerminalView.m:1572 */
+/* File: TerminalView.m:1476 */
 "[Process exited]" = "[Processen avslutade]";
 
 
 /*** Strings from TerminalViewPrefs.m ***/
-/* File: TerminalViewPrefs.m:305 */
+/* File: TerminalViewPrefs.m:330 */
 "Bold font:" = "Fett typsnitt:";
-/* File: TerminalViewPrefs.m:282 */
+/* File: TerminalViewPrefs.m:298 */
 "Color:" = "Färg:";
-/* File: TerminalViewPrefs.m:261 */
+/* File: TerminalViewPrefs.m:277 */
 "Cursor" = "Markör";
-/* File: TerminalViewPrefs.m:214 */
-/* File: TerminalViewPrefs.m:209 */
+/* File: TerminalViewPrefs.m:230 */
+/* File: TerminalViewPrefs.m:225 */
 "Display" = "Uppritning";
-/* File: TerminalViewPrefs.m:275 */
+/* File: TerminalViewPrefs.m:291 */
 "Filled block" = "Fyllt block";
-/* File: TerminalViewPrefs.m:276 */
+/* File: TerminalViewPrefs.m:292 */
 "Inverted block" = "Inverterat block";
-/* File: TerminalViewPrefs.m:582 */
-/* File: TerminalViewPrefs.m:577 */
+/* File: TerminalViewPrefs.m:607 */
+/* File: TerminalViewPrefs.m:602 */
 "Keyboard" = "Tangentbord";
-/* File: TerminalViewPrefs.m:273 */
+/* File: TerminalViewPrefs.m:289 */
 "Line" = "Streck";
-/* File: TerminalViewPrefs.m:332 */
+/* File: TerminalViewPrefs.m:357 */
 "Normal font:" = "Normalt typsnitt:";
-/* File: TerminalViewPrefs.m:344 */
-/* File: TerminalViewPrefs.m:317 */
+/* File: TerminalViewPrefs.m:369 */
+/* File: TerminalViewPrefs.m:342 */
 "Pick font..." = "Välj typsnitt...";
-/* File: TerminalViewPrefs.m:239 */
+/* File: TerminalViewPrefs.m:255 */
 "Scroll-back length in lines:" = "Scroll-back längd i rader:";
-/* File: TerminalViewPrefs.m:626 */
+/* File: TerminalViewPrefs.m:651 */
 "Send a double escape for the escape key.\n\nThis means that the escape key will be\nrecognized faster by many programs, but\nyou can't use it as a substitute for meta."
 = "Skicka dubbel-escape för escape-tangenten.\n\nDetta innebär att escape tangenten\nkommer att kännas igen snabbare av mänga\nprogram, men du kommer inte kunda använda\nden som ersättning för meta.";
-/* File: TerminalViewPrefs.m:462 */
-/* File: TerminalViewPrefs.m:467 */
+/* File: TerminalViewPrefs.m:492 */
+/* File: TerminalViewPrefs.m:487 */
 "Shell" = "Skal";
-/* File: TerminalViewPrefs.m:502 */
+/* File: TerminalViewPrefs.m:527 */
 "Shell:" = "Skal:";
-/* File: TerminalViewPrefs.m:490 */
+/* File: TerminalViewPrefs.m:515 */
 "Start as login-shell" = "Starta som login-skal";
-/* File: TerminalViewPrefs.m:274 */
+/* File: TerminalViewPrefs.m:290 */
 "Stroked block" = "Ihåligt block";
-/* File: TerminalViewPrefs.m:266 */
+/* File: TerminalViewPrefs.m:282 */
 "Style:" = "Stil:";
-/* File: TerminalViewPrefs.m:609 */
+/* File: TerminalViewPrefs.m:634 */
 "Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard."
 = "Behandla kommand-tangenten som meta.\n\nObservera att med denna inställningen\nkommer du inte kunna komma ät menyn\nmed tangentbordet.";
 
 
 /*** Strings from TerminalWindow.m ***/
-/* File: TerminalWindow.m:191 */
-/* File: TerminalWindow.m:187 */
+/* File: TerminalWindow.m:192 */
+/* File: TerminalWindow.m:188 */
 " (idle)" = " (ledig)";
 
 
@@ -196,31 +204,29 @@ add comments above this one
 /*** Strings from main.m ***/
 /* File: main.m:157 */
 "Benchmark" = "Benchmark";
-/* File: main.m:186 */
+/* File: main.m:191 */
 "Close" = "Stäng";
-/* File: main.m:175 */
+/* File: main.m:180 */
 "Copy" = "Kopiera";
-/* File: main.m:172 */
+/* File: main.m:177 */
 "Cut" = "Klipp";
-/* File: main.m:181 */
+/* File: main.m:186 */
 "Edit" = "Redigera";
-/* File: main.m:198 */
+/* File: main.m:203 */
 "Hide" = "Göm";
 /* File: main.m:159 */
 "Info" = "Info";
 /* File: main.m:153 */
 "Info..." = "Info...";
-/* File: main.m:164 */
-"New window" = "Nytt fönster";
-/* File: main.m:178 */
+/* File: main.m:171 */
+"New terminal" = "Ny terminal";
+/* File: main.m:183 */
 "Paste" = "Klistra";
 /* File: main.m:155 */
 "Preferences..." = "Inställningar...";
-/* File: main.m:202 */
+/* File: main.m:207 */
 "Quit" = "Avsluta";
-/* File: main.m:194 */
+/* File: main.m:199 */
 "Services" = "Tjänster";
-/* File: main.m:167 */
-"Terminal" = "Terminal";
-/* File: main.m:189 */
+/* File: main.m:194 */
 "Windows" = "Fönster";

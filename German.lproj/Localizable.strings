@@ -4,7 +4,7 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-09-19 19:16:42 +0200
+updated by make_strings 2002-12-09 18:39:09 +0100
 add comments above this one
 ***/
 
@@ -15,15 +15,15 @@ add comments above this one
 /* File: ServicesPrefs.m:653 */
 "Command line:" = "Befehlszeile:";
 
-/* File: TerminalViewPrefs.m:462 */
+/* File: TerminalViewPrefs.m:487 */
 /* Flag: untranslated */
-/* File: TerminalViewPrefs.m:467 */
+/* File: TerminalViewPrefs.m:492 */
 /* Flag: untranslated */
 "Shell" = "Shell";
 
-/* File: TerminalViewPrefs.m:577 */
+/* File: TerminalViewPrefs.m:602 */
 /* Flag: untranslated */
-/* File: TerminalViewPrefs.m:582 */
+/* File: TerminalViewPrefs.m:607 */
 /* Flag: untranslated */
 "Keyboard" = "Keyboard";
 
@@ -60,26 +60,30 @@ add comments above this one
 
 /* File: TerminalParser_LinuxPrefs.m:151 */
 /* Flag: untranslated */
-"Input character set:" = "Input character set:";
+"Character set:" = "Character set:";
 
-/* File: TerminalViewPrefs.m:239 */
+/* File: TerminalViewPrefs.m:255 */
 /* Flag: untranslated */
 "Scroll-back length in lines:" = "Scroll-back length in lines:";
 
-/* File: TerminalViewPrefs.m:490 */
+/* File: TerminalViewPrefs.m:319 */
+/* Flag: untranslated */
+"Handle wide (multi-cell) glyphs" = "Handle wide (multi-cell) glyphs";
+
+/* File: TerminalViewPrefs.m:515 */
 /* Flag: untranslated */
 "Start as login-shell" = "Start as login-shell";
 
-/* File: TerminalViewPrefs.m:502 */
+/* File: TerminalViewPrefs.m:527 */
 /* Flag: untranslated */
 "Shell:" = "Shell:";
 
-/* File: TerminalViewPrefs.m:609 */
+/* File: TerminalViewPrefs.m:634 */
 /* Flag: untranslated */
 "Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard."
 = "Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard.";
 
-/* File: TerminalViewPrefs.m:626 */
+/* File: TerminalViewPrefs.m:651 */
 /* Flag: untranslated */
 "Send a double escape for the escape key.\n\nThis means that the escape key will be\nrecognized faster by many programs, but\nyou can't use it as a substitute for meta."
 = "Send a double escape for the escape key.\n\nThis means that the escape key will be\nrecognized faster by many programs, but\nyou can't use it as a substitute for meta.";
@@ -119,6 +123,18 @@ add comments above this one
 /* File: main.m:157 */
 /* Flag: untranslated */
 "Benchmark" = "Benchmark";
+
+/* File: main.m:164 */
+/* Flag: unmatched */
+"New window" = "Neues Fenster";
+
+/* File: main.m:167 */
+/* Flag: unmatched */
+"Terminal" = "Terminal";
+
+/* File: main.m:171 */
+/* Flag: untranslated */
+"New terminal" = "New terminal";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -200,74 +216,70 @@ add comments above this one
 
 
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:1719 */
+/* File: TerminalView.m:1623 */
 "Unable to fork: %m." = "Kann keinen neuen Prozess starten: %m.";
-/* File: TerminalView.m:1707 */
+/* File: TerminalView.m:1611 */
 "Unable to open pipe for input: %m."
 = "Kann Pipe nicht zur Eingabe benutzen: %m.";
-/* File: TerminalView.m:1572 */
+/* File: TerminalView.m:1476 */
 "[Process exited]" = "[Prozess beendet]";
 
 
 /*** Strings from TerminalViewPrefs.m ***/
-/* File: TerminalViewPrefs.m:305 */
+/* File: TerminalViewPrefs.m:330 */
 "Bold font:" = "Fettschrift:";
-/* File: TerminalViewPrefs.m:282 */
+/* File: TerminalViewPrefs.m:298 */
 "Color:" = "Farbe:";
-/* File: TerminalViewPrefs.m:261 */
+/* File: TerminalViewPrefs.m:277 */
 "Cursor" = "Cursor";
-/* File: TerminalViewPrefs.m:214 */
-/* File: TerminalViewPrefs.m:209 */
+/* File: TerminalViewPrefs.m:230 */
+/* File: TerminalViewPrefs.m:225 */
 "Display" = "Darstellung";
-/* File: TerminalViewPrefs.m:275 */
+/* File: TerminalViewPrefs.m:291 */
 "Filled block" = "Gefüllter Block";
-/* File: TerminalViewPrefs.m:276 */
+/* File: TerminalViewPrefs.m:292 */
 "Inverted block" = "Invertierter Block";
-/* File: TerminalViewPrefs.m:273 */
+/* File: TerminalViewPrefs.m:289 */
 "Line" = "Linie";
-/* File: TerminalViewPrefs.m:332 */
+/* File: TerminalViewPrefs.m:357 */
 "Normal font:" = "Normalschrift:";
-/* File: TerminalViewPrefs.m:344 */
-/* File: TerminalViewPrefs.m:317 */
+/* File: TerminalViewPrefs.m:369 */
+/* File: TerminalViewPrefs.m:342 */
 "Pick font..." = "Fontauswahl...";
-/* File: TerminalViewPrefs.m:274 */
+/* File: TerminalViewPrefs.m:290 */
 "Stroked block" = "Hohler Block";
-/* File: TerminalViewPrefs.m:266 */
+/* File: TerminalViewPrefs.m:282 */
 "Style:" = "Stil:";
 
 
 /*** Strings from TerminalWindow.m ***/
-/* File: TerminalWindow.m:191 */
-/* File: TerminalWindow.m:187 */
+/* File: TerminalWindow.m:192 */
+/* File: TerminalWindow.m:188 */
 " (idle)" = " (unbenutzt)";
 
 
 /*** Strings from main.m ***/
-/* File: main.m:186 */
+/* File: main.m:191 */
 "Close" = "Schließen";
-/* File: main.m:175 */
+/* File: main.m:180 */
 "Copy" = "Kopieren";
-/* File: main.m:172 */
+/* File: main.m:177 */
 "Cut" = "Ausschneiden";
-/* File: main.m:181 */
+/* File: main.m:186 */
 "Edit" = "Bearbeiten";
-/* File: main.m:198 */
+/* File: main.m:203 */
 "Hide" = "Ausblenden";
 /* File: main.m:159 */
 "Info" = "Info";
 /* File: main.m:153 */
 "Info..." = "Info...";
-/* File: main.m:164 */
-"New window" = "Neues Fenster";
-/* File: main.m:178 */
+/* File: main.m:183 */
 "Paste" = "Einfügen";
 /* File: main.m:155 */
 "Preferences..." = "Grundeinstellungen...";
-/* File: main.m:202 */
+/* File: main.m:207 */
 "Quit" = "Beenden";
-/* File: main.m:194 */
+/* File: main.m:199 */
 "Services" = "Dienste";
-/* File: main.m:167 */
-"Terminal" = "Terminal";
-/* File: main.m:189 */
+/* File: main.m:194 */
 "Windows" = "Fenster";

@@ -40,7 +40,7 @@ Terminal_OBJC_FILES = \
 Terminal_LDFLAGS = -lutil
 
 Terminal_LOCALIZED_RESOURCE_FILES = Localizable.strings
-Terminal_LANGUAGES = English Swedish German
+Terminal_LANGUAGES = English Swedish German French
 
 Terminal_APPLICATION_ICON = Terminal.tiff
 Terminal_RESOURCE_FILES = Terminal.tiff DefaultTerminalServices.svcs
