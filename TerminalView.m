@@ -971,6 +971,8 @@ Keyboard events
 	case '\e':
 		if ([TerminalViewKeyboardPrefs doubleEscape])
 			str="\e\e";
+		else
+			str="\e";
 		break;
 
 	case NSUpArrowFunctionKey   : str="\e[A"; break;
