@@ -383,8 +383,8 @@ of the License. See COPYING or main.m for more information.
 		}
 	}
 
-	[self revert]; /* reload views */
 	[self save]; /* update external service list */
+	[self revert]; /* reload views */
 	[list reloadData];
 }
 
