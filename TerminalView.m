@@ -1293,10 +1293,15 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	if (current_y>=t && current_y<=b)
 	{
-		SCREEN(current_x,current_y).attr|=0x80; /* TODO? */
+		SCREEN(current_x,current_y).attr|=0x80;
+		draw_cursor=YES;
 		/*
 		TODO: does this properly handle the case when the cursor is in
 		an area that gets scrolled 'over'?
+
+		now it does, but not in an optimal way. handling of this could be
+		optimized in all scrolling methods, but it probably won't make
+		much difference
 		*/
 	}
 	memmove(d, s, (b-t-nr) * sx * sizeof(screen_char_t));
@@ -1327,7 +1332,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 			num_scrolls++;
 		}
 	}
-	ADD_DIRTY(0,t,sx,b-t); /* TODO */
+	ADD_DIRTY(0,t,sx,b-t);
 }
 
 -(void) ts_scrollDown: (int)t:(int)b  rows: (int)nr
@@ -1346,7 +1351,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	step = sx * nr;
 	if (current_y>=t && current_y<=b)
 	{
-		SCREEN(current_x,current_y).attr|=0x80; /* TODO? */
+		SCREEN(current_x,current_y).attr|=0x80;
+		draw_cursor=YES;
 	}
 	memmove(s + step, s, (b-t-nr)*sx*sizeof(screen_char_t));
 	if (!current_scroll)
@@ -1376,7 +1382,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 			num_scrolls++;
 		}
 	}
-	ADD_DIRTY(0,t,sx,b-t); /* TODO */
+	ADD_DIRTY(0,t,sx,b-t);
 }
 
 -(void) ts_shiftRow: (int)y  at: (int)x0  delta: (int)delta
@@ -1391,7 +1397,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	if (current_y==y)
 	{
-		SCREEN(current_x,current_y).attr|=0x80; /* TODO? */
+		SCREEN(current_x,current_y).attr|=0x80;
+		draw_cursor=YES;
 	}
 
 	s=&SCREEN(x0,y);
