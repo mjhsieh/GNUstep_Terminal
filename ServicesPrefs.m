@@ -408,6 +408,7 @@ of the License. See COPYING or main.m for more information.
 		[sv setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
 		[sv setHasVerticalScroller: YES];
 		[sv setHasHorizontalScroller: NO];
+		[sv setBorderType: NSBezelBorder];
 
 		c_name=[[NSTableColumn alloc] initWithIdentifier: @"Name"];
 		[c_name setEditable: NO];
@@ -675,6 +676,7 @@ of the License. See COPYING or main.m for more information.
 			[sv setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
 			[sv setHasVerticalScroller: YES];
 			[sv setHasHorizontalScroller: NO];
+			[sv setBorderType: NSBezelBorder];
 
 			c_name=[[NSTableColumn alloc] initWithIdentifier: @"Name"];
 			[c_name setEditable: NO];

@@ -110,6 +110,7 @@ of the License. See COPYING or main.m for more information.
 			[sv setDocumentView: button_box];
 			[sv setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
 			[sv setHasHorizontalScroller: YES];
+			[sv setBorderType: NSBezelBorder];
 
 			[vbox addView: sv  enablingYResizing: NO];
 			DESTROY(sv);
