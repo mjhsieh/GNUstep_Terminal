@@ -865,6 +865,14 @@ static void set_foreground(NSGraphicsContext *gc,
 	return s;
 }
 
+
+-(void) viewPrefsDidChange: (NSNotification *)n
+{
+	/* TODO: handle font changes? */
+	draw_all=YES;
+	[self setNeedsDisplay: YES];
+}
+
 @end
 
 
@@ -1481,7 +1489,7 @@ Handle master_fd
 			for (i=0;i<c;i++)
 			{
 				ch=[msg characterAtIndex: i];
-				if (ch<256)
+				if (ch<256) /* TODO */
 					[tp processByte: ch];
 			}
 			[tp processByte: '\n'];
@@ -1964,11 +1972,20 @@ improve? */
 	[self registerForDraggedTypes: [NSArray arrayWithObjects:
 		NSFilenamesPboardType,NSStringPboardType,nil]];
 
+	[[NSNotificationCenter defaultCenter]
+		addObserver: self
+		selector: @selector(viewPrefsDidChange:)
+		name: TerminalViewDisplayPrefsDidChangeNotification
+		object: nil];
+
 	return self;
 }
 
 -(void) dealloc
 {
+	[[NSNotificationCenter defaultCenter]
+		removeObserver: self];
+
 	[self closeProgram];
 
 	DESTROY(tp);

@@ -202,7 +202,6 @@ static int scrollBackLines;
 	[ud setBool: useMultiCellGlyphs
 		forKey: UseMultiCellGlyphsKey];
 
-	/* TODO: actually use this somewhere */
 	[[NSNotificationCenter defaultCenter]
 		postNotificationName: TerminalViewDisplayPrefsDidChangeNotification
 		object: self];
