@@ -17,6 +17,7 @@ copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 
 #include <Foundation/NSBundle.h>
 #include <Foundation/NSDebug.h>
+#include <Foundation/NSNotification.h>
 #include <Foundation/NSProcessInfo.h>
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSUserDefaults.h>
@@ -24,6 +25,15 @@ copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 #include <AppKit/NSMenu.h>
 #include <AppKit/NSPanel.h>
 #include <AppKit/NSView.h>
+
+/* For the quit panel: */
+#include <AppKit/NSButton.h>
+#include <AppKit/NSImage.h>
+#include <AppKit/NSImageView.h>
+#include <AppKit/NSScreen.h>
+#include <AppKit/GSVbox.h>
+#include <AppKit/GSHbox.h>
+#include "Label.h"
 
 
 #include "TerminalWindow.h"
@@ -51,6 +61,9 @@ copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 @interface Terminal : NSObject
 {
 	PreferencesWindowController *pwc;
+
+	NSPanel *quitPanel;
+	BOOL quitPanelOpen;
 }
 
 @end
@@ -65,34 +78,13 @@ copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 
 -(void) dealloc
 {
+	[[NSNotificationCenter defaultCenter]
+		removeObserver: self];
+
 	DESTROY(pwc);
 	[super dealloc];
 }
 
-
-/*
-
-display
- cursor color
- cursor invert
- font
- bold font
- intensity handling
- colors?
-
-specific
- keyboard mappings?
- terminal emulation
- close on shell exit
- shell to run
- environment
-
-services
-
-
-general
-
-*/
 
 @class TerminalViewDisplayPrefs;
 @class TerminalViewShellPrefs;
@@ -214,6 +206,12 @@ general
 
 	[NSApp setMainMenu: menu];
 	[menu release];
+
+	[[NSNotificationCenter defaultCenter]
+		addObserver: self
+		selector: @selector(noMoreActiveWindows:)
+		name: TerminalWindowNoMoreActiveWindowsNotification
+		object: nil];
 }
 
 -(void) openWindow: (id)sender
@@ -255,16 +253,135 @@ general
 	if (![TerminalWindowController numberOfActiveWindows])
 		return NSTerminateNow;
 
-	if (NSRunAlertPanel(
-		_(@"Quit?"),
-		_(@"There are active windows. Quitting will close them."),
-		_(@"Don't quit"),
-		_(@"Quit anyway"),
-		nil)==NSAlertAlternateReturn)
+	if (!quitPanel)
 	{
-		return NSTerminateNow;
+		NSButton *b_quit,*b_dont;
+
+		{
+			GSVbox *vb=[[GSVbox alloc] init];
+
+			[vb setBorder: 10.0];
+
+			{
+				NSButton *b;
+				GSHbox *hb;
+
+				hb=[[GSHbox alloc] init];
+				[hb setAutoresizingMask: NSViewMinXMargin];
+
+				b=b_quit=[[NSButton alloc] init];
+				[b setTitle: _(@"Quit anyway")];
+				[b setTarget: self];
+				[b setAction: @selector(quitAnyway:)];
+				[b sizeToFit];
+				[hb addView: b  enablingXResizing: NO];
+				DESTROY(b);
+
+				b=b_dont=[[NSButton alloc] init];
+				[b setTitle: _(@"Don't quit")];
+				[b setImagePosition: NSImageRight];
+				[b setImage: [NSImage imageNamed: @"common_ret"]];
+				[b setTarget: self];
+				[b setAction: @selector(dontQuit:)];
+				[b sizeToFit];
+				[hb addView: b  enablingXResizing: NO withMinXMargin: 8.0];
+				DESTROY(b);
+
+				[vb addView: hb enablingYResizing: NO];
+				DESTROY(hb);
+			}
+
+			{
+				NSTextField *text;
+
+				text=[NSTextField newLabel:
+					_(@"There are active windows. Quitting will close them.")];
+				[text setAutoresizingMask: NSViewWidthSizable|NSViewMinYMargin];
+				[text sizeToFit];
+
+				[vb addView: text enablingYResizing: YES withMinYMargin: 8.0];
+				DESTROY(text);
+			}
+
+			[vb addSeparatorWithMinYMargin: 8.0];
+
+			{
+				NSImageView *iv;
+				NSTextField *title;
+				GSHbox *hb;
+
+				hb=[[GSHbox alloc] init];
+
+				iv=[[NSImageView alloc] init];
+				[iv setImage: [NSApp applicationIconImage]];
+				[iv setEditable: NO];
+				[iv sizeToFit];
+				[hb addView: iv enablingXResizing: NO];
+				DESTROY(iv);
+
+				title=[NSTextField newLabel: _(@"Quit?")];
+				[title setAutoresizingMask: NSViewMinYMargin|NSViewMaxYMargin];
+				[title setFont: [NSFont systemFontOfSize: 18.0]];
+				[title sizeToFit];
+				[hb addView: title enablingXResizing: NO withMinXMargin: 8.0];
+				DESTROY(title);
+
+				[vb addView: hb enablingYResizing: NO withMinYMargin: 8.0];
+				DESTROY(hb);
+			}
+
+			[vb sizeToFit];
+
+			quitPanel=[[NSPanel alloc] initWithContentRect: [vb frame]
+				styleMask: NSTitledWindowMask
+				backing: NSBackingStoreRetained
+				defer: YES];
+			[quitPanel setContentView: vb];
+			DESTROY(vb);
+		}
+
+		[quitPanel setTitle: _(@"Quit?")];
+		[quitPanel setOneShot: YES];
+		[quitPanel setHidesOnDeactivate: NO];
+		[quitPanel setExcludedFromWindowsMenu: NO];
+
+		[quitPanel setInitialFirstResponder: b_dont];
+		[b_dont setNextKeyView: b_quit];
+		[b_quit setNextKeyView: b_dont];
 	}
-	return NSTerminateCancel;
+
+	{
+		/* TODO: always using +mainScreen is probably incorrect */
+		NSRect r=[[NSScreen mainScreen] frame];
+		NSPoint o;
+
+		o.x=r.origin.x+r.size.width/2.0-[quitPanel frame].size.width/2.0;
+		o.y=r.origin.y+r.size.height/2.0-[quitPanel frame].size.height/2.0;
+		[quitPanel setFrameOrigin: o];
+	}
+
+	[quitPanel makeKeyAndOrderFront: self];
+	quitPanelOpen=YES;
+
+	return NSTerminateLater;
+}
+
+-(void) quitAnyway: (id)sender
+{
+	[NSApp replyToApplicationShouldTerminate: YES];
+}
+
+-(void) dontQuit: (id)sender
+{
+	[NSApp replyToApplicationShouldTerminate: NO];
+	quitPanelOpen=NO;
+	[quitPanel orderOut: self];
+}
+
+-(void) noMoreActiveWindows: (NSNotification *)n
+{
+	if (quitPanelOpen)
+		[NSApp replyToApplicationShouldTerminate: YES];
 }
 
 

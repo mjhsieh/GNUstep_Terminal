@@ -15,6 +15,7 @@ of the License. See COPYING or main.m for more information.
 #include <Foundation/NSNotification.h>
 #include <Foundation/NSString.h>
 #include <Foundation/NSUserDefaults.h>
+#include <AppKit/NSApplication.h>
 #include <AppKit/NSScroller.h>
 #include <AppKit/NSWindow.h>
 #include <AppKit/GSHbox.h>
@@ -38,6 +39,10 @@ static void get_zombies(void)
 
 
 static int num_instances;
+
+
+NSString *TerminalWindowNoMoreActiveWindowsNotification=
+	@"TerminalWindowNoMoreActiveWindowsNotification";
 
 
 @implementation TerminalWindowController
@@ -158,6 +163,7 @@ static int num_instances;
 -(void) dealloc
 {
 	num_instances--;
+	[isa checkActiveWindows];
 	[[NSNotificationCenter defaultCenter]
 		removeObserver: self];
 	[super dealloc];
@@ -197,6 +203,8 @@ static NSMutableArray *idle_list;
 		t=[t stringByAppendingString: _(@" (idle)")];
 		[[self window] setMiniwindowTitle: t];
 	}
+
+	[isa checkActiveWindows];
 }
 
 -(void) _becameNonIdle
@@ -247,6 +255,16 @@ static NSMutableArray *idle_list;
 +(int) numberOfActiveWindows
 {
 	return num_instances-[idle_list count];
+}
+
++(void) checkActiveWindows
+{
+	if (![self numberOfActiveWindows])
+	{
+		[[NSNotificationCenter defaultCenter]
+			postNotificationName: TerminalWindowNoMoreActiveWindowsNotification
+			object: self];
+	}
 }
 
 @end

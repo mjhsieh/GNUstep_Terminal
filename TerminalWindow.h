@@ -14,6 +14,8 @@ of the License. See COPYING or main.m for more information.
 
 #include <AppKit/NSWindowController.h>
 
+NSString *TerminalWindowNoMoreActiveWindowsNotification;
+
 @interface TerminalWindowController : NSWindowController
 {
 	TerminalView *tv;
@@ -24,6 +26,7 @@ of the License. See COPYING or main.m for more information.
 +(TerminalWindowController *) idleTerminalWindow;
 
 +(int) numberOfActiveWindows;
++(void) checkActiveWindows;
 
 - init;
 
