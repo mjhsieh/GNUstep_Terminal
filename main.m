@@ -115,10 +115,10 @@ general
 
 	/* 'Info' menu */
 	m=[[NSMenu alloc] init];
+	[m addItemWithTitle: _(@"Info...")
+		action: @selector(orderFrontStandardInfoPanel:)];
 	[m addItemWithTitle: _(@"Preferences...")
 		action: @selector(openPreferences:)];
-	[m addItemWithTitle: _(@"Info")
-		action: @selector(orderFrontStandardInfoPanel:)];
 	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Info")]];
 	[m release];
 
