@@ -30,7 +30,9 @@ bits
 -(void) ts_putChar: (screen_char_t)ch  count: (int)c  at: (int)x:(int)y;
 -(void) ts_putChar: (screen_char_t)ch  count: (int)c  offset: (int)ofs;
 
-/* the portions scrolled/shifted from remain unchanged */
+/* The portions scrolled/shifted from remain unchanged. However, it's
+assumed that they will be cleared or overwritten before the redraw is
+complete. (TODO check this) */
 -(void) ts_scrollUp: (int)top:(int)bottom  rows: (int)nr  save: (BOOL)save;
 -(void) ts_scrollDown: (int)top:(int)bottom  rows: (int)nr;
 -(void) ts_shiftRow: (int)y  at: (int)x0  delta: (int)d;
