@@ -7,11 +7,13 @@ Public License as published by the Free Software Foundation; version 2
 of the License. See COPYING or main.m for more information.
 */
 
+#include <Foundation/NSBundle.h>
 #include <Foundation/NSString.h>
 #include <Foundation/NSUserDefaults.h>
-#include <AppKit/NSTextField.h>
-#include <AppKit/NSPopUpButton.h>
 #include <AppKit/NSBox.h>
+#include <AppKit/NSButton.h>
+#include <AppKit/NSMatrix.h>
+#include <AppKit/NSTextField.h>
 #include <AppKit/GSTable.h>
 #include <AppKit/GSVbox.h>
 #include "Label.h"
@@ -78,7 +80,7 @@ static BOOL addYBorders;
 {
 	if (!top) return;
 
-	windowCloseBehavior=[pb_close indexOfSelectedItem];
+	windowCloseBehavior=[[m_close selectedCell] tag];
 	[ud setInteger: windowCloseBehavior  forKey: WindowCloseBehaviorKey];
 
 	addYBorders=[b_addYBorders state];
@@ -98,7 +100,7 @@ static BOOL addYBorders;
 
 -(void) revert
 {
-	[pb_close selectItemAtIndex: windowCloseBehavior];
+	[m_close selectCellWithTag: windowCloseBehavior];
 
 	[tf_width setIntValue: windowWidth];
 	[tf_height setIntValue: windowHeight];
@@ -136,15 +138,34 @@ static BOOL addYBorders;
 
 
 			{
-				NSPopUpButton *pb;
-				pb_close=pb=[[NSPopUpButton alloc] init];
-				[pb setAutoresizingMask: NSViewMinXMargin|NSViewMaxXMargin];
-				[pb setAutoenablesItems: NO];
-				[pb addItemWithTitle: _(@"Close new windows when idle")];
-				[pb addItemWithTitle: _(@"Don't close new windows")];
-				[pb sizeToFit];
-				[top addView: pb enablingYResizing: NO];
-				DESTROY(pb);
+				NSMatrix *m;
+				NSButtonCell *b=[NSButtonCell new];
+				NSSize s,s2;
+
+				[b setButtonType: NSRadioButton];
+
+				m=m_close=[[NSMatrix alloc] initWithFrame: NSMakeRect(0,0,1,1)
+					mode: NSRadioModeMatrix
+					prototype: b
+					numberOfRows: 2
+					numberOfColumns: 1];
+				[m setAutoresizingMask: NSViewMinXMargin|NSViewMaxXMargin];
+
+				[[m cellAtRow: 0 column: 0] setTitle: _(@"Close new windows when idle")];
+				[[m cellAtRow: 1 column: 0] setTitle: _(@"Don't close new windows")];
+				[[m cellAtRow: 0 column: 0] setTag: 0];
+				[[m cellAtRow: 1 column: 0] setTag: 1];
+
+				s=[[m cellAtRow: 0 column: 0] cellSize];
+				s2=[[m cellAtRow: 0 column: 0] cellSize];
+				if (s2.width>s.width) s.width=s2.width;
+				
+				[m setCellSize: s];
+				[m setIntercellSpacing: NSMakeSize(0,3)];
+				[m sizeToCells];
+
+				[top addView: m enablingYResizing: NO];
+				DESTROY(m);
 			}
 
 			{

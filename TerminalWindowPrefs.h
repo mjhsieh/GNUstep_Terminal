@@ -13,13 +13,13 @@ of the License. See COPYING or main.m for more information.
 #include "PrefBox.h"
 
 
-@class GSVbox,NSTextField,NSButton,NSPopUpButton;
+@class GSVbox,NSTextField,NSButton,NSMatrix;
 
 @interface TerminalWindowPrefs : NSObject <PrefBox>
 {
 	GSVbox *top;
 
-	NSPopUpButton *pb_close;
+	NSMatrix *m_close;
 	NSTextField *tf_width,*tf_height;
 	NSButton *b_addYBorders;
 }
