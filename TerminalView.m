@@ -1239,7 +1239,7 @@ Handle master_fd
 				object: self];
 			[self closeProgram];
 
-			msg=_(@"[Process exited]\n");
+			msg=_(@"[Process exited]");
 			c=[msg length];
 			for (i=0;i<c;i++)
 			{
@@ -1247,6 +1247,8 @@ Handle master_fd
 				if (ch<256)
 					[tp processByte: ch];
 			}
+			[tp processByte: '\n'];
+			[tp processByte: '\r'];
 
 			break;
 		}

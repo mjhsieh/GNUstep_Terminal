@@ -4,7 +4,7 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-13 01:12:09 +0200
+updated by make_strings 2002-06-13 02:04:25 +0200
 add comments above this one
 ***/
 
@@ -139,8 +139,8 @@ add comments above this one
 
 
 /*** Strings from TerminalWindow.m ***/
-/* File: TerminalWindow.m:149 */
-/* File: TerminalWindow.m:145 */
+/* File: TerminalWindow.m:159 */
+/* File: TerminalWindow.m:155 */
 " (idle)" = " (unbenutzt)";
 
 
