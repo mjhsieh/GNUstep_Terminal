@@ -16,6 +16,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #ifndef freebsd
 #  include <pty.h>
 #endif
+#include <sys/wait.h>
 
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSBundle.h>
@@ -27,6 +28,16 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSWindowController.h>
 #include <AppKit/PSOperators.h>
+
+
+static void get_zombies(void)
+{
+	int status,pid;
+	while ((pid=waitpid(-1,&status,WNOHANG))>0)
+	{
+//		printf("got %i\n",pid);
+	}
+}
 
 
 /*
@@ -319,6 +330,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	case NSPageDownFunctionKey: str="\e[6~"; break;
 
 	case 8: ch2=0x7f; break;
+	case 3: ch2=0x0d; break;
 
 	default:
 	{
@@ -335,6 +347,9 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		return;
 	}
 	}
+
+	if (mask&NSCommandKeyMask)
+		write(master_fd,"\e",1);
 
 	if (str)
 		[self sendCString: str];
@@ -1350,6 +1365,8 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	int size,total;
 //	BOOL needs_update=NO;
 
+	get_zombies();
+
 //	printf("got event %i %i\n",(int)data,t);
 	total=0;
 while (1)
@@ -1368,6 +1385,7 @@ while (1)
 	if (size==0) return;
 	if (size<0)
 	{
+		get_zombies();
 		[[NSNotificationCenter defaultCenter]
 			postNotificationName: TerminalViewEndOfInput
 			object: self];
@@ -1494,7 +1512,7 @@ while (1)
 			fy0=fy+r.origin.y;
 		else
 			fy0=r.origin.y;
-		NSLog(@"Bounding (%g %g)+(%g %g)",fx0,fy0,fx,fy);
+//		NSLog(@"Bounding (%g %g)+(%g %g)",fx0,fy0,fx,fy);
 	}
 
 	screen=malloc(sizeof(screen_char_t)*sx*sy);
@@ -1515,13 +1533,14 @@ while (1)
 
 -(void) dealloc
 {
-	NSLog(@"closing master fd=%i\n",master_fd);
+//	NSLog(@"closing master fd=%i\n",master_fd);
 	[[NSRunLoop currentRunLoop] removeEvent: (void *)master_fd
 		type: ET_RDESC
 		forMode: NSDefaultRunLoopMode
 		all: YES];
 
 	close(master_fd);
+	get_zombies();
 
 	free(screen);
 	screen=NULL;
@@ -1585,6 +1604,7 @@ while (1)
 
 -(void) windowWillClose: (NSNotification *)n
 {
+	get_zombies();
 	[self autorelease];
 }
 
