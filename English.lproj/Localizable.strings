@@ -1,6 +1,6 @@
 /***
 English.lproj/Localizable.strings
-updated by make_strings 2002-06-08 02:57:11 +0200
+updated by make_strings 2002-06-08 03:23:34 +0200
 add comments above this one
 ***/
 
@@ -26,8 +26,8 @@ add comments above this one
 "Color:" = "Color:";
 /* File: TerminalViewPrefs.m:210 */
 "Cursor" = "Cursor";
-/* File: TerminalViewPrefs.m:177 */
 /* File: TerminalViewPrefs.m:182 */
+/* File: TerminalViewPrefs.m:177 */
 "Display" = "Display";
 /* File: TerminalViewPrefs.m:231 */
 "Filled block" = "Filled block";
@@ -37,8 +37,8 @@ add comments above this one
 "Line" = "Line";
 /* File: TerminalViewPrefs.m:303 */
 "Normal font:" = "Normal font:";
-/* File: TerminalViewPrefs.m:287 */
 /* File: TerminalViewPrefs.m:321 */
+/* File: TerminalViewPrefs.m:287 */
 "Pick font..." = "Pick font...";
 /* File: TerminalViewPrefs.m:230 */
 "Stroked block" = "Stroked block";

@@ -1,6 +1,6 @@
 /***
 Swedish.lproj/Localizable.strings
-updated by make_strings 2002-06-08 02:57:11 +0200
+updated by make_strings 2002-06-08 03:23:34 +0200
 add comments above this one
 ***/
 
@@ -26,8 +26,8 @@ add comments above this one
 "Color:" = "Färg:";
 /* File: TerminalViewPrefs.m:210 */
 "Cursor" = "Markör";
-/* File: TerminalViewPrefs.m:177 */
 /* File: TerminalViewPrefs.m:182 */
+/* File: TerminalViewPrefs.m:177 */
 "Display" = "Uppritning";
 /* File: TerminalViewPrefs.m:231 */
 "Filled block" = "Fyllt block";
@@ -37,8 +37,8 @@ add comments above this one
 "Line" = "Streck";
 /* File: TerminalViewPrefs.m:303 */
 "Normal font:" = "Normalt typsnitt:";
-/* File: TerminalViewPrefs.m:287 */
 /* File: TerminalViewPrefs.m:321 */
+/* File: TerminalViewPrefs.m:287 */
 "Pick font..." = "Välj typsnitt...";
 /* File: TerminalViewPrefs.m:230 */
 "Stroked block" = "Ihåligt block";

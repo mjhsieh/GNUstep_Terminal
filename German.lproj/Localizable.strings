@@ -4,80 +4,50 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-08 02:57:11 +0200
+updated by make_strings 2002-06-08 03:23:34 +0200
 add comments above this one
 ***/
 
 
-/*** Keys found in multiple places ***/
-
-/* File: TerminalViewPrefs.m:177 */
-/* Flag: untranslated */
-/* File: TerminalViewPrefs.m:182 */
-/* Flag: untranslated */
-"Display" = "Display";
-
-/* File: TerminalViewPrefs.m:287 */
-/* Flag: untranslated */
-/* File: TerminalViewPrefs.m:321 */
-/* Flag: untranslated */
-"Pick font..." = "Pick font...";
-
-
-/*** Unmatched/untranslated keys ***/
-
-/* File: PreferencesWindowController.m:65 */
-/* Flag: untranslated */
-"Revert" = "Revert";
-
+/*** Strings from PreferencesWindowController.m ***/
 /* File: PreferencesWindowController.m:73 */
-/* Flag: untranslated */
-"Apply and save" = "Apply and save";
-
+"Apply and save" = "Anwenden und Speichern";
 /* File: PreferencesWindowController.m:117 */
-/* Flag: untranslated */
-"Preferences" = "Preferences";
-
-/* File: TerminalViewPrefs.m:210 */
-/* Flag: untranslated */
-"Cursor" = "Cursor";
-
-/* File: TerminalViewPrefs.m:217 */
-/* Flag: untranslated */
-"Style:" = "Style:";
-
-/* File: TerminalViewPrefs.m:229 */
-/* Flag: untranslated */
-"Line" = "Line";
-
-/* File: TerminalViewPrefs.m:230 */
-/* Flag: untranslated */
-"Stroked block" = "Stroked block";
-
-/* File: TerminalViewPrefs.m:231 */
-/* Flag: untranslated */
-"Filled block" = "Filled block";
-
-/* File: TerminalViewPrefs.m:232 */
-/* Flag: untranslated */
-"Inverted block" = "Inverted block";
-
-/* File: TerminalViewPrefs.m:240 */
-/* Flag: untranslated */
-"Color:" = "Color:";
-
-/* File: TerminalViewPrefs.m:269 */
-/* Flag: untranslated */
-"Bold font:" = "Bold font:";
-
-/* File: TerminalViewPrefs.m:303 */
-/* Flag: untranslated */
-"Normal font:" = "Normal font:";
+"Preferences" = "Grundeinstellungen";
+/* File: PreferencesWindowController.m:65 */
+"Revert" = "Zurücksetzen";
 
 
 /*** Strings from TerminalView.m ***/
 /* File: TerminalView.m:958 */
-"Unable to spawn process: %m." = "Unable to spawn process: %m.";
+"Unable to spawn process: %m." = "Kann keinen Prozess erzeugen: %m.";
+
+
+/*** Strings from TerminalViewPrefs.m ***/
+/* File: TerminalViewPrefs.m:269 */
+"Bold font:" = "Fettschrift:";
+/* File: TerminalViewPrefs.m:240 */
+"Color:" = "Farbe:";
+/* File: TerminalViewPrefs.m:210 */
+"Cursor" = "Cursor";
+/* File: TerminalViewPrefs.m:177 */
+/* File: TerminalViewPrefs.m:182 */
+"Display" = "Darstellung";
+/* File: TerminalViewPrefs.m:231 */
+"Filled block" = "Gefüllter Block";
+/* File: TerminalViewPrefs.m:232 */
+"Inverted block" = "Invertierter Block";
+/* File: TerminalViewPrefs.m:229 */
+"Line" = "Linie";
+/* File: TerminalViewPrefs.m:303 */
+"Normal font:" = "Normalschrift:";
+/* File: TerminalViewPrefs.m:287 */
+/* File: TerminalViewPrefs.m:321 */
+"Pick font..." = "Fontauswahl...";
+/* File: TerminalViewPrefs.m:230 */
+"Stroked block" = "Hohler Block";
+/* File: TerminalViewPrefs.m:217 */
+"Style:" = "Stil:";
 
 
 /*** Strings from main.m ***/
