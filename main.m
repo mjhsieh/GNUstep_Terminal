@@ -289,12 +289,17 @@ general
 	[twc showWindow: self];
 }
 
+
+@class TerminalServices;
+
 -(void) applicationDidFinishLaunching: (NSNotification *)n
 {
+	[NSApp setServicesProvider: [[TerminalServices alloc] init]];
 	[self openWindow: self];
 }
 
 @end
+
 
 
 int main(int argc, char **argv)
