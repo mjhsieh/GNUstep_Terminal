@@ -8,6 +8,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #ifdef freebsd
 #  include <sys/types.h>
 #  include <sys/ioctl.h>
+#  include <sys/time.h>
 #  include <termios.h>
 #  include <libutil.h>
 #  include <pcap.h>
@@ -226,6 +227,9 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 					DPScompositerect(cur,ix*fx,(sy-1-iy)*fy,fx,fy,NSCompositeHighlight);
 			}
 
+/*		DPSsetrgbcolor(cur,0.5,0.5,1.0);
+		DPSsetalpha(cur,0.5);
+		DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);*/
 		DPSsetrgbcolor(cur,0.2,0.2,1.0);
 		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
 	}
@@ -251,8 +255,11 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 				if (SCREEN(ix,iy).attr&0x40)
 					DPScompositerect(cur,ix*fx,(sy-1-iy)*fy,fx,fy,NSCompositeHighlight);
 			}
+/*		DPSsetrgbcolor(cur,0.5,0.5,1.0);
+		DPSsetalpha(cur,0.5);
+		DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y)*fy,fx,fy);*/
 		DPSsetrgbcolor(cur,0.2,0.2,1.0);
-		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y)*fy,fx,fy);
+		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
 	}
 
 	NSDebugLLog(@"draw",@"total_draw=%i",total_draw);
@@ -629,6 +636,34 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 }
 
 
+-(void) scrollWheel: (NSEvent *)e
+{
+	float delta=[e deltaY];
+	int new_scroll;
+
+	NSLog(@"scrollWheel: %@",e);
+
+	new_scroll=current_scroll+delta;
+	if (new_scroll>0)
+		new_scroll=0;
+	if (new_scroll<-sb_length)
+		new_scroll=-sb_length;
+
+	if (new_scroll==current_scroll)
+		return;
+	current_scroll=new_scroll;
+
+	if (sb_length)
+		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+			knobProportion: sy/(float)(sy+sb_length)];
+	else
+		[scroller setFloatValue: 1.0 knobProportion: 1.0];
+
+	draw_all=YES;
+	[self setNeedsDisplay: YES];
+}
+
+
 -(BOOL) acceptsFirstResponder
 {
 	return YES;
@@ -992,9 +1027,9 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 -(void) ts_setTitle: (NSString *)new_title  type: (int)title_type
 {
 	NSDebugLLog(@"ts",@"setTitle: %@  type: %i",new_title,title_type);
-	if (title_type==1)
+	if (title_type==1 || title_type==0)
 		ASSIGN(title_miniwindow,new_title);
-	else if (title_type==2)
+	if (title_type==2 || title_type==0)
 		ASSIGN(title_window,new_title);
 	[[NSNotificationCenter defaultCenter]
 		postNotificationName: TerminalViewTitleDidChangeNotification

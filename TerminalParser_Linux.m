@@ -732,14 +732,11 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	case ESnonstd:
 		switch (c)
 		{
+		case '0':
 		case '1':
-			vc_state=EStitle_semi;
-			title_type=1;
-			return;
-
 		case '2':
 			vc_state=EStitle_semi;
-			title_type=2;
+			title_type=c-'0';
 			return;
 
 		case 'P':
