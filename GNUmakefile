@@ -5,7 +5,7 @@ APP_NAME = Terminal
 PACKAGE_NAME = Terminal
 CVS_MODULE_NAME = Terminal
 CVS_OPTIONS = -d/opt/cvsroot
-VERSION = 0.3.11
+VERSION = 0.3.12
 
 ADDITIONAL_OBJCFLAGS += -Wall -O2 -D$(subst -,_,$(GNUSTEP_HOST_OS))
 
