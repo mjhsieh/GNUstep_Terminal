@@ -71,16 +71,16 @@ static int scrollBackLines;
 		size=[ud floatForKey: TerminalFontSizeKey];
 		s=[ud stringForKey: TerminalFontKey];
 		if (!s)
-			terminalFont=[NSFont userFixedPitchFontOfSize: size];
+			terminalFont=[[NSFont userFixedPitchFontOfSize: size] retain];
 		else
-			terminalFont=[NSFont fontWithName: s  size: size];
+			terminalFont=[[NSFont fontWithName: s  size: size] retain];
 
 		size=[ud floatForKey: BoldTerminalFontSizeKey];
 		s=[ud stringForKey: BoldTerminalFontKey];
 		if (!s)
-			boldTerminalFont=[NSFont userFixedPitchFontOfSize: size];
+			boldTerminalFont=[[NSFont userFixedPitchFontOfSize: size] retain];
 		else
-			boldTerminalFont=[NSFont fontWithName: s  size: size];
+			boldTerminalFont=[[NSFont fontWithName: s  size: size] retain];
 
 		cursorStyle=[ud integerForKey: CursorStyleKey];
 		if ([ud objectForKey: CursorColorRKey])
@@ -163,13 +163,13 @@ static int scrollBackLines;
 			forKey: CursorColorAKey];
 	}
 
-	terminalFont=[f_terminalFont font];
+	ASSIGN(terminalFont,[f_terminalFont font]);
 	[ud setFloat: [terminalFont pointSize]
 		forKey: TerminalFontSizeKey];
 	[ud setObject: [terminalFont fontName]
 		forKey: TerminalFontKey];
 
-	boldTerminalFont=[f_boldTerminalFont font];
+	ASSIGN(boldTerminalFont,[f_boldTerminalFont font]);
 	[ud setFloat: [boldTerminalFont pointSize]
 		forKey: BoldTerminalFontSizeKey];
 	[ud setObject: [boldTerminalFont fontName]
@@ -192,11 +192,11 @@ static int scrollBackLines;
 	[pb_cursorStyle selectItemAtIndex: [[self class] cursorStyle]];
 	[w_cursorColor setColor: [[self class] cursorColor]];
 
-	f=[[self class] terminalFont];
+	f=[isa terminalFont];
 	[f_terminalFont setStringValue: [NSString stringWithFormat: @"%@ %0.1f",[f fontName],[f pointSize]]];
 	[f_terminalFont setFont: f];
 
-	f=[[self class] boldTerminalFont];
+	f=[isa boldTerminalFont];
 	[f_boldTerminalFont setStringValue: [NSString stringWithFormat: @"%@ %0.1f",[f fontName],[f pointSize]]];
 	[f_boldTerminalFont setFont: f];
 

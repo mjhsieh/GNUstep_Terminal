@@ -1934,8 +1934,8 @@ improve? */
 
 	{
 		NSRect r;
-		font=[TerminalView terminalFont];
-		boldFont=[TerminalViewDisplayPrefs boldTerminalFont];
+		font=[[TerminalView terminalFont] retain];
+		boldFont=[[TerminalViewDisplayPrefs boldTerminalFont] retain];
 		r=[font boundingRectForFont];
 		fx=r.size.width;
 		fy=r.size.height;
@@ -1981,6 +1981,9 @@ improve? */
 	free(sbuf);
 	screen=NULL;
 	sbuf=NULL;
+
+	DESTROY(font);
+	DESTROY(boldFont);
 
 	DESTROY(title_window);
 	DESTROY(title_miniwindow);
