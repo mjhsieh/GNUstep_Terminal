@@ -331,6 +331,7 @@ static void set_foreground(NSGraphicsContext *gc,
 				if (ch->attr&0x8)
 				{
 					color=ch->color&0xf;
+					if (ch->attr&0x40) color^=0xf;
 					if (color!=l_color || (ch->attr&0x03)!=l_attr)
 					{
 						if (start_x!=-1)
@@ -347,6 +348,7 @@ static void set_foreground(NSGraphicsContext *gc,
 				else
 				{
 					color=ch->color&0xf0;
+					if (ch->attr&0x40) color^=0xf0;
 					if (color!=l_color)
 					{
 						if (start_x!=-1)
@@ -398,6 +400,7 @@ static void set_foreground(NSGraphicsContext *gc,
 					if (!(ch->attr&0x8))
 					{
 						color=ch->color&0xf;
+						if (ch->attr&0x40) color^=0xf;
 						if (color!=l_color || (ch->attr&0x03)!=l_attr)
 						{
 							l_color=color;
@@ -408,6 +411,7 @@ static void set_foreground(NSGraphicsContext *gc,
 					else
 					{
 						color=ch->color&0xf0;
+						if (ch->attr&0x40) color^=0xf0;
 						if (color!=l_color)
 						{
 							l_color=color;
@@ -505,10 +509,6 @@ static void set_foreground(NSGraphicsContext *gc,
 				/* underline */
 				if (ch->attr&0x4)
 					DPSrectfill(cur,scr_x,scr_y,fx,1);
-
-				/* invert */
-				if (ch->attr&0x40)
-					DPScompositerect(cur,scr_x,scr_y,fx,fy,NSCompositeHighlight);
 			}
 		}
 	}
