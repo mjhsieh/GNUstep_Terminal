@@ -1087,6 +1087,8 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		cr(); \
 		lf(); \
 	} \
+	if (decim) \
+		[ts ts_shiftRow: y  at: x  delta: 1]; \
 	[ts ts_putChar: ch  count: 1  at: x:y]; \
 	if (x<width) \
 	{ \
