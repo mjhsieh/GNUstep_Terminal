@@ -9,7 +9,9 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 
 extern NSString
-	*TerminalViewEndOfInputNotification,
+	*TerminalViewBecameIdleNotification,
+	*TerminalViewBecameNonIdleNotification,
+
 	*TerminalViewTitleDidChangeNotification;
 
 
@@ -88,7 +90,7 @@ struct selection_range
 @end
 
 @interface TerminalView (scrolling_2)
--(void) setScroller: (NSScroller *)sc;
+-(void) setScroller: (NSScroller *)sc; /* TODO? */
 @end
 
 #endif

@@ -12,7 +12,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 @interface TerminalWindowController : NSWindowController
 {
 	TerminalView *tv;
-	BOOL close_on_exit;
+	BOOL close_on_idle;
 }
 
 +(TerminalWindowController *) newTerminalWindow;
@@ -22,7 +22,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 -(TerminalView *) terminalView;
 
--(void) setShouldCloseOnEOF: (BOOL)should_close;
+-(void) setShouldCloseWhenIdle: (BOOL)should_close;
 
 @end
 

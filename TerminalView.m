@@ -46,7 +46,9 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 
 NSString
-	*TerminalViewEndOfInputNotification=@"TerminalViewEndOfInput",
+	*TerminalViewBecameIdleNotification=@"TerminalViewBecameIdle",
+	*TerminalViewBecameNonIdleNotification=@"TerminalViewBecameNonIdle",
+
 	*TerminalViewTitleDidChangeNotification=@"TerminalViewTitleDidChange";
 
 
@@ -1205,7 +1207,7 @@ Handle master_fd
 		{
 //			get_zombies();
 			[[NSNotificationCenter defaultCenter]
-				postNotificationName: TerminalViewEndOfInputNotification
+				postNotificationName: TerminalViewBecameIdleNotification
 				object: self];
 			break;
 		}

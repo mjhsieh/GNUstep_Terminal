@@ -82,8 +82,13 @@ static void get_zombies(void)
 
 	[[NSNotificationCenter defaultCenter]
 		addObserver: self
-		selector: @selector(_endOfInput)
-		name: TerminalViewEndOfInputNotification
+		selector: @selector(_becameIdle)
+		name: TerminalViewBecameIdleNotification
+		object: tv];
+	[[NSNotificationCenter defaultCenter]
+		addObserver: self
+		selector: @selector(_becameNonIdle)
+		name: TerminalViewBecameNonIdleNotification
 		object: tv];
 	[[NSNotificationCenter defaultCenter]
 		addObserver: self
@@ -116,10 +121,14 @@ static void get_zombies(void)
 }
 
 
--(void) _endOfInput
+-(void) _becameIdle
 {
-	if (close_on_exit)
+	if (close_on_idle)
 		[self close];
+}
+
+-(void) _becameNonIdle
+{
 }
 
 
@@ -128,9 +137,9 @@ static void get_zombies(void)
 	return tv;
 }
 
--(void) setShouldCloseOnEOF: (BOOL)should
+-(void) setShouldCloseWhenIdle: (BOOL)should
 {
-	close_on_exit=should;
+	close_on_idle=should;
 }
 
 
