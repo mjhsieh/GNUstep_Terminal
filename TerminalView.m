@@ -1578,6 +1578,8 @@ misc. stuff
 		NSDebugLLog(@"term",@"Bounding (%g %g)+(%g %g)",fx0,fy0,fx,fy);
 		font_encoding=[font mostCompatibleStringEncoding];
 		boldFont_encoding=[boldFont mostCompatibleStringEncoding];
+		NSDebugLLog(@"term",@"encoding %i and %i",
+			font_encoding,boldFont_encoding);
 	}
 
 	screen=malloc(sizeof(screen_char_t)*sx*sy);
