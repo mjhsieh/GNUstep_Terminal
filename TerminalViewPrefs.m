@@ -156,6 +156,11 @@ static NSColor *cursorColor;
 		forKey: BoldTerminalFontSizeKey];
 	[ud setObject: [boldTerminalFont fontName]
 		forKey: BoldTerminalFontKey];
+
+	/* TODO: actually use this somewhere */
+	[[NSNotificationCenter defaultCenter]
+		postNotificationName: TerminalViewDisplayPrefsDidChangeNotification
+		object: self];
 }
 
 -(void) revert

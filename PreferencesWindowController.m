@@ -3,7 +3,6 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 */
 
 #include <Foundation/NSObject.h>
-#include <Foundation/NSNotification.h>
 #include <Foundation/NSInvocation.h>
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSButton.h>
