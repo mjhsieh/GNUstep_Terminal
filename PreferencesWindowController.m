@@ -40,7 +40,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 {
 	NSWindow *win;
 
-	win=[[NSPanel alloc] initWithContentRect: NSMakeRect(100,100,380,340)
+	win=[[NSPanel alloc] initWithContentRect: NSMakeRect(100,100,380,410)
 		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
 		backing: NSBackingStoreRetained
 		defer: YES];
