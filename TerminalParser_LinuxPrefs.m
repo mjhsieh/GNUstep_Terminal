@@ -54,7 +54,7 @@ static character_set_choice_t cs_choices[]={
 	{
 		ud=[NSUserDefaults standardUserDefaults];
 
-		characterSet=[ud stringForKey: CharacterSetKey];
+		characterSet=[[ud stringForKey: CharacterSetKey] retain];
 		if (!characterSet)
 			characterSet=@"iso-8859-1";
 	}
@@ -75,7 +75,7 @@ static character_set_choice_t cs_choices[]={
 	i=[pb_characterSet indexOfSelectedItem];
 	if (cs_choices[i].name!=nil)
 	{
-		characterSet=cs_choices[i].name;
+		ASSIGN(characterSet,cs_choices[i].name);
 		[ud setObject: characterSet  forKey: CharacterSetKey];
 
 		[[NSNotificationCenter defaultCenter]
