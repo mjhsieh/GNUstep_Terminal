@@ -155,6 +155,8 @@ of the License. See COPYING or main.m for more information.
 		}
 	}
 
+	NSDebugLLog(@"service",@"final command line='%@'",cmdline);
+
 	switch (type)
 	{
 	case TYPE_BACKGROUND:
@@ -259,6 +261,8 @@ of the License. See COPYING or main.m for more information.
 			twc=[TerminalWindowController idleTerminalWindow];
 		if (!twc)
 			twc=[TerminalWindowController newTerminalWindow];
+
+		NSDebugLLog(@"service",@"got window %@",twc);
 
 		[twc showWindow: self];
 
