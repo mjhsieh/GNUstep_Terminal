@@ -116,6 +116,11 @@ static int scrollBackLines;
 	return boldTerminalFont;
 }
 
++(BOOL) useMultiCellGlyphs
+{/* TODO */
+	return YES;
+}
+
 +(const float *) brightnessForIntensities
 {
 	return brightness;

@@ -32,6 +32,8 @@ extern NSString *TerminalViewDisplayPrefsDidChangeNotification;
 +(NSFont *) terminalFont;
 +(NSFont *) boldTerminalFont;
 
++(BOOL) useMultiCellGlyphs;
+
 +(const float *) brightnessForIntensities;
 +(const float *) saturationForIntensities;
 

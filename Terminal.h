@@ -29,6 +29,10 @@ bits
 } screen_char_t;
 
 
+/* Used as a marker. */
+#define MULTI_CELL_GLYPH 0xfffe
+
+
 @protocol TerminalScreen
 -(void) ts_sendCString: (const char *)str;
 -(void) ts_goto: (int)x:(int)y;
@@ -45,6 +49,10 @@ complete. (TODO check this) */
 -(screen_char_t) ts_getCharAt: (int)x:(int)y;
 
 -(void) ts_setTitle: (NSString *)new_title  type: (int)title_type;
+
+
+-(BOOL) useMultiCellGlyphs;
+-(int) relativeWidthOfCharacter: (unichar)ch;
 @end
 
 

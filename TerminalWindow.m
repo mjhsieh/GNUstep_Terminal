@@ -43,7 +43,6 @@ static void get_zombies(void)
 - init
 {
 	NSWindow *win;
-	NSFont *font;
 	NSScroller *scroller;
 	GSHbox *hb;
 	float fx,fy;
@@ -54,9 +53,11 @@ static void get_zombies(void)
 	int sx,sy;
 
 
-	font=[TerminalView terminalFont];
-	fx=[font boundingRectForFont].size.width;
-	fy=[font boundingRectForFont].size.height;
+	{
+		NSSize size=[TerminalView characterCellSize];
+		fx=size.width;
+		fy=size.height;
+	}
 
 	sx=[TerminalWindowPrefs defaultWindowWidth];
 	sy=[TerminalWindowPrefs defaultWindowHeight];

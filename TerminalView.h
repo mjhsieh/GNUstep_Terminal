@@ -41,6 +41,8 @@ struct selection_range
 	int font_encoding,boldFont_encoding;
 	float fx,fy,fx0,fy0;
 
+	BOOL use_multi_cell_glyphs;
+
 	struct
 	{
 		int x0,y0,x1,y1;
@@ -86,7 +88,7 @@ struct selection_range
 -(NSString *) windowTitle;
 -(NSString *) miniwindowTitle;
 
-+(NSFont *) terminalFont;
++(NSSize) characterCellSize;
 
 +(void) registerPasteboardTypes;
 

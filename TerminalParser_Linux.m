@@ -1087,12 +1087,22 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		cr(); \
 		lf(); \
 	} \
+	char_width=[ts relativeWidthOfCharacter: ch.ch]; \
 	if (decim) \
-		[ts ts_shiftRow: y  at: x  delta: 1]; \
+		[ts ts_shiftRow: y  at: x  delta: char_width]; \
 	[ts ts_putChar: ch  count: 1  at: x:y]; \
 	if (x<width) \
 	{ \
 		x++; \
+		char_width--; \
+		if (char_width+x>width) \
+			char_width=width-x; \
+		if (char_width>0) \
+		{ \
+			ch.ch=MULTI_CELL_GLYPH; \
+			[ts ts_putChar: ch  count: char_width  at: x:y]; \
+			x+=char_width; \
+		} \
 		[ts ts_goto: x:y]; \
 	}
 
@@ -1103,6 +1113,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 			int in_size;
 			char *outp;
 			int out_size;
+			int char_width;
 
 			int ret;
 
@@ -1166,6 +1177,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 
 		{
 			screen_char_t ch;
+			int char_width;
 			ch.color=color;
 			ch.attr=(intensity)|(underline<<2)|(reverse<<3)|(blink<<4);
 			ch.ch=unich;

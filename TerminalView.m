@@ -842,6 +842,23 @@ static void set_foreground(NSGraphicsContext *gc,
 		write(master_fd,msg,len);
 }
 
+
+-(BOOL) useMultiCellGlyphs
+{
+	return use_multi_cell_glyphs;
+}
+
+-(int) relativeWidthOfCharacter: (unichar)ch
+{
+	int s;
+	if (!use_multi_cell_glyphs)
+		return 1;
+	s=ceil([font boundingRectForGlyph: ch].size.width/fx);
+	if (s<1)
+		return 1;
+	return s;
+}
+
 @end
 
 
@@ -1138,7 +1155,7 @@ Selection, copy/paste/services
 			else
 				ch=screen[i].ch;
 
-			if (ch!=' ' && ch!=0)
+			if (ch!=' ' && ch!=0 && ch!=MULTI_CELL_GLYPH)
 				break;
 			ws_len++;
 			i++;
@@ -1426,6 +1443,7 @@ Selection, copy/paste/services
 
 	s.location=pos;
 	s.length=0;
+
 	return s;
 }
 
@@ -1933,12 +1951,15 @@ improve? */
 	if (!(self=[super initWithFrame: frame])) return nil;
 
 	{
+		NSSize s;
 		NSRect r;
-		font=[[TerminalView terminalFont] retain];
+		font=[[TerminalViewDisplayPrefs terminalFont] retain];
 		boldFont=[[TerminalViewDisplayPrefs boldTerminalFont] retain];
+
 		r=[font boundingRectForFont];
-		fx=r.size.width;
-		fy=r.size.height;
+		s=[TerminalView characterCellSize];
+		fx=s.width;
+		fy=s.height;
 		/* TODO: clear up font metrics issues with xlib/backart */
 		fx0=fabs(r.origin.x);
 		if (r.origin.y<0)
@@ -1951,6 +1972,8 @@ improve? */
 		NSDebugLLog(@"term",@"encoding %i and %i",
 			font_encoding,boldFont_encoding);
 	}
+
+	use_multi_cell_glyphs=[TerminalViewDisplayPrefs useMultiCellGlyphs];
 
 	screen=malloc(sizeof(screen_char_t)*sx*sy);
 	memset(screen,0,sizeof(screen_char_t)*sx*sy);
@@ -2015,9 +2038,16 @@ improve? */
 }
 
 
-+(NSFont *) terminalFont
++(NSSize) characterCellSize
 {
-	return [TerminalViewDisplayPrefs terminalFont];
+	NSFont *f=[TerminalViewDisplayPrefs terminalFont];
+	NSSize s;
+	s=[f boundingRectForFont].size;
+	if ([TerminalViewDisplayPrefs useMultiCellGlyphs])
+	{
+		s.width=[f boundingRectForGlyph: 'A'].size.width;
+	}
+	return s;
 }
 
 +(void) registerPasteboardTypes
