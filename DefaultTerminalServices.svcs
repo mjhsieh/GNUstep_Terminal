@@ -12,7 +12,7 @@
 	    AcceptTypes = 1;
 	    Commandline = "dict \"%s\"";
 	    Input = 2;
-	    Key = "";
+	    Key = "=";
 	    ReturnData = 0;
 	    Type = 2;
 	};
