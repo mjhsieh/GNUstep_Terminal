@@ -83,7 +83,26 @@ static NSString
 	int sx,sy;
 	screen_char_t *screen;
 
-	NSRect dirty;
+	struct
+	{
+		int x0,y0,x1,y1;
+	} dirty;
+#define ADD_DIRTY(ax0,ay0,asx,asy) do { \
+		if (dirty.x0==-1) \
+		{ \
+			dirty.x0=(ax0); \
+			dirty.y0=(ay0); \
+			dirty.x1=(ax0)+(asx); \
+			dirty.y1=(ay0)+(asx); \
+		} \
+		else \
+		{ \
+			if (dirty.x0>(ax0)) dirty.x0=(ax0); \
+			if (dirty.y0>(ay0)) dirty.y0=(ay0); \
+			if (dirty.x1<(ax0)+(asx)) dirty.x1=(ax0)+(asx); \
+			if (dirty.y1<(ay0)+(asy)) dirty.y1=(ay0)+(asy); \
+		} \
+	} while (0)
 
 	int x,y;
 	unsigned int tab_stop[8];
@@ -418,7 +437,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 #define gotoxy(foo,new_x,new_y) do { \
 	int min_y, max_y; \
  \
-	dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
+	ADD_DIRTY(x,y,1,1); \
  \
 	if (new_x < 0) \
 		x = 0; \
@@ -441,7 +460,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	else \
 		y = new_y; \
  \
-	dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
+	ADD_DIRTY(x,y,1,1); \
 } while (0)
 
 #define gotoxay(foo,nx,ny) gotoxy(foo,nx,decom?top+ny:ny)
@@ -535,17 +554,17 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		case 0:	/* erase from cursor to end of display */
 			count = sx*sy-(x+y*sx);
 			start = &SCREEN(x,y);
-			dirty=NSUnionRect(dirty,NSMakeRect(0,y,sx,sy-y));
+			ADD_DIRTY(0,y,sx,sy-y);
 			break;
 		case 1:	/* erase from start to cursor */
 			count = x+y*sx+1;
 			start = &SCREEN(0,0);
-			dirty=NSUnionRect(dirty,NSMakeRect(0,0,sx,y+1));
+			ADD_DIRTY(0,0,sx,y+1);
 			break;
 		case 2: /* erase whole display */
 			count = sx*sy;
 			start = &SCREEN(0,0);
-			dirty=NSUnionRect(dirty,NSMakeRect(0,0,sx,sy));
+			ADD_DIRTY(0,0,sx,sy);
 			break;
 		default:
 			return;
@@ -563,17 +582,17 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		case 0:	/* erase from cursor to end of line */
 			count = sx-x;
 			start = &SCREEN(x,y);
-			dirty=NSUnionRect(dirty,NSMakeRect(x,y,sx-x,1));
+			ADD_DIRTY(x,y,sx-x,1);
 			break;
 		case 1:	/* erase from start of line to cursor */
 			count = x+1;
 			start = &SCREEN(0,y);
-			dirty=NSUnionRect(dirty,NSMakeRect(0,y,x+1,1));
+			ADD_DIRTY(0,y,x+1,1);
 			break;
 		case 2: /* erase whole line */
 			count = sx;
 			start = &SCREEN(0,y);
-			dirty=NSUnionRect(dirty,NSMakeRect(0,y,sx,1));
+			ADD_DIRTY(0,y,sx,1);
 			break;
 		default:
 			return;
@@ -589,7 +608,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		vpar++;
 	count = (vpar > video_num_columns-x) ? (video_num_columns-x) : vpar;
 
-	dirty=NSUnionRect(dirty,NSMakeRect(x,y,count,1));
+	ADD_DIRTY(x,y,count,1);
 	memset(&SCREEN(x,y), video_erase_char, sizeof(screen_char_t) * count);
 }
 
@@ -708,7 +727,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		scrup_nr = b - t - 1; \
 	if (b > video_num_lines || t >= b || scrup_nr < 1) \
 		return; \
-	dirty=NSUnionRect(dirty,NSMakeRect(0,t,sx,b-t)); \
+	ADD_DIRTY(0,t,sx,b-t); \
 	d = &SCREEN(0,t); \
 	s = &SCREEN(0,t+scrup_nr); \
 	memmove(d, s, (b-t-scrup_nr) * sx*sizeof(screen_char_t)); \
@@ -724,7 +743,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		scrdown_nr = b - t - 1; \
 	if (b > video_num_lines || t >= b || scrdown_nr < 1) \
 		return; \
-	dirty=NSUnionRect(dirty,NSMakeRect(0,t,sx,b-t)); \
+	ADD_DIRTY(0,t,sx,b-t); \
 	s = &SCREEN(0,t); \
 	step = video_num_columns * scrdown_nr; \
 	memmove(s + step, s, (b-t-scrdown_nr)*sx*sizeof(screen_char_t)); \
@@ -738,7 +757,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	p = q + video_num_columns - nr - x; \
 	while (--p >= q) \
 		p[nr]=*p; \
-	dirty=NSUnionRect(dirty,NSMakeRect(0,y,sx,1)); /* FIX */ \
+	ADD_DIRTY(0,y,sx,1); /* FIX */ \
 	memset(q, video_erase_char, nr*sizeof(screen_char_t)); \
 } while (0)
 
@@ -750,7 +769,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		*p=p[nr]; \
 		p++; \
 	} \
-	dirty=NSUnionRect(dirty,NSMakeRect(0,y,sx,1)); /* FIX */ \
+	ADD_DIRTY(0,y,sx,1); /* FIX */ \
 	memset(p, video_erase_char, nr*sizeof(screen_char_t)); \
 } while (0)
 
@@ -943,9 +962,8 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	} \
 	else if (y<sy-1) \
 	{ \
-		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
+		ADD_DIRTY(x,y,1,2); \
 		y++; \
-		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
 	} \
 } while (0)
 
@@ -956,13 +974,12 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	} \
 	else if (y>0) \
 	{ \
-		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
+		ADD_DIRTY(x,y-1,1,2); \
 		y--; \
-		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); \
 	} \
 } while (0)
 
-#define cr() do { dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); x=0; dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1)); } while (0)
+#define cr() do { ADD_DIRTY(x,y,1,1); x=0; ADD_DIRTY(x,y,1,1); } while (0)
 
 
 #define cursor_report(foo,bar) do { \
@@ -1007,19 +1024,18 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	case 8:
 		if (x>0)
 		{
-			dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
+			ADD_DIRTY(x-1,y,1,2);
 			x--;
-			dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
 		}
 		return;
 	case 9:
-		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
+		ADD_DIRTY(x,y,1,1);
 		while (x < sx - 1) {
 			x++;
 			if (tab_stop[x >> 5] & (1 << (x & 31)))
 				break;
 		}
-		dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
+		ADD_DIRTY(x,y,1,1);
 		return;
 	case 10: case 11: case 12:
 		lf();
@@ -1465,11 +1481,11 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		SCREEN(x,y).attr=(intensity)|(underline<<2)|(reverse<<3)|(blink<<4);
 		if (x<sx)
 		{
-			dirty=NSUnionRect(dirty,NSMakeRect(x,y,2,1));
+			ADD_DIRTY(x,y,2,1);
 			x++;
 		}
 		else
-			dirty=NSUnionRect(dirty,NSMakeRect(x,y,1,1));
+			ADD_DIRTY(x,y,1,1);
 		return;
 	}
 }
@@ -1495,7 +1511,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 
 //	printf("got event %i %i\n",(int)data,t);
 	total=0;
-	dirty.size.width=dirty.size.height=-1;
+	dirty.x0=-1;
 
 while (1)
 {
@@ -1525,20 +1541,21 @@ while (1)
 	[self processChar: buf[0]];
 
 	total++;
-	if (total>=4096)
+	if (total>=8192)
 		break; /* give other things a chance */
 }
 
-	if (dirty.size.width>0)
+	if (dirty.x0>=0)
 	{
-//		NSLog(@"dirty=(%g %g)+(%g %g)\n",dirty.origin.x,dirty.origin.y,dirty.size.width,dirty.size.height);
-		dirty.origin.x*=fx;
-		dirty.origin.y*=fy;
-		dirty.size.width*=fx;
-		dirty.size.height*=fy;
-		dirty.origin.y=fy*sy-(dirty.origin.y+dirty.size.height);
+		NSRect dr;
+//		NSLog(@"dirty=(%i %i)-(%i %i)\n",dirty.x0,dirty.y0,dirty.x1,dirty.y1);
+		dr.origin.x=dirty.x0*fx;
+		dr.origin.y=dirty.y0*fy;
+		dr.size.width=(dirty.x1-dirty.x0)*fx;
+		dr.size.height=(dirty.y1-dirty.y0)*fy;
+		dr.origin.y=fy*sy-(dr.origin.y+dr.size.height);
 //		NSLog(@"-> dirty=(%g %g)+(%g %g)\n",dirty.origin.x,dirty.origin.y,dirty.size.width,dirty.size.height);
-		[self setNeedsDisplayInRect: dirty];
+		[self setNeedsDisplayInRect: dr];
 	}
 }
 
@@ -1592,6 +1609,7 @@ while (1)
 	ws.ws_row=nsy;
 	ws.ws_col=nsx;
 	ioctl(master_fd,TIOCSWINSZ,&ws);
+	[self setNeedsDisplay: YES];
 }
 
 
