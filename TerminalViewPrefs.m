@@ -23,6 +23,7 @@ NSString *TerminalViewDisplayPrefsDidChangeNotification=
 
 static NSUserDefaults *ud;
 
+
 static NSString
 	*TerminalFontKey=@"TerminalFont",
 	*TerminalFontSizeKey=@"TerminalFontSize",
@@ -50,11 +51,13 @@ static NSColor *cursorColor;
 +(void) initialize
 {
 	if (!ud)
+		ud=[NSUserDefaults standardUserDefaults];
+
+	if (!cursorColor)
 	{
 		NSString *s;
 		float size;
 
-		ud=[NSUserDefaults standardUserDefaults];
 
 		size=[ud floatForKey: TerminalFontSizeKey];
 		s=[ud stringForKey: TerminalFontKey];
@@ -370,6 +373,132 @@ static NSColor *cursorColor;
 
 	[f_cur setStringValue: [NSString stringWithFormat: @"%@ %0.1f",[f fontName],[f pointSize]]];
 	[f_cur setFont: f];
+}
+
+@end
+
+
+static NSString
+	*LoginShellKey=@"LoginShell",
+	*ShellKey=@"Shell";
+
+static NSString *shell;
+static BOOL loginShell;
+
+@implementation TerminalViewShellPrefs
+
++(void) initialize
+{
+	if (!ud)
+		ud=[NSUserDefaults standardUserDefaults];
+
+	if (!shell)
+	{
+		loginShell=[ud boolForKey: LoginShellKey];
+		shell=[ud stringForKey: ShellKey];
+		if (!shell && getenv("SHELL"))
+			shell=[NSString stringWithCString: getenv("SHELL")];
+		if (!shell)
+			shell=@"/bin/sh";
+		shell=[shell retain];
+	}
+}
+
++(NSString *) shell
+{
+	return shell;
+}
+
++(BOOL) loginShell
+{
+	return loginShell;
+}
+
+
+-(void) save
+{
+	if (!top) return;
+
+	if ([b_loginShell state])
+		loginShell=YES;
+	else
+		loginShell=NO;
+	[ud setBool: loginShell forKey: LoginShellKey];
+
+	DESTROY(shell);
+	shell=[[tf_shell stringValue] copy];
+	[ud setObject: shell forKey: ShellKey];
+}
+
+-(void) revert
+{
+	[b_loginShell setState: loginShell];
+	[tf_shell setStringValue: shell];
+}
+
+
+-(NSString *) name
+{
+	return _(@"Shell");
+}
+
+-(void) setupButton: (NSButton *)b
+{
+	[b setTitle: _(@"Shell")];
+	[b sizeToFit];
+}
+
+-(void) willHide
+{
+}
+
+-(NSView *) willShow
+{
+	if (!top)
+	{
+		top=[[GSVbox alloc] init];
+		[top setDefaultMinYMargin: 4];
+
+		{
+			NSTextField *f;
+			NSButton *b;
+
+			b=b_loginShell=[[NSButton alloc] init];
+			[b setAutoresizingMask: NSViewWidthSizable];
+			[b setTitle: _(@"Start as login-shell")];
+			[b setButtonType: NSSwitchButton];
+			[b sizeToFit];
+			[top addView: b enablingYResizing: NO];
+			DESTROY(b);
+
+			tf_shell=f=[[NSTextField alloc] init];
+			[f sizeToFit];
+			[f setAutoresizingMask: NSViewWidthSizable];
+			[top addView: f enablingYResizing: NO];
+			DESTROY(f);
+
+			f=[[NSTextField alloc] init];
+			[f setAutoresizingMask: NSViewWidthSizable];
+			[f setStringValue: _(@"Shell:")];
+			[f setEditable: NO];
+			[f setDrawsBackground: NO];
+			[f setBordered: NO];
+			[f setBezeled: NO];
+			[f setSelectable: NO];
+			[f sizeToFit];
+			[top addView: f enablingYResizing: NO];
+			DESTROY(f);
+		}
+
+		[self revert];
+	}
+	return top;
+}
+
+-(void) dealloc
+{
+	DESTROY(top);
+	[super dealloc];
 }
 
 @end

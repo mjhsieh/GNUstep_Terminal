@@ -38,5 +38,19 @@ extern NSString *TerminalViewDisplayPrefsDidChangeNotification;
 
 @end
 
+
+@interface TerminalViewShellPrefs : NSObject <PrefBox>
+{
+	GSVbox *top;
+
+	NSTextField *tf_shell;
+	NSButton *b_loginShell;
+}
+
++(NSString *) shell;
++(BOOL) loginShell;
+
+@end
+
 #endif
 
