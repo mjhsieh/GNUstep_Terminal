@@ -41,24 +41,45 @@ static void get_zombies(void)
 	GSHbox *hb;
 	float fx,fy;
 	int scroller_width;
+	NSRect	contentRect, windowRect;
+	NSSize	contentSize, minSize;
 
 	font=[TerminalView terminalFont];
 	fx=[font boundingRectForFont].size.width;
 	fy=[font boundingRectForFont].size.height;
 
-	scroller_width=ceil([NSScroller scrollerWidth]/fx);
+	scroller_width=[NSScroller scrollerWidth];
 
-	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*(80+scroller_width),fy*25)
+	// calc the rects for our window
+	contentSize = NSMakeSize (fx * 80 + scroller_width + 1, fy * 25 + 1);
+	minSize = NSMakeSize (fx * 20 + scroller_width + 1, fy * 10 + 1);
+
+	// add the borders to the size
+	contentSize.width += 8;
+	minSize.width += 8;
+	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"]) {
+		contentSize.height += 8;
+		minSize.height += 8;
+	}
+
+	contentRect = NSMakeRect (100, 100, contentSize.width, contentSize.height);
+
+	win=[[NSWindow alloc] initWithContentRect: contentRect
 		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
 		backing: NSBackingStoreRetained
 		defer: YES];
 	if (!(self=[super initWithWindow: win])) return nil;
 
+	windowRect = [win frame];
+	minSize.width += windowRect.size.width - contentSize.width;
+	minSize.height += windowRect.size.height - contentSize.height;
+
 	[win setTitle: @"Terminal"];
 	[win setDelegate: self];
 
-	[win setResizeIncrements: NSMakeSize(fx,fy)];
-	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*25+1)];
+	[win setContentSize: contentSize];
+	[win setResizeIncrements: NSMakeSize (fx , fy)];
+	[win setMinSize: minSize];
 
 	hb=[[GSHbox alloc] init];
 
@@ -79,9 +100,9 @@ static void get_zombies(void)
 	[tv setIgnoreResize: NO];
 
 	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"])
-		[tv setBorder: floor(fx/2) : floor(fy/2-0.5)];
+		[tv setBorder: 4 : 4];
 	else
-		[tv setBorder: floor(fx/2) : 0];
+		[tv setBorder: 4 : 0];
 
 	[win setContentView: hb];
 	DESTROY(hb);
