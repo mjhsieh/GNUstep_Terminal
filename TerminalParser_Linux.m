@@ -1156,6 +1156,8 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 
 				if (errno==EILSEQ)
 				{ /* illegal input sequence. skip one byte and try again. */
+					ch.ch=0xfffd;
+					PUTCH
 					in_size--;
 					inp++;
 				}
