@@ -1107,10 +1107,18 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 
 -(void) setTerminalScreenWidth: (int)w height: (int)h
 {
+	x+=w-width;
+	y+=h-height;
+
 	width=w;
 	height=h;
 	top=0;
 	bottom=height;
+
+	if (x>=width) x=width-1;
+	if (x<0) x=0;
+	if (y>=height) y=height-1;
+	if (y<0) y=0;
 }
 
 @end
