@@ -192,6 +192,9 @@ general
 	[m addItemWithTitle: _(@"Close")
 		action: @selector(performClose:)
 		keyEquivalent: @"w"];
+	[m addItemWithTitle: _(@"Miniaturize all")
+		action: @selector(miniaturizeAll:)
+		keyEquivalent: @"m"];
 	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Windows")]];
 	[NSApp setWindowsMenu: m];
 	[m release];
