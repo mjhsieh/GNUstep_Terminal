@@ -21,6 +21,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSBundle.h>
 #include <Foundation/NSNotification.h>
+#include <Foundation/NSUserDefaults.h>
 #include <gnustep/base/Unicode.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSView.h>
@@ -148,6 +149,8 @@ enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 
 -(NSString *) windowTitle;
 -(NSString *) miniwindowTitle;
+
++(NSFont *) terminalFont;
 
 @end
 
@@ -1568,7 +1571,7 @@ while (1)
 
 	{
 		NSRect r;
-		font=[NSFont userFixedPitchFontOfSize: 14];
+		font=[TerminalView terminalFont];
 		r=[font boundingRectForFont];
 		fx=r.size.width;
 		fy=r.size.height;
@@ -1628,6 +1631,18 @@ while (1)
 	return title_miniwindow;
 }
 
+
++(NSFont *) terminalFont
+{
+	NSUserDefaults *ud=[NSUserDefaults standardUserDefaults];
+	if ([ud stringForKey: @"TerminalFont"])
+	{
+		return [NSFont fontWithName: [ud stringForKey: @"TerminalFont"]
+			size: [ud floatForKey: @"TerminalFontSize"]];
+	}
+	return [NSFont userFixedPitchFontOfSize: 0];
+}
+
 @end
 
 
@@ -1646,7 +1661,7 @@ while (1)
 	NSFont *font;
 	float fx,fy;
 
-	font=[NSFont userFixedPitchFontOfSize: 14];
+	font=[TerminalView terminalFont];
 	fx=[font boundingRectForFont].size.width;
 	fy=[font boundingRectForFont].size.height;
 
