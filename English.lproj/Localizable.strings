@@ -1,40 +1,76 @@
 /***
 English.lproj/Localizable.strings
-updated by make_strings 2002-06-07 00:47:44 +0200
+updated by make_strings 2002-06-08 02:57:11 +0200
 add comments above this one
 ***/
 
 
+/*** Strings from PreferencesWindowController.m ***/
+/* File: PreferencesWindowController.m:73 */
+"Apply and save" = "Apply and save";
+/* File: PreferencesWindowController.m:117 */
+"Preferences" = "Preferences";
+/* File: PreferencesWindowController.m:65 */
+"Revert" = "Revert";
+
+
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:817 */
+/* File: TerminalView.m:958 */
 "Unable to spawn process: %m." = "Unable to spawn process: %m.";
 
 
+/*** Strings from TerminalViewPrefs.m ***/
+/* File: TerminalViewPrefs.m:269 */
+"Bold font:" = "Bold font:";
+/* File: TerminalViewPrefs.m:240 */
+"Color:" = "Color:";
+/* File: TerminalViewPrefs.m:210 */
+"Cursor" = "Cursor";
+/* File: TerminalViewPrefs.m:177 */
+/* File: TerminalViewPrefs.m:182 */
+"Display" = "Display";
+/* File: TerminalViewPrefs.m:231 */
+"Filled block" = "Filled block";
+/* File: TerminalViewPrefs.m:232 */
+"Inverted block" = "Inverted block";
+/* File: TerminalViewPrefs.m:229 */
+"Line" = "Line";
+/* File: TerminalViewPrefs.m:303 */
+"Normal font:" = "Normal font:";
+/* File: TerminalViewPrefs.m:287 */
+/* File: TerminalViewPrefs.m:321 */
+"Pick font..." = "Pick font...";
+/* File: TerminalViewPrefs.m:230 */
+"Stroked block" = "Stroked block";
+/* File: TerminalViewPrefs.m:217 */
+"Style:" = "Style:";
+
+
 /*** Strings from main.m ***/
-/* File: main.m:210 */
+/* File: main.m:261 */
 "Close" = "Close";
-/* File: main.m:196 */
+/* File: main.m:247 */
 "Copy" = "Copy";
-/* File: main.m:199 */
+/* File: main.m:250 */
 "Cut" = "Cut";
-/* File: main.m:205 */
+/* File: main.m:256 */
 "Edit" = "Edit";
-/* File: main.m:222 */
+/* File: main.m:273 */
 "Hide" = "Hide";
-/* File: main.m:183 */
-/* File: main.m:181 */
+/* File: main.m:234 */
+/* File: main.m:232 */
 "Info" = "Info";
-/* File: main.m:188 */
+/* File: main.m:239 */
 "New window" = "New window";
-/* File: main.m:202 */
+/* File: main.m:253 */
 "Paste" = "Paste";
-/* File: main.m:179 */
+/* File: main.m:230 */
 "Preferences..." = "Preferences...";
-/* File: main.m:226 */
+/* File: main.m:277 */
 "Quit" = "Quit";
-/* File: main.m:218 */
+/* File: main.m:269 */
 "Services" = "Services";
-/* File: main.m:191 */
+/* File: main.m:242 */
 "Terminal" = "Terminal";
-/* File: main.m:213 */
+/* File: main.m:264 */
 "Windows" = "Windows";

@@ -4,41 +4,107 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-07 00:47:44 +0200
+updated by make_strings 2002-06-08 02:57:11 +0200
 add comments above this one
 ***/
 
 
+/*** Keys found in multiple places ***/
+
+/* File: TerminalViewPrefs.m:177 */
+/* Flag: untranslated */
+/* File: TerminalViewPrefs.m:182 */
+/* Flag: untranslated */
+"Display" = "Display";
+
+/* File: TerminalViewPrefs.m:287 */
+/* Flag: untranslated */
+/* File: TerminalViewPrefs.m:321 */
+/* Flag: untranslated */
+"Pick font..." = "Pick font...";
+
+
+/*** Unmatched/untranslated keys ***/
+
+/* File: PreferencesWindowController.m:65 */
+/* Flag: untranslated */
+"Revert" = "Revert";
+
+/* File: PreferencesWindowController.m:73 */
+/* Flag: untranslated */
+"Apply and save" = "Apply and save";
+
+/* File: PreferencesWindowController.m:117 */
+/* Flag: untranslated */
+"Preferences" = "Preferences";
+
+/* File: TerminalViewPrefs.m:210 */
+/* Flag: untranslated */
+"Cursor" = "Cursor";
+
+/* File: TerminalViewPrefs.m:217 */
+/* Flag: untranslated */
+"Style:" = "Style:";
+
+/* File: TerminalViewPrefs.m:229 */
+/* Flag: untranslated */
+"Line" = "Line";
+
+/* File: TerminalViewPrefs.m:230 */
+/* Flag: untranslated */
+"Stroked block" = "Stroked block";
+
+/* File: TerminalViewPrefs.m:231 */
+/* Flag: untranslated */
+"Filled block" = "Filled block";
+
+/* File: TerminalViewPrefs.m:232 */
+/* Flag: untranslated */
+"Inverted block" = "Inverted block";
+
+/* File: TerminalViewPrefs.m:240 */
+/* Flag: untranslated */
+"Color:" = "Color:";
+
+/* File: TerminalViewPrefs.m:269 */
+/* Flag: untranslated */
+"Bold font:" = "Bold font:";
+
+/* File: TerminalViewPrefs.m:303 */
+/* Flag: untranslated */
+"Normal font:" = "Normal font:";
+
+
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:817 */
+/* File: TerminalView.m:958 */
 "Unable to spawn process: %m." = "Unable to spawn process: %m.";
 
 
 /*** Strings from main.m ***/
-/* File: main.m:210 */
+/* File: main.m:261 */
 "Close" = "Schließen";
-/* File: main.m:196 */
+/* File: main.m:247 */
 "Copy" = "Kopieren";
-/* File: main.m:199 */
+/* File: main.m:250 */
 "Cut" = "Ausschneiden";
-/* File: main.m:205 */
+/* File: main.m:256 */
 "Edit" = "Bearbeiten";
-/* File: main.m:222 */
+/* File: main.m:273 */
 "Hide" = "Ausblenden";
-/* File: main.m:183 */
-/* File: main.m:181 */
+/* File: main.m:234 */
+/* File: main.m:232 */
 "Info" = "Info";
-/* File: main.m:188 */
+/* File: main.m:239 */
 "New window" = "Neues Fenster";
-/* File: main.m:202 */
+/* File: main.m:253 */
 "Paste" = "Einfügen";
-/* File: main.m:179 */
+/* File: main.m:230 */
 "Preferences..." = "Grundeinstellungen...";
-/* File: main.m:226 */
+/* File: main.m:277 */
 "Quit" = "Beenden";
-/* File: main.m:218 */
+/* File: main.m:269 */
 "Services" = "Dienste";
-/* File: main.m:191 */
+/* File: main.m:242 */
 "Terminal" = "Terminal";
-/* File: main.m:213 */
+/* File: main.m:264 */
 "Windows" = "Fenster";
