@@ -2,6 +2,11 @@
 copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 */
 
+/*
+TODO: Move pty and child process handling to another class. Make this a
+stupid but fast character cell display view.
+*/
+
 #include <math.h>
 #include <unistd.h>
 
@@ -1316,6 +1321,11 @@ Selection, copy/paste/services
 }
 
 
+/* Return the range we should select for the given position and granularity:
+ 0   characters
+ 1   words
+ 2   lines
+*/
 -(struct selection_range) _selectionRangeAt: (int)pos  granularity: (int)g
 {
 	struct selection_range s;
@@ -1329,7 +1339,7 @@ Selection, copy/paste/services
 	}
 
 	if (g==2)
-	{
+	{ /* select words */
 		int ofs=max_scrollback*sx;
 		unichar ch,ch2;
 		NSCharacterSet *cs;
@@ -1341,6 +1351,7 @@ Selection, copy/paste/services
 			ch=screen[pos].ch;
 		if (ch==0) ch=' ';
 
+		/* try to find a character set for this character */
 		cs=[NSCharacterSet alphanumericCharacterSet];
 		if (![cs characterIsMember: ch])
 			cs=[NSCharacterSet punctuationCharacterSet];
@@ -1353,6 +1364,7 @@ Selection, copy/paste/services
 			return s;
 		}
 
+		/* search the line backwards for a boundary */
 		j=floor(pos/(float)sx);
 		j*=sx;
 		for (i=pos-1;i>=j;i--)
@@ -1368,6 +1380,7 @@ Selection, copy/paste/services
 		}
 		s.location=i+1;
 
+		/* and forwards... */
 		j+=sx;
 		for (i=pos+1;i<j;i++)
 		{
@@ -1529,9 +1542,6 @@ Handle master_fd
 			unichar ch;
 
 //			get_zombies();
-			[[NSNotificationCenter defaultCenter]
-				postNotificationName: TerminalViewBecameIdleNotification
-				object: self];
 			[self closeProgram];
 
 			msg=_(@"[Process exited]");
@@ -1545,16 +1555,41 @@ Handle master_fd
 			[tp processByte: '\n'];
 			[tp processByte: '\r'];
 
+			/* Sending this notification might cause us to be deallocated, in
+			which case we can't let the rest of code here run (and we'd rather
+			not to avoid a pointless update of the screen). To detect this, we
+			retain ourself before the call and check the retaincount after. */
+			[self retain];
+			[[NSNotificationCenter defaultCenter]
+				postNotificationName: TerminalViewBecameIdleNotification
+				object: self];
+			if ([self retainCount]==1)
+			{ /* we only have our own retain left, so we release ourself
+			  (causing us to be deallocated) and return */
+				[self release];
+				return;
+			}
+			[self release];
+
 			break;
 		}
-//		printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
 
 
 		[tp processByte: buf[0]];
 
 		total++;
+		/*
+		Don't get stuck processing input forever; give other terminal windows
+		and the user a chance to do things. The numbers affect latency versus
+		throughput. High numbers means more input is processed before the
+		screen is updated, leading to higher throughput but also to more
+		'jerky' updates. Low numbers would give smoother updating and less
+		latency, but throughput goes down.
+
+		TODO: tweak more? seems pretty good now
+		*/
 		if (total>=8192 || (num_scrolls+abs(pending_scroll))>10)
-			break; /* give other things a chance */
+			break;
 	}
 
 	if (cursor_x!=current_x || cursor_y!=current_y)
