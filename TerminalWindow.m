@@ -246,10 +246,14 @@ static NSMutableArray *idle_list;
 
 +(TerminalWindowController *) idleTerminalWindow
 {
+	TerminalWindowController *new;
+
 	NSDebugLLog(@"idle",@"get idle window from idle list: %@",idle_list);
 	if ([idle_list count])
 		return [idle_list objectAtIndex: 0];
-	return [[self alloc] init];
+	new=[[self alloc] init];
+	[new showWindow: self];
+	return new;
 }
 
 +(int) numberOfActiveWindows
