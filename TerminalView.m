@@ -382,15 +382,15 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	while (1)
 	{
-	{
-		fd_set s;
-		struct timeval tv;
-		FD_ZERO(&s);
-		FD_SET(master_fd,&s);
-		tv.tv_sec=0;
-		tv.tv_usec=0;
-		if (!select(master_fd+1,&s,NULL,NULL,&tv)) break;
-	}
+		{
+			fd_set s;
+			struct timeval tv;
+			FD_ZERO(&s);
+			FD_SET(master_fd,&s);
+			tv.tv_sec=0;
+			tv.tv_usec=0;
+			if (!select(master_fd+1,&s,NULL,NULL,&tv)) break;
+		}
 
 		size=read(master_fd,buf,1);
 		if (size==0) break;
