@@ -314,6 +314,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	case NSPageUpFunctionKey  : str="\e[5~"; break;
 	case NSPageDownFunctionKey: str="\e[6~"; break;
 
+	case 8: ch2=0x7f; break;
+
 	default:
 	{
 		int i;
@@ -518,7 +520,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		vpar++;
 	count = (vpar > video_num_columns-x) ? (video_num_columns-x) : vpar;
 
-	memset(&SCREEN(x,y), video_erase_char, 2 * count);
+	memset(&SCREEN(x,y), video_erase_char, sizeof(screen_char_t) * count);
 }
 
 
