@@ -16,6 +16,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 #include "TerminalWindow.h"
 
+#include "TerminalWindowPrefs.h"
 #include "TerminalView.h"
 
 
@@ -44,20 +45,26 @@ static void get_zombies(void)
 	NSRect contentRect,windowRect;
 	NSSize contentSize,minSize;
 
+	int sx,sy;
+
+
 	font=[TerminalView terminalFont];
 	fx=[font boundingRectForFont].size.width;
 	fy=[font boundingRectForFont].size.height;
 
+	sx=[TerminalWindowPrefs defaultWindowWidth];
+	sy=[TerminalWindowPrefs defaultWindowHeight];
+
 	scroller_width=[NSScroller scrollerWidth];
 
 	// calc the rects for our window
-	contentSize = NSMakeSize (fx * 80 + scroller_width + 1, fy * 25 + 1);
-	minSize = NSMakeSize (fx * 20 + scroller_width + 1, fy * 10 + 1);
+	contentSize = NSMakeSize (fx * sx + scroller_width + 1, fy * sy + 1);
+	minSize = NSMakeSize (fx * 20 + scroller_width + 1, fy * 4 + 1);
 
 	// add the borders to the size
 	contentSize.width += 8;
 	minSize.width += 8;
-	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"])
+	if ([TerminalWindowPrefs addYBorders])
 	{
 		contentSize.height += 8;
 		minSize.height += 8;
@@ -100,7 +107,7 @@ static void get_zombies(void)
 	[win makeFirstResponder: tv];
 	[tv setIgnoreResize: NO];
 
-	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"])
+	if ([TerminalWindowPrefs addYBorders])
 		[tv setBorder: 4 : 4];
 	else
 		[tv setBorder: 4 : 0];
@@ -211,7 +218,8 @@ static NSMutableArray *idle_list;
 	TerminalWindowController *twc;
 
 	twc=[[self alloc] init];
-	[twc setShouldCloseWhenIdle: YES];
+	if ([TerminalWindowPrefs windowCloseBehavior]==0)
+		[twc setShouldCloseWhenIdle: YES];
 	[twc showWindow: self];
 	return twc;
 }

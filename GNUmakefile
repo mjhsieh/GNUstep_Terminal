@@ -17,6 +17,7 @@ Terminal_OBJC_FILES = \
 	ServicesParameterWindowController.m \
 	\
 	TerminalWindow.m \
+	TerminalWindowPrefs.m \
 	\
 	TerminalView.m \
 	TerminalViewPrefs.m \
@@ -24,7 +25,9 @@ Terminal_OBJC_FILES = \
 	TerminalParser_Linux.m \
 	\
 	PreferencesWindowController.m \
-	autokeyviewchain.m
+	autokeyviewchain.m \
+	\
+	Label.m
 
 Terminal_LDFLAGS = -lutil
 
