@@ -1180,10 +1180,6 @@ Selection, copy/paste/services
 -(void) _setSelection: (struct selection_range)s
 {
 	int i,j,ofs2;
-	if (!s.length && !selection.length)
-		return;
-	if (s.length==selection.length && s.location==selection.location)
-		return;
 
 	if (s.location<-sb_length*sx)
 	{
@@ -1194,8 +1190,11 @@ Selection, copy/paste/services
 	{
 		s.length=sx*sy-s.location;
 	}
-	if (s.length<0)
-		s.length=0;
+
+	if (!s.length && !selection.length)
+		return;
+	if (s.length==selection.length && s.location==selection.location)
+		return;
 
 	ofs2=max_scrollback*sx;
 
@@ -1244,6 +1243,14 @@ Selection, copy/paste/services
 
 	selection=s;
 	[self setNeedsDisplay: YES];
+
+	if (selection.length)
+	{
+		NSString *str=[self _selectionAsString];
+		if (str && [str length])
+			[self writeSelectionToPasteboard: [NSPasteboard pasteboardWithName: @"Selection"]
+				types: [NSArray arrayWithObject: NSStringPboardType]];
+	}
 }
 
 -(void) _clearSelection
@@ -1278,7 +1285,8 @@ Selection, copy/paste/services
 	if (!type)
 		return;
 	str=[pb stringForType: NSStringPboardType];
-	[self _sendString: str];
+	if (str)
+		[self _sendString: str];
 }
 
 -(BOOL) writeSelectionToPasteboard: (NSPasteboard *)pb
@@ -1447,6 +1455,20 @@ Selection, copy/paste/services
 			inMode: NSEventTrackingRunLoopMode
 			dequeue: YES];
 	}
+}
+
+-(void) otherMouseUp: (NSEvent *)e
+{
+	NSPasteboard *pb=[NSPasteboard pasteboardWithName: @"Selection"];
+	NSString *type;
+	NSString *str;
+
+	type=[pb availableTypeFromArray: [NSArray arrayWithObject: NSStringPboardType]];
+	if (!type)
+		return;
+	str=[pb stringForType: NSStringPboardType];
+	if (str)
+		[self _sendString: str];
 }
 
 @end
