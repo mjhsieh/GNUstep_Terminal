@@ -15,11 +15,12 @@ lots borrowed from linux/drivers/char/console.c, GNU GPL:ed
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
-#include <netinet/in.h>
 
 #include <Foundation/NSString.h>
 #include <Foundation/NSDebug.h>
 #include <AppKit/NSGraphics.h>
+
+#include <netinet/in.h>
 
 /* TODO */
 #include "TerminalViewPrefs.h"
