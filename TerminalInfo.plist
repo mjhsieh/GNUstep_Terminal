@@ -2,13 +2,13 @@
     ApplicationDescription = "A terminal emulator";
     ApplicationIcon = Terminal;
     ApplicationName = Terminal;
-    ApplicationRelease = "0.9.0";
+    ApplicationRelease = "0.9.1";
     ApplicationURL = "http://w1.423.telia.com/~u42308495/alex/";
     Authors = (
 	"Alexander Malmberg <alex@malmberg.org>"
     );
     Copyright = "Copyright \u00a9 2002 Alexander Malmberg <alex@malmberg.org>";
     CopyrightDescription = "Released under the GNU GPL. See COPYING for details.";
-    FullVersionID = "0.9.0";
+    FullVersionID = "0.9.1";
 }
 
