@@ -75,11 +75,6 @@ struct selection_range
 -(NSString *) windowTitle;
 -(NSString *) miniwindowTitle;
 
--(void) runShell;
--(void) runProgram: (NSString *)path
-	withArguments: (NSArray *)args
-	initialInput: (NSString *)d;
-
 +(NSFont *) terminalFont;
 
 +(void) registerPasteboardTypes;
@@ -89,8 +84,17 @@ struct selection_range
 @interface TerminalView (display) <TerminalScreen>
 @end
 
+/* TODO: this is ugly */
 @interface TerminalView (scrolling_2)
--(void) setScroller: (NSScroller *)sc; /* TODO? */
+-(void) setScroller: (NSScroller *)sc;
+@end
+
+@interface TerminalView (input_2)
+-(void) closeProgram;
+-(void) runShell;
+-(void) runProgram: (NSString *)path
+	withArguments: (NSArray *)args
+	initialInput: (NSString *)d;
 @end
 
 #endif

@@ -6,6 +6,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <sys/wait.h>
 
 #include <Foundation/NSString.h>
+#include <Foundation/NSDebug.h>
 #include <Foundation/NSNotification.h>
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSScroller.h>
@@ -114,21 +115,35 @@ static void get_zombies(void)
 	[super dealloc];
 }
 
+
+static NSMutableArray *idle_list;
+
 -(void) windowWillClose: (NSNotification *)n
 {
 	get_zombies();
+	[idle_list removeObject: self];
 	[self autorelease];
 }
 
-
 -(void) _becameIdle
 {
+	NSDebugLLog(@"idle",@"%@ _becameIdle",self);
+
 	if (close_on_idle)
+	{
 		[self close];
+		return;
+	}
+
+	[idle_list addObject: self];
+	NSDebugLLog(@"idle",@"idle list: %@",idle_list);
 }
 
 -(void) _becameNonIdle
 {
+	NSDebugLLog(@"idle",@"%@ _becameNonIdle",self);
+	[idle_list removeObject: self];
+	NSDebugLLog(@"idle",@"idle list: %@",idle_list);
 }
 
 
@@ -143,6 +158,13 @@ static void get_zombies(void)
 }
 
 
++(void) initialize
+{
+	if (!idle_list)
+		idle_list=[[NSMutableArray alloc] init];
+}
+
+
 +(TerminalWindowController *) newTerminalWindow
 {
 	TerminalWindowController *twc;
@@ -154,6 +176,9 @@ static void get_zombies(void)
 
 +(TerminalWindowController *) idleTerminalWindow
 {
+	NSDebugLLog(@"idle",@"get idle window from idle list: %@",idle_list);
+	if ([idle_list count])
+		return [idle_list objectAtIndex: 0];
 	return [self newTerminalWindow];
 }
 

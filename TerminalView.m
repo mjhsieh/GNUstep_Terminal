@@ -67,6 +67,11 @@ NSString
 @end
 
 @interface TerminalView (input) <RunLoopEvents>
+-(void) closeProgram;
+-(void) runShell;
+-(void) runProgram: (NSString *)path
+	withArguments: (NSArray *)args
+	initialInput: (NSString *)d;
 @end
 
 
@@ -654,7 +659,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 -(void) ts_sendCString: (const char *)msg
 {
 	int len=strlen(msg);
-	write(master_fd,msg,len);
+	if (master_fd!=-1)
+		write(master_fd,msg,len);
 }
 
 @end
@@ -769,7 +775,8 @@ Keyboard events
 		else
 		{
 			tmp=ch;
-			write(master_fd,&tmp,1);
+			if (master_fd!=-1)
+				write(master_fd,&tmp,1);
 		}
 	}
 }
@@ -782,6 +789,9 @@ Keyboard events
 	unichar ch,ch2;
 	unsigned char tmp;
 	const char *str;
+
+	if (master_fd==-1)
+		return;
 
 	NSDebugLLog(@"key",@"got key flags=%08x  repeat=%i '%@' '%@' %4i %04x %i %04x %i\n",
 		[e modifierFlags],[e isARepeat],[e characters],[e charactersIgnoringModifiers],[e keyCode],
@@ -1209,6 +1219,7 @@ Handle master_fd
 			[[NSNotificationCenter defaultCenter]
 				postNotificationName: TerminalViewBecameIdleNotification
 				object: self];
+			[self closeProgram];
 			break;
 		}
 //		printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
@@ -1257,6 +1268,146 @@ Handle master_fd
 			draw_all=YES;
 			[self setNeedsDisplay: YES];
 		}
+	}
+}
+
+
+-(void) closeProgram
+{
+	if (master_fd==-1)
+		return;
+	NSDebugLLog(@"pty",@"closing master fd=%i\n",master_fd);
+	[[NSRunLoop currentRunLoop] removeEvent: (void *)master_fd
+		type: ET_RDESC
+		forMode: NSDefaultRunLoopMode
+		all: YES];
+	close(master_fd);
+	master_fd=-1;
+}
+
+
+-(void) runShell
+{
+	struct winsize ws;
+	int ret;
+	NSRunLoop *rl;
+
+	NSDebugLLog(@"pty",@"-runShell");
+
+	[self closeProgram];
+
+	ws.ws_row=sy;
+	ws.ws_col=sx;
+	ret=forkpty(&master_fd,NULL,NULL,&ws);
+	if (ret<0)
+	{
+		NSLog(_(@"Unable to spawn process: %m."));
+		return;
+	}
+
+	if (ret==0)
+	{
+		const char *shell=getenv("SHELL");
+		if (!shell) shell="/bin/sh";
+		putenv("TERM=linux");
+		putenv("TERM_PROGRAM=GNUstep_Terminal");
+		execl(shell,shell,NULL);
+		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
+		exit(1);
+	}
+
+	NSDebugLLog(@"pty",@"forked child %i, fd %i",ret,master_fd);
+
+	rl=[NSRunLoop currentRunLoop];
+	[rl addEvent: (void *)master_fd
+		type: ET_RDESC
+		watcher: self
+		forMode: NSDefaultRunLoopMode];
+
+	[[NSNotificationCenter defaultCenter]
+		postNotificationName: TerminalViewBecameNonIdleNotification
+		object: self];
+}
+
+-(void) runProgram: (NSString *)path
+	withArguments: (NSArray *)args
+	initialInput: (NSString *)d
+{
+	int ret;
+	struct winsize ws;
+	NSRunLoop *rl;
+	const char *cpath;
+	const char *cargs[[args count]+2];
+	int i;
+
+	int pipefd[2];
+
+	NSDebugLLog(@"pty",@"-runProgram: %@ withArguments: %@ initialInput: %@",
+		path,args,d);
+
+	[self closeProgram];
+
+	cpath=[path cString];
+	cargs[0]=cpath;
+	for (i=0;i<[args count];i++)
+	{
+		cargs[i+1]=[[args objectAtIndex: i] cString];
+	}
+	cargs[i+1]=NULL;
+
+	if (d)
+	{
+		if (pipe(pipefd))
+		{
+			NSLog(_(@"Unable to open pipe for input: %m."));
+			return;
+		}
+		NSDebugLLog(@"pty",@"creating pipe for initial data, got %i %i",
+			pipefd[0],pipefd[1]);
+	}
+
+	ws.ws_row=sy;
+	ws.ws_col=sx;
+	ret=forkpty(&master_fd,NULL,NULL,&ws);
+	if (ret<0)
+	{
+		NSLog(_(@"Unable to fork: %m."));
+		return;
+	}
+
+	if (ret==0)
+	{
+		if (d)
+		{
+			close(pipefd[1]);
+			dup2(pipefd[0],0);
+		}
+	
+		putenv("TERM=linux");
+		putenv("TERM_PROGRAM=GNUstep_Terminal");
+		execv(cpath,(char *const*)cargs);
+		fprintf(stderr,"Unable to spawn process '%s': %m!",cpath);
+		exit(1);
+	}
+
+	NSDebugLLog(@"pty",@"forked child %i, fd %i",ret,master_fd);
+
+	rl=[NSRunLoop currentRunLoop];
+	[rl addEvent: (void *)master_fd
+		type: ET_RDESC
+		watcher: self
+		forMode: NSDefaultRunLoopMode];
+
+	[[NSNotificationCenter defaultCenter]
+		postNotificationName: TerminalViewBecameNonIdleNotification
+		object: self];
+
+	if (d)
+	{
+		const char *s=[d UTF8String];
+		close(pipefd[0]);
+		write(pipefd[1],s,strlen(s));
+		close(pipefd[1]);
 	}
 }
 
@@ -1366,9 +1517,12 @@ misc. stuff
 
 	[tp setTerminalScreenWidth: sx height: sy];
 
-	ws.ws_row=nsy;
-	ws.ws_col=nsx;
-	ioctl(master_fd,TIOCSWINSZ,&ws);
+	if (master_fd!=-1)
+	{
+		ws.ws_row=nsy;
+		ws.ws_col=nsx;
+		ioctl(master_fd,TIOCSWINSZ,&ws);
+	}
 
 	draw_all=YES;
 	[self setNeedsDisplay: YES];
@@ -1389,33 +1543,8 @@ misc. stuff
 
 - initWithFrame: (NSRect)frame
 {
-	int ret;
-	NSRunLoop *rl;
-	struct winsize ws;
-
 	sx=80;
 	sy=25;
-
-	ws.ws_row=sy;
-	ws.ws_col=sx;
-	ret=forkpty(&master_fd,NULL,NULL,&ws);
-	if (ret<0)
-	{
-		NSLog(_(@"Unable to spawn process: %m."));
-		return nil;
-	}
-
-	if (ret==0)
-	{
-		const char *shell=getenv("SHELL");
-		if (!shell) shell="/bin/sh";
-		putenv("TERM=linux");
-		putenv("TERM_PROGRAM=GNUstep_Terminal");
-		execl(shell,shell,NULL);
-		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
-		exit(1);
-	}
-
 
 	if (!(self=[super initWithFrame: frame])) return nil;
 
@@ -1446,26 +1575,14 @@ misc. stuff
 	tp=[[TerminalParser_Linux alloc] initWithTerminalScreen: self
 		width: sx  height: sy];
 
-//	NSLog(@"Got master fd=%i",master_fd);
+	master_fd=-1;
 
-	rl=[NSRunLoop currentRunLoop];
-	[rl addEvent: (void *)master_fd
-		type: ET_RDESC
-		watcher: self
-		forMode: NSDefaultRunLoopMode];
 	return self;
 }
 
 -(void) dealloc
 {
-//	NSLog(@"closing master fd=%i\n",master_fd);
-	[[NSRunLoop currentRunLoop] removeEvent: (void *)master_fd
-		type: ET_RDESC
-		forMode: NSDefaultRunLoopMode
-		all: YES];
-
-	close(master_fd);
-//	get_zombies();
+	[self closeProgram];
 
 	DESTROY(tp);
 
@@ -1498,20 +1615,6 @@ misc. stuff
 -(void) setIgnoreResize: (BOOL)ignore
 {
 	ignore_resize=ignore;
-}
-
-
--(void) runShell
-{
-	NSLog(@"-runShell");
-}
-
--(void) runProgram: (NSString *)path
-	withArguments: (NSArray *)args
-	initialInput: (NSString *)d
-{
-	NSLog(@"-runProgram: %@  withArguments: %@  initialInput: %@",
-		path,args,d);
 }
 
 
