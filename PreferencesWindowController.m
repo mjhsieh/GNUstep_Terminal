@@ -116,6 +116,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	[win setDelegate: self];
 	[win setTitle: _(@"Preferences")];
 
+	[win setMinSize: NSMakeSize(275,400)];
 	[win setFrameUsingName: @"Preferences"];
 	[win setFrameAutosaveName: @"Preferences"];
 
