@@ -66,11 +66,11 @@ static void get_zombies(void)
 	[win setDelegate: self];
 
 	[win setResizeIncrements: NSMakeSize(fx,fy)];
-	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*25+1)];
+	[win setContentSize: NSMakeSize(fx*(80+scroller_width),fy*25+1)];
 
 	hb=[[GSHbox alloc] init];
 
-	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,scroller_width*fx-1,fy)];
+	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,[NSScroller scrollerWidth]-1,fy)];
 	[scroller setArrowsPosition: NSScrollerArrowsMaxEnd];
 	[scroller setEnabled: YES];
 	[scroller setAutoresizingMask: NSViewHeightSizable];
