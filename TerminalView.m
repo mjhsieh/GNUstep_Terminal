@@ -35,6 +35,7 @@ lots borrowed from linux/drivers/char/console.c, GNU GPL:ed
 #include <gnustep/base/Unicode.h>
 #include <AppKit/NSEvent.h>
 #include <AppKit/NSGraphics.h>
+#include <AppKit/NSScroller.h>
 #include <AppKit/DPSOperators.h>
 
 #include "TerminalView.h"
@@ -194,26 +195,56 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	[font set];
 
-	for (ix=x0;ix<x1;ix++)
-		for (iy=y0;iy<y1;iy++)
-		{
-			if (!(SCREEN(ix,iy).attr&0x80) && !draw_all)
-				continue;
-			SCREEN(ix,iy).attr&=0x7f;
-			total_draw++;
-			[self _setAttrs: SCREEN(ix,iy) : ix*fx:(sy-1-iy)*fy : cur];
-
-			if (SCREEN(ix,iy).ch!=0)
+	if (current_scroll)
+	{
+		int ry;
+		screen_char_t *ch;
+		for (ix=x0;ix<x1;ix++)
+			for (iy=y0;iy<y1;iy++)
 			{
-				dlen=sizeof(buf)-1;
-				GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
-				DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
-				DPSshow(cur,buf);
+				ry=iy+current_scroll;
+				if (ry>=0)
+					ch=&SCREEN(ix,ry);
+				else
+					ch=&sbuf[ix+(max_scrollback+ry)*sx];
+				ch->attr&=0x7f;
+				total_draw++;
+				[self _setAttrs: *ch : ix*fx:(sy-1-iy)*fy : cur];
+	
+				if (ch->ch!=0)
+				{
+					dlen=sizeof(buf)-1;
+					GSFromUnicode(&pbuf,&dlen,&ch->ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
+					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
+					DPSshow(cur,buf);
+				}
 			}
-		}
 
-	DPSsetrgbcolor(cur,0.2,0.2,1.0);
-	DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y)*fy,fx,fy);
+		DPSsetrgbcolor(cur,0.2,0.2,1.0);
+		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
+	}
+	else
+	{
+		for (ix=x0;ix<x1;ix++)
+			for (iy=y0;iy<y1;iy++)
+			{
+				if (!(SCREEN(ix,iy).attr&0x80) && !draw_all)
+					continue;
+				SCREEN(ix,iy).attr&=0x7f;
+				total_draw++;
+				[self _setAttrs: SCREEN(ix,iy) : ix*fx:(sy-1-iy)*fy : cur];
+	
+				if (SCREEN(ix,iy).ch!=0)
+				{
+					dlen=sizeof(buf)-1;
+					GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
+					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
+					DPSshow(cur,buf);
+				}
+			}
+		DPSsetrgbcolor(cur,0.2,0.2,1.0);
+		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y)*fy,fx,fy);
+	}
 
 	NSDebugLLog(@"draw",@"total_draw=%i",total_draw);
 
@@ -422,6 +453,10 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	if (dirty.x0>=0)
 	{
 		NSRect dr;
+
+		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length+0.1)
+			knobProportion: sy/(float)(sy+sb_length)];
+
 //		NSLog(@"dirty=(%i %i)-(%i %i)\n",dirty.x0,dirty.y0,dirty.x1,dirty.y1);
 		dr.origin.x=dirty.x0*fx;
 		dr.origin.y=dirty.y0*fy;
@@ -430,6 +465,13 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		dr.origin.y=fy*sy-(dr.origin.y+dr.size.height);
 //		NSLog(@"-> dirty=(%g %g)+(%g %g)\n",dirty.origin.x,dirty.origin.y,dirty.size.width,dirty.size.height);
 		[self setNeedsDisplayInRect: dr];
+
+		if (current_scroll!=0)
+		{ /* TODO */
+			current_scroll=0;
+			draw_all=YES;
+			[self setNeedsDisplay: YES];
+		}
 	}
 }
 
@@ -438,7 +480,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 {
 	int nsx,nsy;
 	struct winsize ws;
-	screen_char_t *nscreen;
+	screen_char_t *nscreen,*nsbuf;
 	int iy,start,num,copy_sx;
 
 	nsx=size.width/fx;
@@ -446,12 +488,14 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	if (nsx==sx && nsy==sy) return;
 
 	nscreen=malloc(nsx*nsy*sizeof(screen_char_t));
-	if (!nscreen)
+	nsbuf=malloc(nsx*max_scrollback*sizeof(screen_char_t));
+	if (!nscreen || !nsbuf)
 	{
 		NSLog(@"Failed to allocate screen buffer!");
 		return;
 	}
 	memset(nscreen,0,sizeof(screen_char_t)*nsx*nsy);
+	memset(nsbuf,0,sizeof(screen_char_t)*nsx*max_scrollback);
 
 	num=nsy;
 	if (num>sy)
@@ -464,20 +508,31 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 //	NSLog(@"copy %i+%i %i  (%ix%i)-(%ix%i)\n",start,num,copy_sx,sx,sy,nsx,nsy);
 
+/* TODO: handle resizing and scrollback */
 	for (iy=start;iy<start+num;iy++)
 	{
 		memcpy(&nscreen[nsx*(iy-start)],&screen[sx*iy],copy_sx*sizeof(screen_char_t));
 	}
 
+	for (iy=0;iy<max_scrollback;iy++)
+	{
+		memcpy(&nsbuf[nsx*iy],&sbuf[sx*iy],copy_sx*sizeof(screen_char_t));
+	}
+
 	sx=nsx;
 	sy=nsy;
 	free(screen);
+	free(sbuf);
 	screen=nscreen;
+	sbuf=nsbuf;
 
 	if (cursor_x>sx) cursor_x=sx-1;
 	if (cursor_y>sy) cursor_y=sy-1;
 
 	[tp setTerminalScreenWidth: sx height: sy];
+
+	[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length+0.1)
+		knobProportion: sy/(float)(sy+sb_length)];
 
 	ws.ws_row=nsy;
 	ws.ws_col=nsx;
@@ -551,6 +606,10 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	memset(screen,0,sizeof(screen_char_t)*sx*sy);
 	draw_all=YES;
 
+	max_scrollback=256;
+	sbuf=malloc(sizeof(screen_char_t)*sx*max_scrollback);
+	memset(sbuf,0,sizeof(screen_char_t)*sx*max_scrollback);
+
 	tp=[[TerminalParser_Linux alloc] initWithTerminalScreen: self
 		width: sx  height: sy];
 
@@ -563,6 +622,31 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		forMode: NSDefaultRunLoopMode];
 	return self;
 }
+
+
+-(void) _updateScroll: (id)sender
+{
+	int new_scroll;
+	float f=[scroller floatValue];
+	new_scroll=(f-1.0)*sb_length;
+	if (new_scroll!=current_scroll)
+	{
+		current_scroll=new_scroll;
+		draw_all=YES;
+		[self setNeedsDisplay: YES];
+	}
+}
+
+-(void) setScroller: (NSScroller *)sc
+{
+	[scroller setTarget: nil];
+	ASSIGN(scroller,sc);
+	[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length+0.1)
+		knobProportion: sy/(float)(sy+sb_length)];
+	[scroller setTarget: self];
+	[scroller setAction: @selector(_updateScroll:)];
+}
+
 
 -(void) dealloc
 {
@@ -577,8 +661,13 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	DESTROY(tp);
 
+	[scroller setTarget: nil];
+	DESTROY(scroller);
+
 	free(screen);
+	free(sbuf);
 	screen=NULL;
+	sbuf=NULL;
 
 	DESTROY(title_window);
 	DESTROY(title_miniwindow);
@@ -686,12 +775,40 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	NSDebugLLog(@"ts",@"scrollUp: %i:%i  rows: %i  save: %i",
 		t,b,nr,save);
 
+	if (save && t==0 && b==sy) /* TODO? */
+	{
+		int num;
+		if (nr<max_scrollback)
+		{
+			memmove(sbuf,&sbuf[sx*nr],sizeof(screen_char_t)*sx*(max_scrollback-nr));
+			num=nr;
+		}
+		else
+			num=max_scrollback;
+
+		if (num<sy)
+		{
+			memmove(&sbuf[sx*(max_scrollback-num)],screen,num*sx*sizeof(screen_char_t));
+		}
+		else
+		{
+			memmove(&sbuf[sx*(max_scrollback-num)],screen,sy*sx*sizeof(screen_char_t));
+
+			/* TODO: should this use video_erase_char? */
+			memset(&sbuf[sx*(max_scrollback-num+sy)],0,sx*(num-sy)*sizeof(screen_char_t));
+		}
+		sb_length+=num;
+		if (sb_length>max_scrollback)
+			sb_length=max_scrollback;
+	}
+
 	if (t+nr >= b)
 		nr = b - t - 1;
 	if (b > sy || t >= b || nr < 1)
 		return;
 	d = &SCREEN(0,t);
 	s = &SCREEN(0,t+nr);
+
 	if (current_y>=t && current_y<=b)
 	{
 		SCREEN(current_x,current_y).attr|=0x80; /* TODO? */
@@ -711,7 +828,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
 		[self unlockFocus];
 	}
-	ADD_DIRTY(0,0,sx,sy); /* TODO */
+	ADD_DIRTY(0,t,sx,b-t); /* TODO */
 }
 
 -(void) ts_scrollDown: (int)t:(int)b  rows: (int)nr
@@ -747,7 +864,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
 		[self unlockFocus];
 	}
-	ADD_DIRTY(0,0,sx,sy); /* TODO */
+	ADD_DIRTY(0,t,sx,b-t); /* TODO */
 }
 
 -(void) ts_shiftRow: (int)y  at: (int)x0  delta: (int)delta

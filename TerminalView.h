@@ -7,6 +7,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 #include <AppKit/NSView.h>
 
+
 extern NSString
 	*TerminalViewEndOfInputNotification,
 	*TerminalViewTitleDidChangeNotification;
@@ -18,8 +19,12 @@ extern NSString
 @class TerminalParser_Linux;
 
 
+@class NSScroller;
+
 @interface TerminalView : NSView <TerminalScreen>
 {
+	NSScroller *scroller;
+
 	NSFont *font;
 	float fx,fy,fx0,fy0;
 
@@ -29,6 +34,10 @@ extern NSString
 	} dirty;
 
 	int master_fd;
+
+	int max_scrollback;
+	int sb_length,current_scroll;
+	screen_char_t *sbuf;
 
 	int sx,sy;
 	screen_char_t *screen;
@@ -42,6 +51,8 @@ extern NSString
 
 	BOOL draw_all;
 }
+
+-(void) setScroller: (NSScroller *)sc;
 
 -(NSString *) windowTitle;
 -(NSString *) miniwindowTitle;
