@@ -8,6 +8,7 @@ of the License. See COPYING or main.m for more information.
 */
 
 #include <Foundation/NSString.h>
+#include <Foundation/NSBundle.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSTextField.h>
 #include <AppKit/NSPanel.h>

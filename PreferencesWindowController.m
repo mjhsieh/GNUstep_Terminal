@@ -9,6 +9,7 @@ of the License. See COPYING or main.m for more information.
 
 #include <Foundation/NSObject.h>
 #include <Foundation/NSInvocation.h>
+#include <Foundation/NSBundle.h>
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSButton.h>
 #include <AppKit/GSHbox.h>

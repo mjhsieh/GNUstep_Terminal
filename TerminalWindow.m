@@ -11,6 +11,7 @@ of the License. See COPYING or main.m for more information.
 #include <sys/wait.h>
 
 #include <Foundation/NSString.h>
+#include <Foundation/NSBundle.h>
 #include <Foundation/NSDebug.h>
 #include <Foundation/NSNotification.h>
 #include <Foundation/NSUserDefaults.h>
