@@ -8,7 +8,7 @@
 	    ReturnData = 1;
 	    Type = 0;
 	};
-	"Define word (dict)" = {
+	"Define word" = {
 	    AcceptTypes = 1;
 	    Commandline = "dict \"%s\"";
 	    Input = 2;
@@ -18,14 +18,21 @@
 	};
 	"Fetch URL" = {
 	    AcceptTypes = 1;
-	    Commandline = "cd ; wget \"%s\"";
+	    Commandline = "cd ~; wget \"%s\"";
 	    Input = 2;
 	    Key = "";
 	    ReturnData = 0;
 	    Type = 2;
 	};
-	"Line Count" = {
+	"Count lines" = {
 	    Commandline = "wc -l";
+	    Input = 1;
+	    Key = "";
+	    ReturnData = 1;
+	    Type = 0;
+	};
+	"Count words" = {
+	    Commandline = wc;
 	    Input = 1;
 	    Key = "";
 	    ReturnData = 1;
@@ -33,20 +40,20 @@
 	};
 	"Open shell here" = {
 	    AcceptTypes = 3;
-	    Commandline = "cd \"%s\"; /bin/bash";
+	    Commandline = "cd \"%s\" && exec $SHELL";
 	    Input = 2;
 	    Key = "";
 	    ReturnData = 0;
 	    Type = 1;
 	};
-	"Reformat source" = {
+	"Four-space hard tabs" = {
 	    Commandline = "expand | unexpand -t4";
 	    Input = 1;
 	    Key = "";
 	    ReturnData = 1;
 	    Type = 0;
 	};
-	Sort = {
+	"Sort lines" = {
 	    Commandline = sort;
 	    Input = 1;
 	    Key = "";
@@ -60,14 +67,7 @@
 	    ReturnData = 1;
 	    Type = 0;
 	};
-	"Word Count" = {
-	    Commandline = wc;
-	    Input = 1;
-	    Key = "";
-	    ReturnData = 1;
-	    Type = 0;
-	};
-	"Wrap and Reply" = {
+	"Wrap and reply" = {
 	    Commandline = "fmt -w 70 | sed -e \"s/^/> /\"";
 	    Input = 1;
 	    Key = "";
