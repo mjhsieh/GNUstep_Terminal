@@ -4,9 +4,17 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-08 03:23:34 +0200
+updated by make_strings 2002-06-08 19:11:17 +0200
 add comments above this one
 ***/
+
+
+/*** Unmatched/untranslated keys ***/
+
+/* File: Services.m:48 */
+/* Flag: untranslated */
+"There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
+= "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it.";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -30,8 +38,8 @@ add comments above this one
 "Color:" = "Farbe:";
 /* File: TerminalViewPrefs.m:210 */
 "Cursor" = "Cursor";
-/* File: TerminalViewPrefs.m:177 */
 /* File: TerminalViewPrefs.m:182 */
+/* File: TerminalViewPrefs.m:177 */
 "Display" = "Darstellung";
 /* File: TerminalViewPrefs.m:231 */
 "Filled block" = "Gefüllter Block";
@@ -41,8 +49,8 @@ add comments above this one
 "Line" = "Linie";
 /* File: TerminalViewPrefs.m:303 */
 "Normal font:" = "Normalschrift:";
-/* File: TerminalViewPrefs.m:287 */
 /* File: TerminalViewPrefs.m:321 */
+/* File: TerminalViewPrefs.m:287 */
 "Pick font..." = "Fontauswahl...";
 /* File: TerminalViewPrefs.m:230 */
 "Stroked block" = "Hohler Block";
