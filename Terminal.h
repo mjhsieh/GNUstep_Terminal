@@ -17,7 +17,8 @@ bits
 2     underline
 3     reverse
 4     blink
-5,6   unused
+5     unused
+6     used as a selected flag internally
 7     used as a dirty flag internally
 */
 } screen_char_t;

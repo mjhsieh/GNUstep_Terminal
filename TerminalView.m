@@ -1,14 +1,6 @@
 /*
 copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 */
-/*
-lots borrowed from linux/drivers/char/console.c, GNU GPL:ed
-*/
-/*
- *  linux/drivers/char/console.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
 
 #include <math.h>
 #include <unistd.h>
@@ -33,6 +25,8 @@ lots borrowed from linux/drivers/char/console.c, GNU GPL:ed
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSUserDefaults.h>
 #include <gnustep/base/Unicode.h>
+#include <AppKit/NSApplication.h>
+#include <AppKit/NSPasteboard.h>
 #include <AppKit/NSEvent.h>
 #include <AppKit/NSGraphics.h>
 #include <AppKit/NSScroller.h>
@@ -212,17 +206,24 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 					ch=&SCREEN(ix,ry);
 				else
 					ch=&sbuf[ix+(max_scrollback+ry)*sx];
+
+				if (!(ch->attr&0x80) && !draw_all)
+					continue;
+
 				ch->attr&=0x7f;
 				total_draw++;
 				[self _setAttrs: *ch : ix*fx:(sy-1-iy)*fy : cur];
 	
-				if (ch->ch!=0)
+				if (ch->ch!=0 && ch->ch!=32)
 				{
 					dlen=sizeof(buf)-1;
 					GSFromUnicode(&pbuf,&dlen,&ch->ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
 					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
 					DPSshow(cur,buf);
 				}
+
+				if (ch->attr&0x40)
+					DPScompositerect(cur,ix*fx,(sy-1-iy)*fy,fx,fy,NSCompositeHighlight);
 			}
 
 		DPSsetrgbcolor(cur,0.2,0.2,1.0);
@@ -239,13 +240,16 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 				total_draw++;
 				[self _setAttrs: SCREEN(ix,iy) : ix*fx:(sy-1-iy)*fy : cur];
 	
-				if (SCREEN(ix,iy).ch!=0)
+				if (SCREEN(ix,iy).ch!=0 && SCREEN(ix,iy).ch!=32)
 				{
 					dlen=sizeof(buf)-1;
 					GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
 					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
 					DPSshow(cur,buf);
 				}
+
+				if (SCREEN(ix,iy).attr&0x40)
+					DPScompositerect(cur,ix*fx,(sy-1-iy)*fy,fx,fy,NSCompositeHighlight);
 			}
 		DPSsetrgbcolor(cur,0.2,0.2,1.0);
 		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y)*fy,fx,fy);
@@ -262,12 +266,31 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 }
 
 
+-(void) _sendString: (NSString *)s
+{
+	int i;
+	unsigned char tmp;
+	unichar ch;
+	for (i=0;i<[s length];i++)
+	{
+		ch=[s characterAtIndex: i];
+		if (ch>256)
+			NSBeep();
+		else
+		{
+			tmp=ch;
+			write(master_fd,&tmp,1);
+		}
+	}
+}
+
 -(void) keyDown: (NSEvent *)e
 {
 /* TODO: what do we do with non-ascii characters? */
 	NSString *s=[e charactersIgnoringModifiers];
 	unsigned int mask=[e modifierFlags];
 	unichar ch,ch2;
+	unsigned char tmp;
 	const char *str;
 
 	NSDebugLLog(@"key",@"got key flags=%08x  repeat=%i '%@' '%@' %4i %04x %i %04x %i\n",
@@ -277,23 +300,9 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	if ([s length]>1)
 	{
-		int i;
 		s=[e characters];
 		NSDebugLLog(@"key",@" writing '%@'\n",s);
-		for (i=0;i<[s length];i++)
-		{
-			unichar uc=[s characterAtIndex: 0];
-			if (uc>256)
-			{
-				NSDebugLLog(@"key",@"  couldn't send %04x",uc);
-				NSBeep();
-			}
-			else
-			{
-				NSDebugLLog(@"key",@"  send %04x",uc);
-				write(master_fd,&uc,1);
-			}
-		}
+		[self _sendString: s];
 		return;
 	}
 
@@ -342,16 +351,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	default:
 	{
-		int i;
 		s=[e characters];
-		for (i=0;i<[s length];i++)
-		{
-			unichar uc=[s characterAtIndex: 0];
-			if (uc>256)
-				NSBeep();
-			else
-				write(master_fd,&uc,1);
-		}
+		[self _sendString: s];
 		return;
 	}
 	}
@@ -374,10 +375,224 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	}
 	else if (ch2>0)
 	{
+		tmp=ch2;
 		NSDebugLLog(@"key",@"  send %02x",ch2);
-		write(master_fd,&ch2,1);
+		write(master_fd,&tmp,1);
 	}
 }
+
+-(void) paste: (id)sender
+{
+	NSPasteboard *pb=[NSPasteboard generalPasteboard];
+	NSString *type;
+	NSString *str;
+
+	type=[pb availableTypeFromArray: [NSArray arrayWithObject: NSStringPboardType]];
+	if (!type)
+		return;
+	str=[pb stringForType: NSStringPboardType];
+	[self _sendString: str];
+}
+
+
+-(NSString *) _selectionAsString
+{
+	int ofs=max_scrollback*sx;
+	NSMutableString *mstr;
+	NSString *tmp;
+	unichar buf[32];
+	unichar ch;
+	int len;
+	int i,j;
+
+	if (selection.length==0)
+		return nil;
+
+	mstr=[[NSMutableString alloc] init];
+	j=selection.location+selection.length;
+	len=0;
+	for (i=selection.location;i<j;i++)
+	{
+		if (i%sx==0 && i>selection.location)
+		{
+			buf[len++]='\n';
+			if (len==32)
+			{
+				tmp=[[NSString alloc] initWithCharacters: buf length: 32];
+				[mstr appendString: tmp];
+				DESTROY(tmp);
+				len=0;
+			}
+		}
+		if (i<0)
+			ch=sbuf[ofs+i].ch;
+		else
+			ch=screen[i].ch;
+		if (ch)
+		{
+			buf[len++]=ch;
+			if (len==32)
+			{
+				tmp=[[NSString alloc] initWithCharacters: buf length: 32];
+				[mstr appendString: tmp];
+				DESTROY(tmp);
+				len=0;
+			}
+		}
+	}
+
+	if (len)
+	{
+		tmp=[[NSString alloc] initWithCharacters: buf length: len];
+		[mstr appendString: tmp];
+		DESTROY(tmp);
+	}
+
+	return AUTORELEASE(mstr);
+}
+
+-(void) _setSelection: (struct selection_range)s
+{
+	int i,j,ofs2;
+	if (!s.length && !selection.length)
+		return;
+	if (s.length==selection.length && s.location==selection.location)
+		return;
+
+	if (s.location<-sb_length*sx)
+	{
+		s.length+=sb_length*sx+s.location;
+		s.location=-sb_length*sx;
+	}
+	if (s.location+s.length>sx*sy)
+	{
+		s.length=sx*sy-s.location;
+	}
+	if (s.length<0)
+		s.length=0;
+
+	ofs2=max_scrollback*sx;
+
+	j=selection.location+selection.length;
+	if (j>s.location)
+		j=s.location;
+
+	for (i=selection.location;i<j && i<0;i++)
+	{
+		sbuf[ofs2+i].attr&=0xbf;
+		sbuf[ofs2+i].attr|=0x80;
+	}
+	for (;i<j;i++)
+	{
+		screen[i].attr&=0xbf;
+		screen[i].attr|=0x80;
+	}
+
+	i=s.location+s.length;
+	if (i<selection.location)
+		i=selection.location;
+	j=selection.location+selection.length;
+	for (;i<j && i<0;i++)
+	{
+		sbuf[ofs2+i].attr&=0xbf;
+		sbuf[ofs2+i].attr|=0x80;
+	}
+	for (;i<j;i++)
+	{
+		screen[i].attr&=0xbf;
+		screen[i].attr|=0x80;
+	}
+
+	i=s.location;
+	j=s.location+s.length;
+	for (;i<j && i<0;i++)
+	{
+		if (!(sbuf[ofs2+i].attr&0x40))
+			sbuf[ofs2+i].attr|=0xc0;
+	}
+	for (;i<j;i++)
+	{
+		if (!(screen[i].attr&0x40))
+			screen[i].attr|=0xc0;
+	}
+
+	selection=s;
+	[self setNeedsDisplay: YES];
+}
+
+-(void) _clearSelection
+{
+	struct selection_range s;
+	s.location=s.length=0;
+	[self _setSelection: s];
+}
+
+
+-(void) copy: (id)sender
+{
+	NSPasteboard *pb=[NSPasteboard generalPasteboard];
+	NSString *s=[self _selectionAsString];
+	if (!s)
+	{
+		NSBeep();
+		return;
+	}
+	[pb declareTypes: [NSArray arrayWithObject: NSStringPboardType]
+		owner: self];
+	[pb setString: s forType: NSStringPboardType];
+}
+
+
+-(void) mouseDown: (NSEvent *)e
+{
+	int ofs0,ofs1,first;
+	NSPoint p;
+	struct selection_range s;
+
+	first=YES;
+	ofs0=0; /* get compiler to shut up */
+	while ([e type]!=NSLeftMouseUp)
+	{
+		p=[e locationInWindow];
+
+		p=[self convertPoint: p  fromView: nil];
+		p.x=floor(p.x/fx);
+		if (p.x<0) p.x=0;
+		if (p.x>=sx) p.x=sx-1;
+		p.y=ceil(p.y/fy);
+		if (p.y<0) p.y=0;
+		if (p.y>=sy) p.x=sy-1;
+		p.y=sy-p.y+current_scroll;
+		ofs1=((int)p.x)+((int)p.y)*sx;
+
+		if (first)
+		{
+			ofs0=ofs1;
+			first=0;
+		}
+
+		if (ofs1>ofs0)
+		{
+			s.location=ofs0;
+			s.length=ofs1-ofs0;
+		}
+		else
+		{
+			s.location=ofs1;
+			s.length=ofs0-ofs1;
+		}
+
+		[self _setSelection: s];
+		[self displayIfNeeded];
+
+		e=[NSApp nextEventMatchingMask: NSLeftMouseDownMask|NSLeftMouseUpMask|
+		                                NSLeftMouseDraggedMask|NSMouseMovedMask
+			untilDate: [NSDate distantFuture]
+			inMode: NSEventTrackingRunLoopMode
+			dequeue: YES];
+	}
+}
+
 
 -(BOOL) acceptsFirstResponder
 {
@@ -411,10 +626,15 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 //	printf("got event %i %i\n",(int)data,t);
 	total=0;
+	num_scrolls=0;
 	dirty.x0=-1;
 
 	current_x=cursor_x;
 	current_y=cursor_y;
+
+	[self _clearSelection]; /* TODO? */
+
+	NSDebugLLog(@"term",@"receiving output");
 
 	while (1)
 	{
@@ -429,8 +649,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		}
 
 		size=read(master_fd,buf,1);
-		if (size==0) break;
-		if (size<0)
+		if (size<=0)
 		{
 //			get_zombies();
 			[[NSNotificationCenter defaultCenter]
@@ -444,7 +663,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		[tp processByte: buf[0]];
 
 		total++;
-		if (total>=8192)
+		if (total>=8192 || num_scrolls>100)
 			break; /* give other things a chance */
 	}
 
@@ -454,6 +673,9 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		SCREEN(current_x,current_y).attr|=0x80;
 		ADD_DIRTY(cursor_x,cursor_y,1,1);
 	}
+
+	NSDebugLLog(@"term",@"done (%i %i) (%i %i)\n",
+		dirty.x0,dirty.y0,dirty.x1,dirty.y1);
 
 	if (dirty.x0>=0)
 	{
@@ -503,6 +725,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	if (nsy<1) nsy=1;
 
 	if (nsx==sx && nsy==sy) return;
+
+	[self _clearSelection]; /* TODO? */
 
 	nscreen=malloc(nsx*nsy*sizeof(screen_char_t));
 	nsbuf=malloc(nsx*max_scrollback*sizeof(screen_char_t));
@@ -764,8 +988,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	}
 	s=&SCREEN(x,y);
 	ch.attr|=0x80;
-	if (ch.ch==' ')
-		ch.ch=0;
 	for (i=0;i<c;i++)
 		*s++=ch;
 	ADD_DIRTY(x,y,c,1);
@@ -788,8 +1010,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	}
 	s=&SCREEN(ofs,0);
 	ch.attr|=0x80;
-	if (ch.ch==' ')
-		ch.ch=0;
 	for (i=0;i<c;i++)
 		*s++=ch;
 	ADD_DIRTY(0,0,sx,sy); /* TODO */
@@ -839,6 +1059,10 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	if (current_y>=t && current_y<=b)
 	{
 		SCREEN(current_x,current_y).attr|=0x80; /* TODO? */
+		/*
+		TODO: does this properly handle the case when the cursor is in
+		an area that gets scrolled 'over'?
+		*/
 	}
 	memmove(d, s, (b-t-nr) * sx * sizeof(screen_char_t));
 	if (!current_scroll)
@@ -855,6 +1079,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		[self lockFocus];
 		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
 		[self unlockFocusNeedsFlush: NO];
+		num_scrolls++;
 	}
 	ADD_DIRTY(0,t,sx,b-t); /* TODO */
 }
@@ -892,6 +1117,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		[self lockFocus];
 		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
 		[self unlockFocusNeedsFlush: NO];
+		num_scrolls++;
 	}
 	ADD_DIRTY(0,t,sx,b-t); /* TODO */
 }
@@ -936,6 +1162,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		[self lockFocus];
 		DPScomposite(GSCurrentContext(),cx0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
 		[self unlockFocusNeedsFlush: NO];
+		num_scrolls++;
 	}
 	ADD_DIRTY(0,y,sx,1);
 }
@@ -943,7 +1170,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 -(screen_char_t) ts_getCharAt: (int)x:(int)y
 {
 	NSDebugLLog(@"ts",@"getCharAt: %i:%i",x,y);
-	/* TODO: map 0 back to ' '? */
 	return SCREEN(x,y);
 }
 

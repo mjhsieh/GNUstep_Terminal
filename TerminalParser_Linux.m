@@ -1,6 +1,14 @@
 /*
 copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 */
+/*
+lots borrowed from linux/drivers/char/console.c, GNU GPL:ed
+*/
+/*
+ *  linux/drivers/char/console.c
+ *
+ *  Copyright (C) 1991, 1992  Linus Torvalds
+ */
 
 #include <Foundation/NSString.h>
 #include <Foundation/NSDebug.h>
