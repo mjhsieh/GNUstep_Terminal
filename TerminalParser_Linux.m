@@ -851,9 +851,6 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 			}
 #endif
 			break;
-		case 'm':
-//			NSDebugLLog(@"term",@"ignore ESgotpars m"); nothing?
-			break;
 		case 'n':
 			if (!ques) {
 				if (par[0] == 5)
