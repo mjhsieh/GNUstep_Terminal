@@ -7,16 +7,17 @@ Public License as published by the Free Software Foundation; version 2
 of the License. See COPYING or main.m for more information.
 */
 
+#include <Foundation/NSNotification.h>
 #include <Foundation/NSString.h>
 #include <Foundation/NSUserDefaults.h>
+#include <AppKit/NSBox.h>
 #include <AppKit/NSColor.h>
 #include <AppKit/NSColorPanel.h>
-#include <AppKit/NSGraphics.h>
-#include <AppKit/NSFont.h>
-#include <AppKit/NSTextField.h>
 #include <AppKit/NSColorWell.h>
-#include <AppKit/NSPopUpButton.h>
-#include <AppKit/NSBox.h>
+#include <AppKit/NSFont.h>
+#include <AppKit/NSGraphics.h>
+#include <AppKit/NSImage.h>
+#include <AppKit/NSTextField.h>
 #include <AppKit/GSVbox.h>
 #include <AppKit/GSHbox.h>
 #include "Label.h"
@@ -163,7 +164,7 @@ static int scrollBackLines;
 {
 	if (!top) return;
 
-	cursorStyle=[pb_cursorStyle indexOfSelectedItem];
+	cursorStyle=[[m_cursorStyle selectedCell] tag];
 	[ud setInteger: cursorStyle
 		forKey: CursorStyleKey];
 
@@ -213,7 +214,7 @@ static int scrollBackLines;
 
 	[b_useMultiCellGlyphs setState: useMultiCellGlyphs];
 
-	[pb_cursorStyle selectItemAtIndex: [[self class] cursorStyle]];
+	[m_cursorStyle selectCellWithTag: [[self class] cursorStyle]];
 	[w_cursorColor setColor: [[self class] cursorColor]];
 
 	f=[isa terminalFont];
@@ -277,7 +278,6 @@ static int scrollBackLines;
 			{
 				NSBox *b;
 				GSTable *t;
-				NSPopUpButton *pb;
 				NSColorWell *w;
 
 				b=[[NSBox alloc] init];
@@ -292,15 +292,39 @@ static int scrollBackLines;
 				[t putView: f  atRow: 0 column: 0  withXMargins: 2 yMargins: 2];
 				DESTROY(f);
 
-				pb_cursorStyle=pb=[[NSPopUpButton alloc] init];
-				[pb setAutoenablesItems: NO];
-				[pb addItemWithTitle: _(@"Line")];
-				[pb addItemWithTitle: _(@"Stroked block")];
-				[pb addItemWithTitle: _(@"Filled block")];
-				[pb addItemWithTitle: _(@"Inverted block")];
-				[pb sizeToFit];
-				[t putView: pb  atRow: 0 column: 1  withXMargins: 2 yMargins: 2];
-				DESTROY(pb);
+				{
+					NSMatrix *m;
+					NSButtonCell *b=[NSButtonCell new];
+					NSSize s;
+
+					[b setImagePosition: NSImageOnly];
+					[b setHighlightsBy: NSChangeBackgroundCellMask];
+					[b setShowsStateBy: NSChangeBackgroundCellMask];
+
+					m=m_cursorStyle=[[NSMatrix alloc] initWithFrame: NSMakeRect(0,0,1,1)
+						mode: NSRadioModeMatrix
+						prototype: b
+						numberOfRows: 1
+						numberOfColumns: 4];
+
+					[[m cellAtRow: 0 column: 0] setImage: [NSImage imageNamed: @"cursor_line"]];
+					[[m cellAtRow: 0 column: 1] setImage: [NSImage imageNamed: @"cursor_stroked"]];
+					[[m cellAtRow: 0 column: 2] setImage: [NSImage imageNamed: @"cursor_filled"]];
+					[[m cellAtRow: 0 column: 3] setImage: [NSImage imageNamed: @"cursor_inverted"]];
+					[[m cellAtRow: 0 column: 0] setTag: 0];
+					[[m cellAtRow: 0 column: 1] setTag: 1];
+					[[m cellAtRow: 0 column: 2] setTag: 2];
+					[[m cellAtRow: 0 column: 3] setTag: 3];
+
+					s=[[m cellAtRow: 0 column: 0] cellSize];
+					s.width+=6;
+					s.height+=6;
+					[m setCellSize: s];
+					[m sizeToCells];
+
+					[t putView: m  atRow: 0 column: 1  withXMargins: 2 yMargins: 2];
+					DESTROY(m);
+				}
 
 
 				f=[NSTextField newLabel: _(@"Color:")];

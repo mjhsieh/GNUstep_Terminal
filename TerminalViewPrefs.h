@@ -14,7 +14,7 @@ of the License. See COPYING or main.m for more information.
 
 
 @class NSString,NSFont,NSColor;
-@class GSVbox,NSTextField,NSColorWell,NSPopUpButton;
+@class GSVbox,NSTextField,NSColorWell,NSMatrix;
 
 extern NSString *TerminalViewDisplayPrefsDidChangeNotification;
 
@@ -23,7 +23,7 @@ extern NSString *TerminalViewDisplayPrefsDidChangeNotification;
 	GSVbox *top;
 	NSTextField *f_terminalFont,*f_boldTerminalFont;
 	NSColorWell *w_cursorColor;
-	NSPopUpButton *pb_cursorStyle;
+	NSMatrix *m_cursorStyle;
 	NSTextField *f_scrollBackLines;
 	NSButton *b_useMultiCellGlyphs;
 

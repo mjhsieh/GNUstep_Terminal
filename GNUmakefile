@@ -43,7 +43,10 @@ Terminal_LOCALIZED_RESOURCE_FILES = Localizable.strings
 Terminal_LANGUAGES = English Swedish German French
 
 Terminal_APPLICATION_ICON = Terminal.tiff
-Terminal_RESOURCE_FILES = Terminal.tiff DefaultTerminalServices.svcs
+Terminal_RESOURCE_FILES = \
+	Terminal.tiff DefaultTerminalServices.svcs \
+	cursor_line.tiff cursor_stroked.tiff cursor_filled.tiff \
+	cursor_inverted.tiff
 
 MAKE_STRINGS_OPTIONS = --aggressive-match --aggressive-remove
 
