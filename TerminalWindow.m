@@ -30,22 +30,6 @@ static void get_zombies(void)
 }
 
 
-@interface BlackView : NSView
-@end
-
-@implementation BlackView
--(BOOL) isOpaque
-{
-	return YES;
-}
--(void) drawRect: (NSRect)r
-{
-	PSsetgray(0.0);
-	PSrectfill(r.origin.x,r.origin.y,r.size.width,r.size.height);
-}
-@end
-
-
 @implementation TerminalWindowController
 
 - init
@@ -75,6 +59,8 @@ static void get_zombies(void)
 	[win setResizeIncrements: NSMakeSize(fx,fy)];
 	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*25+1)];
 
+	[win setBackgroundColor: [NSColor blackColor]];
+
 	hb=[[GSHbox alloc] init];
 
 	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,[NSScroller scrollerWidth],fy)];
@@ -85,7 +71,7 @@ static void get_zombies(void)
 	[scroller release];
 
 	{
-		NSView *v=[[BlackView alloc] initWithFrame: NSMakeRect(0,0,(scroller_width*fx-[NSScroller scrollerWidth])/2,fy)];
+		NSView *v=[[NSView alloc] initWithFrame: NSMakeRect(0,0,(scroller_width*fx-[NSScroller scrollerWidth])/2,fy)];
 		[v setAutoresizingMask: NSViewHeightSizable];
 		[hb addView: v  enablingXResizing: NO];
 		DESTROY(v);
