@@ -10,8 +10,8 @@ include $(GNUSTEP_MAKEFILES)/common.make
 APP_NAME = Terminal
 
 PACKAGE_NAME = Terminal
-CVS_MODULE_NAME = Terminal
-CVS_OPTIONS = -d/opt/cvsroot
+CVS_MODULE_NAME = terminal
+CVS_OPTIONS = -d alexm@subversions.gnu.org:/cvsroot/terminal
 VERSION = 0.9.2
 
 ADDITIONAL_OBJCFLAGS += -Wall -O2 -D$(subst -,_,$(GNUSTEP_HOST_OS))
