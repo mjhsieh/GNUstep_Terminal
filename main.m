@@ -19,6 +19,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 
 #include "TerminalView.h"
+#include "PreferencesWindowController.h"
 
 
 static void get_zombies(void)
@@ -55,7 +56,7 @@ static void get_zombies(void)
 
 	scroller_width=ceil([NSScroller scrollerWidth]/fx);
 
-	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*(80+scroller_width),fy*24)
+	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*(80+scroller_width),fy*25)
 		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
 		backing: NSBackingStoreRetained
 		defer: YES];
@@ -65,11 +66,14 @@ static void get_zombies(void)
 	[win setDelegate: self];
 
 	[win setResizeIncrements: NSMakeSize(fx,fy)];
-	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*24+1)];
+	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*25+1)];
+
+	/* TODO: this doesn't seem to work properly */
+	[win setMinSize: NSMakeSize((scroller_width+4)*fx,fy*4)];
 
 	hb=[[GSHbox alloc] init];
 
-	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,scroller_width*fx-1,fy*24)];
+	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,scroller_width*fx-1,fy)];
 	[scroller setArrowsPosition: NSScrollerArrowsMaxEnd];
 	[scroller setEnabled: YES];
 	[scroller setAutoresizingMask: NSViewHeightSizable];
@@ -77,11 +81,13 @@ static void get_zombies(void)
 	[scroller release];
 
 	tv=[[TerminalView alloc] init];
+	[tv setIgnoreResize: YES];
 	[tv setAutoresizingMask: NSViewHeightSizable|NSViewWidthSizable];
 	[tv setScroller: scroller];
 	[hb addView: tv];
 	[tv release];
 	[win makeFirstResponder: tv];
+	[tv setIgnoreResize: NO];
 
 	[win setContentView: hb];
 	DESTROY(hb);
@@ -145,6 +151,7 @@ static void get_zombies(void)
 
 @interface Terminal : NSObject
 {
+	PreferencesWindowController *pwc;
 }
 
 @end
@@ -159,7 +166,49 @@ static void get_zombies(void)
 
 -(void) dealloc
 {
+	DESTROY(pwc);
 	[super dealloc];
+}
+
+
+/*
+
+display
+ cursor color
+ cursor invert
+ font
+ bold font
+ intensity handling
+ colors?
+
+specific
+ keyboard mappings?
+ terminal emulation
+ close on shell exit
+ shell to run
+ environment
+
+services
+
+
+general
+
+*/
+
+@class TerminalViewDisplayPrefs;
+
+-(void) openPreferences: (id)sender
+{
+	if (!pwc)
+	{
+		NSObject<PrefBox> *pb;
+		pwc=[[PreferencesWindowController alloc] init];
+
+		pb=[[TerminalViewDisplayPrefs alloc] init];
+		[pwc addPrefBox: pb];
+		DESTROY(pb);
+	}
+	[pwc showWindow: self];
 }
 
 
