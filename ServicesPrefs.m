@@ -254,7 +254,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	if (!d)
 	{
 		NSRunAlertPanel(_(@"Error importing services"),
-			_(@"The file %@ doesn't containt valid terminal services."),
+			_(@"The file '%@' doesn't contain valid terminal services."),
 			nil,nil,nil,
 			[op filename]);
 		return;

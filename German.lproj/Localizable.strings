@@ -4,7 +4,7 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-09 18:50:23 +0200
+updated by make_strings 2002-06-10 00:50:01 +0200
 add comments above this one
 ***/
 
@@ -13,7 +13,7 @@ add comments above this one
 
 /* File: ServicesParameterWindowController.m:92 */
 /* Flag: untranslated */
-/* File: ServicesPrefs.m:419 */
+/* File: ServicesPrefs.m:573 */
 /* Flag: untranslated */
 "Command line:" = "Command line:";
 
@@ -25,7 +25,7 @@ add comments above this one
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
 = "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it.";
 
-/* File: Services.m:141 */
+/* File: Services.m:139 */
 /* Flag: untranslated */
 "Service aborted by user." = "Service aborted by user.";
 
@@ -41,67 +41,92 @@ add comments above this one
 /* Flag: untranslated */
 "Parameter for service %@" = "Parameter for service %@";
 
-/* File: ServicesPrefs.m:219 */
+/* File: ServicesPrefs.m:223 */
 /* Flag: untranslated */
 "Unnamed service" = "Unnamed service";
 
-/* File: ServicesPrefs.m:228 */
+/* File: ServicesPrefs.m:242 */
+/* Flag: untranslated */
+"Import services" = "Import services";
+
+/* File: ServicesPrefs.m:256 */
+/* Flag: untranslated */
+"Error importing services" = "Error importing services";
+
+/* File: ServicesPrefs.m:257 */
+/* Flag: untranslated */
+"The file '%@' doesn't contain valid terminal services."
+= "The file '%@' doesn't contain valid terminal services.";
+
+/* File: ServicesPrefs.m:307 */
+/* Flag: untranslated */
+"Export services" = "Export services";
+
+/* File: ServicesPrefs.m:374 */
 /* Flag: untranslated */
 "Terminal services" = "Terminal services";
 
-/* File: ServicesPrefs.m:233 */
+/* File: ServicesPrefs.m:379 */
 /* Flag: untranslated */
 "Terminal\nservices" = "Terminal\nservices";
 
-/* File: ServicesPrefs.m:259 */
+/* File: ServicesPrefs.m:405 */
 /* Flag: untranslated */
 "Add" = "Add";
 
-/* File: ServicesPrefs.m:267 */
+/* File: ServicesPrefs.m:413 */
 /* Flag: untranslated */
 "Remove" = "Remove";
 
-/* File: ServicesPrefs.m:301 */
+/* File: ServicesPrefs.m:421 */
+/* Flag: untranslated */
+"Import..." = "Import...";
+
+/* File: ServicesPrefs.m:429 */
+/* Flag: untranslated */
+"Export..." = "Export...";
+
+/* File: ServicesPrefs.m:455 */
 /* Flag: untranslated */
 "Ignore output" = "Ignore output";
 
-/* File: ServicesPrefs.m:302 */
+/* File: ServicesPrefs.m:456 */
 /* Flag: untranslated */
 "Return output" = "Return output";
 
-/* File: ServicesPrefs.m:310 */
+/* File: ServicesPrefs.m:464 */
 /* Flag: untranslated */
 "No input" = "No input";
 
-/* File: ServicesPrefs.m:311 */
+/* File: ServicesPrefs.m:465 */
 /* Flag: untranslated */
 "Input in stdin" = "Input in stdin";
 
-/* File: ServicesPrefs.m:312 */
+/* File: ServicesPrefs.m:466 */
 /* Flag: untranslated */
 "Input on command line" = "Input on command line";
 
-/* File: ServicesPrefs.m:320 */
+/* File: ServicesPrefs.m:474 */
 /* Flag: untranslated */
 "Run in background" = "Run in background";
 
-/* File: ServicesPrefs.m:335 */
+/* File: ServicesPrefs.m:489 */
 /* Flag: untranslated */
 "Accept types" = "Accept types";
 
-/* File: ServicesPrefs.m:344 */
+/* File: ServicesPrefs.m:498 */
 /* Flag: untranslated */
 "Filenames" = "Filenames";
 
-/* File: ServicesPrefs.m:352 */
+/* File: ServicesPrefs.m:506 */
 /* Flag: untranslated */
 "Plain text" = "Plain text";
 
-/* File: ServicesPrefs.m:379 */
+/* File: ServicesPrefs.m:533 */
 /* Flag: untranslated */
 "Name:" = "Name:";
 
-/* File: ServicesPrefs.m:399 */
+/* File: ServicesPrefs.m:553 */
 /* Flag: untranslated */
 "Key:" = "Key:";
 
