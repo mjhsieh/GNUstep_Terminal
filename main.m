@@ -160,12 +160,17 @@ general
 	[m release];
 
 	/* 'Terminal' menu */
-	m=[[NSMenu alloc] init];
+	/* TODO: think hard about this. originally, the Terminal menu was supposed
+	to have several entries. */
+/*	m=[[NSMenu alloc] init];
 	[m addItemWithTitle: _(@"New window")
 		action: @selector(openWindow:)
 		keyEquivalent: @"n"];
 	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Terminal")]];
-	[m release];
+	[m release];*/
+	[menu addItemWithTitle: _(@"New terminal")
+		action: @selector(openWindow:)
+		keyEquivalent: @"n"];
 
 	/* 'Edit' menu */
 	m=[[NSMenu alloc] init];
