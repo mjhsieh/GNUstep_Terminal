@@ -640,10 +640,18 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 {
 	float delta=[e deltaY];
 	int new_scroll;
+	int mult;
 
 	NSLog(@"scrollWheel: %@",e);
 
-	new_scroll=current_scroll+delta;
+	if ([e modifierFlags]&NSShiftKeyMask)
+		mult=1;
+	else if ([e modifierFlags]&NSControlKeyMask)
+		mult=sy;
+	else
+		mult=5;
+
+	new_scroll=current_scroll-delta*mult;
 	if (new_scroll>0)
 		new_scroll=0;
 	if (new_scroll<-sb_length)
