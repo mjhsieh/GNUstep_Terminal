@@ -15,6 +15,12 @@ stupid but fast character cell display view.
 #include <math.h>
 #include <unistd.h>
 
+#ifdef __NetBSD__
+#  include <sys/types.h>
+#  include <sys/ioctl.h>
+#  include <termios.h>
+#  include <pcap.h>
+#else
 #ifdef freebsd
 #  include <sys/types.h>
 #  include <sys/ioctl.h>
@@ -24,11 +30,15 @@ stupid but fast character cell display view.
 #else
 #  include <termio.h>
 #endif
+#endif
+
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 #ifndef freebsd
+#ifndef __NetBSD__
 #  include <pty.h>
+#endif
 #endif
 
 #include <Foundation/NSBundle.h>
