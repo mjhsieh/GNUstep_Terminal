@@ -37,9 +37,11 @@ stupid but fast character cell display view.
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSUserDefaults.h>
 #include <Foundation/NSCharacterSet.h>
+#include <Foundation/NSArchiver.h>
 #include <gnustep/base/Unicode.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSPasteboard.h>
+#include <AppKit/NSDragging.h>
 #include <AppKit/NSEvent.h>
 #include <AppKit/NSGraphics.h>
 #include <AppKit/NSScroller.h>
@@ -1700,6 +1702,79 @@ Handle master_fd
 
 
 /**
+drag'n'drop support
+**/
+
+@implementation TerminalView (drag_n_drop)
+
+static int handled_mask=
+	NSDragOperationCopy|NSDragOperationPrivate|NSDragOperationGeneric;
+
+-(unsigned int) draggingEntered: (id<NSDraggingInfo>)sender
+{
+	NSArray *types=[[sender draggingPasteboard] types];
+	unsigned int mask=[sender draggingSourceOperationMask];
+
+	NSDebugLLog(@"dragndrop",@"TerminalView draggingEntered mask=%x types=%@",mask,types);
+
+	if (mask&handled_mask &&
+	    ([types containsObject: NSFilenamesPboardType] ||
+	     [types containsObject: NSStringPboardType]))
+		return NSDragOperationCopy;
+	return 0;
+}
+
+/* TODO: should I really have to implement this? */
+-(BOOL) prepareForDragOperation: (id<NSDraggingInfo>)sender
+{
+	NSDebugLLog(@"dragndrop",@"preparing for drag");
+	return YES;
+}
+
+-(BOOL) performDragOperation: (id<NSDraggingInfo>)sender
+{
+	NSPasteboard *pb=[sender draggingPasteboard];
+	NSArray *types=[pb types];
+	unsigned int mask=[sender draggingSourceOperationMask];
+
+	NSDebugLLog(@"dragndrop",@"performDrag %x %@",mask,types);
+
+	if (!(mask&handled_mask))
+		return NO;
+
+	if ([types containsObject: NSFilenamesPboardType])
+	{
+		NSArray *data;
+		int i,c;
+
+		data=[pb propertyListForType: NSFilenamesPboardType];
+		if (!data)
+			data=[NSUnarchiver unarchiveObjectWithData: [pb dataForType: NSFilenamesPboardType]];
+
+		c=[data count];
+
+		for (i=0;i<c;i++)
+		{
+			[tp sendString: @" "];
+			[tp sendString: [data objectAtIndex: i]];
+		}
+		return YES;
+	}
+
+	if ([types containsObject: NSStringPboardType])
+	{
+		NSString *str=[pb stringForType: NSStringPboardType];
+		[tp sendString: str];
+		return YES;
+	}
+
+	return NO;
+}
+
+@end
+
+
+/**
 misc. stuff
 **/
 
@@ -1871,6 +1946,9 @@ improve? */
 		width: sx  height: sy];
 
 	master_fd=-1;
+
+	[self registerForDraggedTypes: [NSArray arrayWithObjects:
+		NSFilenamesPboardType,NSStringPboardType,nil]];
 
 	return self;
 }
