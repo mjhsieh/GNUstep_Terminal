@@ -54,7 +54,7 @@ struct selection_range
 
 	NSObject<TerminalParser> *tp;
 
-	BOOL draw_all;
+	BOOL draw_all,draw_cursor;
 
 	struct selection_range selection;
 

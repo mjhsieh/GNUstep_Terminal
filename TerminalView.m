@@ -197,6 +197,9 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		DPSrectfill(cur,r.origin.x,r.origin.y,r.size.width,r.size.height);
 	}
 
+	draw_cursor=draw_cursor || draw_all ||
+	            (SCREEN(cursor_x,cursor_y).attr&0x80)!=0;
+
 	if (current_scroll)
 	{
 		int ry;
@@ -276,22 +279,26 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 			}
 	}
 
-	[[TerminalViewDisplayPrefs cursorColor] set];
-	switch ([TerminalViewDisplayPrefs cursorStyle])
+	if (draw_cursor)
 	{
-	case CURSOR_LINE:
-		DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy*0.1);
-		break;
-	case CURSOR_BLOCK_STROKE:
-		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
-		break;
-	case CURSOR_BLOCK_FILL:
-		DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
-		break;
-	case CURSOR_BLOCK_INVERT:
-		DPScompositerect(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy,
-			NSCompositeHighlight);
-		break;
+		[[TerminalViewDisplayPrefs cursorColor] set];
+		switch ([TerminalViewDisplayPrefs cursorStyle])
+		{
+		case CURSOR_LINE:
+			DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy*0.1);
+			break;
+		case CURSOR_BLOCK_STROKE:
+			DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
+			break;
+		case CURSOR_BLOCK_FILL:
+			DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
+			break;
+		case CURSOR_BLOCK_INVERT:
+			DPScompositerect(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy,
+				NSCompositeHighlight);
+			break;
+		}
+		draw_cursor=NO;
 	}
 
 	NSDebugLLog(@"draw",@"total_draw=%i",total_draw);
@@ -811,6 +818,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		ADD_DIRTY(current_x,current_y,1,1);
 		SCREEN(current_x,current_y).attr|=0x80;
 		ADD_DIRTY(cursor_x,cursor_y,1,1);
+		draw_cursor=YES;
 	}
 
 	NSDebugLLog(@"term",@"done (%i %i) (%i %i)\n",
