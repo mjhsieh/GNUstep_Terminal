@@ -1213,13 +1213,12 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 			ucs=htonl([s characterAtIndex: i]);
 			inp=&ucs;
 			insize=4;
-			outsize=sizeof(buf)-1;
+			outsize=sizeof(buf);
 			outp=buf;
 			ret=iconv(iconv_input_state,(char **)&inp,&insize,&outp,&outsize);
-			if (outsize!=sizeof(buf)-1)
+			if (outsize!=sizeof(buf))
 			{
-				*outp=0;
-				[ts ts_sendCString: buf  length: outsize];
+				[ts ts_sendCString: buf  length: sizeof(buf)-outsize];
 			}
 			else
 				NSBeep();
