@@ -1266,10 +1266,11 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	forMode: (NSString *)mode
 {
 	char buf[8];
-	int size;
+	int size,total;
 //	BOOL needs_update=NO;
 
 //	printf("got event %i %i\n",(int)data,t);
+	total=0;
 while (1)
 {
 {
@@ -1289,6 +1290,10 @@ while (1)
 	[self processChar: buf[0]];
 
 	[self setNeedsDisplay: YES];
+
+	total++;
+	if (total>=4096)
+		return; /* give other things a chance */
 }
 }
 
@@ -1321,16 +1326,10 @@ while (1)
 	if (copy_sx>nsx)
 		copy_sx=nsx;
 
-	NSLog(@"copy %i+%i %i  (%ix%i)-(%ix%i)\n",start,num,copy_sx,sx,sy,nsx,nsy);
+//	NSLog(@"copy %i+%i %i  (%ix%i)-(%ix%i)\n",start,num,copy_sx,sx,sy,nsx,nsy);
 
 	for (iy=start;iy<start+num;iy++)
 	{
-#define CHECK(x,y,z) if ((unsigned int)(x)<(unsigned int)(y) || (unsigned int)(x)>=((unsigned int)(y)+(unsigned int)(z))) \
-	NSLog(@"broken iy=%i  x=%08x y=%08x y+z=%08x",iy,x,y,(unsigned int)(y)+(unsigned int)(z));
-
-		CHECK(&nscreen[nsx*(iy-start)],nscreen,nsx*nsy*sizeof(screen_char_t))
-		CHECK(&nscreen[nsx*(iy-start)+copy_sx],nscreen,nsx*nsy*sizeof(screen_char_t))
-
 		memcpy(&nscreen[nsx*(iy-start)],&screen[sx*iy],copy_sx*sizeof(screen_char_t));
 	}
 
