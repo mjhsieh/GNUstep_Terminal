@@ -1554,8 +1554,6 @@ Handle master_fd
 	{
 		NSRect dr;
 
-		[self _updateScroller];
-
 //		NSLog(@"dirty=(%i %i)-(%i %i)\n",dirty.x0,dirty.y0,dirty.x1,dirty.y1);
 		dr.origin.x=dirty.x0*fx;
 		dr.origin.y=dirty.y0*fy;
@@ -1573,6 +1571,8 @@ Handle master_fd
 			draw_all=YES;
 			[self setNeedsDisplay: YES];
 		}
+
+		[self _updateScroller];
 	}
 }
 
