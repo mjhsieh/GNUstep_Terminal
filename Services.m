@@ -281,7 +281,10 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 				forKey: @"NSKeyEquivalent"];
 		}
 
-		i=[[info objectForKey: AcceptTypes] intValue];
+		if ([info objectForKey: AcceptTypes])
+			i=[[info objectForKey: AcceptTypes] intValue];
+		else
+			i=ACCEPT_STRING;
 		if (i==(ACCEPT_STRING|ACCEPT_FILENAMES))
 			types=[NSArray arrayWithObjects: NSStringPboardType,NSFilenamesPboardType,nil];
 		else if (i==ACCEPT_FILENAMES)
