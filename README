@@ -1,0 +1,32 @@
+Terminal.app - copyright (c) 2002 Alexander Malmberg
+
+a terminal emulator for GNUstep
+
+
+Terminal emulation
+------------------
+
+The terminal emulation code is based on Linux's console code, and nearly
+all parts of it are handled. Thus, the TERM environment variable is set
+to 'linux'. Additionally, 'vt100', 'vt220', 'xterm', and others similar
+to these should mostly work. To distinguish Terminal.app from a 'real'
+linux console, the environment variable TERM_PROGRAM is set to
+'GNUstep_Terminal'.
+
+
+The xterm extensions for setting the window's title are also supported.
+You set the title using:
+
+'\033]'+0, 1, or 2+';'+the title+'\007'
+
+1 sets the miniwindow title, 2 sets the window title, and 0 sets both.
+
+Example (from Jeff Teunissen):
+ export PROMPT_COMMAND='echo -ne "\033]2;Terminal - ${HOSTNAME}:${PWD}\007"'
+
+
+[The terminal emulation code is fairly modular. If you want to write a
+terminal emulation class for some other terminal, contact me and I'll
+do the remaining cleanups necessary to load terminal emulation classes
+from bundles.]
+
