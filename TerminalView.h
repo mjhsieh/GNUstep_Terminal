@@ -63,6 +63,8 @@ struct selection_range
 	/* TODO: collect scrolls and do the compositing in drawRect */
 	int num_scrolls;
 
+	int pending_scroll;
+
 	BOOL ignore_resize;
 }
 

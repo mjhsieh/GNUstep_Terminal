@@ -74,6 +74,55 @@ NSString
 
 #define SCREEN(x,y) (screen[(y)*sx+(x)])
 
+
+-(void) _handlePendingScroll: (BOOL)lockFocus
+{
+	float x0,y0,w,h,dx,dy;
+
+	if (!pending_scroll)
+		return;
+
+	if (pending_scroll>=sy || pending_scroll<=-sy)
+	{
+		pending_scroll=0;
+		return;
+	}
+
+	NSDebugLLog(@"draw",@"_handlePendingScroll %i %i",pending_scroll,lockFocus);
+
+	dx=x0=0;
+	w=fx*sx;
+
+	if (pending_scroll>0)
+	{
+		y0=0;
+		h=(sy-pending_scroll)*fy;
+		dy=pending_scroll*fy;
+		y0=sy*fy-y0-h;
+		dy=sy*fy-dy-h;
+	}
+	else
+	{
+		pending_scroll=-pending_scroll;
+
+		y0=pending_scroll*fy;
+		h=(sy-pending_scroll)*fy;
+		dy=0;
+		y0=sy*fy-y0-h;
+		dy=sy*fy-dy-h;
+	}
+
+	if (lockFocus)
+		[self lockFocus];
+	DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
+	if (lockFocus)
+		[self unlockFocusNeedsFlush: NO];
+
+	num_scrolls++;
+	pending_scroll=0;
+}
+
+
 -(void) _setAttrs: (screen_char_t)sch : (float)x0 : (float)y0 : (NSGraphicsContext *)gc
 {
 	int fg,bg;
@@ -177,6 +226,10 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	NSDebugLLog(@"draw",@"drawRect: (%g %g)+(%g %g) %i\n",
 		r.origin.x,r.origin.y,r.size.width,r.size.height,
 		draw_all);
+
+	if (pending_scroll)
+		[self _handlePendingScroll: NO];
+
 	x0=floor(r.origin.x/fx);
 	x1=ceil((r.origin.x+r.size.width)/fx);
 	if (x0<0) x0=0;
@@ -809,7 +862,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		[tp processByte: buf[0]];
 
 		total++;
-		if (total>=8192 || num_scrolls>100)
+		if (total>=8192 || (num_scrolls+abs(pending_scroll))>10)
 			break; /* give other things a chance */
 	}
 
@@ -1249,19 +1302,30 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	memmove(d, s, (b-t-nr) * sx * sizeof(screen_char_t));
 	if (!current_scroll)
 	{
-		float x0,y0,w,h,dx,dy;
-		x0=0;
-		w=fx*sx;
-		y0=(t+nr)*fy;
-		h=(b-t-nr)*fy;
-		dx=0;
-		dy=t*fy;
-		y0=sy*fy-y0-h;
-		dy=sy*fy-dy-h;
-		[self lockFocus];
-		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
-		[self unlockFocusNeedsFlush: NO];
-		num_scrolls++;
+		if (t==0 && b==sy)
+		{
+			pending_scroll-=nr;
+		}
+		else
+		{
+			float x0,y0,w,h,dx,dy;
+
+			if (pending_scroll)
+				[self _handlePendingScroll: YES];
+
+			x0=0;
+			w=fx*sx;
+			y0=(t+nr)*fy;
+			h=(b-t-nr)*fy;
+			dx=0;
+			dy=t*fy;
+			y0=sy*fy-y0-h;
+			dy=sy*fy-dy-h;
+			[self lockFocus];
+			DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
+			[self unlockFocusNeedsFlush: NO];
+			num_scrolls++;
+		}
 	}
 	ADD_DIRTY(0,t,sx,b-t); /* TODO */
 }
@@ -1287,19 +1351,30 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	memmove(s + step, s, (b-t-nr)*sx*sizeof(screen_char_t));
 	if (!current_scroll)
 	{
-		float x0,y0,w,h,dx,dy;
-		x0=0;
-		w=fx*sx;
-		y0=(t)*fy;
-		h=(b-t-nr)*fy;
-		dx=0;
-		dy=(t+nr)*fy;
-		y0=sy*fy-y0-h;
-		dy=sy*fy-dy-h;
-		[self lockFocus];
-		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
-		[self unlockFocusNeedsFlush: NO];
-		num_scrolls++;
+		if (t==0 && b==sy)
+		{
+			pending_scroll+=nr;
+		}
+		else
+		{
+			float x0,y0,w,h,dx,dy;
+
+			if (pending_scroll)
+				[self _handlePendingScroll: YES];
+
+			x0=0;
+			w=fx*sx;
+			y0=(t)*fy;
+			h=(b-t-nr)*fy;
+			dx=0;
+			dy=(t+nr)*fy;
+			y0=sy*fy-y0-h;
+			dy=sy*fy-dy-h;
+			[self lockFocus];
+			DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
+			[self unlockFocusNeedsFlush: NO];
+			num_scrolls++;
+		}
 	}
 	ADD_DIRTY(0,t,sx,b-t); /* TODO */
 }
@@ -1335,6 +1410,9 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	if (!current_scroll)
 	{
 		float cx0,y0,w,h,dx,dy;
+
+		if (pending_scroll)
+			[self _handlePendingScroll: YES];
 
 		cx0=x0*fx;
 		w=fx*c;
