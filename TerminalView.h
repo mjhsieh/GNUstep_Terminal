@@ -100,6 +100,10 @@ struct selection_range
 -(void) runProgram: (NSString *)path
 	withArguments: (NSArray *)args
 	initialInput: (NSString *)d;
+-(void) runProgram: (NSString *)path
+	withArguments: (NSArray *)args
+	initialInput: (NSString *)d
+	arg0: (NSString *)arg0;
 @end
 
 #endif

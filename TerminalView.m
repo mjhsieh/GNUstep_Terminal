@@ -1459,55 +1459,10 @@ Handle master_fd
 }
 
 
--(void) runShell
-{
-	struct winsize ws;
-	int ret;
-	NSRunLoop *rl;
-
-	NSDebugLLog(@"pty",@"-runShell");
-
-	[self closeProgram];
-
-	ws.ws_row=sy;
-	ws.ws_col=sx;
-	ret=forkpty(&master_fd,NULL,NULL,&ws);
-	if (ret<0)
-	{
-		NSLog(_(@"Unable to spawn process: %m."));
-		return;
-	}
-
-	if (ret==0)
-	{
-		const char *shell=getenv("SHELL");
-		if (!shell) shell="/bin/sh";
-		putenv("TERM=linux");
-		putenv("TERM_PROGRAM=GNUstep_Terminal");
-		execl(shell,shell,NULL);
-		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
-		exit(1);
-	}
-
-	NSDebugLLog(@"pty",@"forked child %i, fd %i",ret,master_fd);
-
-	rl=[NSRunLoop currentRunLoop];
-	[rl addEvent: (void *)master_fd
-		type: ET_RDESC
-		watcher: self
-		forMode: NSDefaultRunLoopMode];
-
-	[[NSNotificationCenter defaultCenter]
-		postNotificationName: TerminalViewBecameNonIdleNotification
-		object: self];
-
-	ASSIGN(title_window,_(@"Terminal"));
-	ASSIGN(title_miniwindow,_(@"Terminal"));
-}
-
 -(void) runProgram: (NSString *)path
 	withArguments: (NSArray *)args
 	initialInput: (NSString *)d
+	arg0: (NSString *)arg0
 {
 	int ret;
 	struct winsize ws;
@@ -1524,7 +1479,7 @@ Handle master_fd
 	[self closeProgram];
 
 	cpath=[path cString];
-	cargs[0]=cpath;
+	cargs[0]=[arg0 cString];
 	for (i=0;i<[args count];i++)
 	{
 		cargs[i+1]=[[args objectAtIndex: i] cString];
@@ -1587,12 +1542,42 @@ Handle master_fd
 	}
 
 	DESTROY(title_window);
-	title_window=[[NSString stringWithFormat: @"%@ %@",
-		path,[args componentsJoinedByString: @" "]] retain];
+	if (args)
+		title_window=[[NSString stringWithFormat: @"%@ %@",
+			path,[args componentsJoinedByString: @" "]] retain];
+	else
+		title_window=[path copy];
+
 	ASSIGN(title_miniwindow,path);
 	[[NSNotificationCenter defaultCenter]
 		postNotificationName: TerminalViewTitleDidChangeNotification
 		object: self];
+}
+
+-(void) runProgram: (NSString *)path
+	withArguments: (NSArray *)args
+	initialInput: (NSString *)d
+{
+	[self runProgram: path
+		withArguments: args
+		initialInput: d
+		arg0: path];
+}
+
+-(void) runShell
+{
+	NSString *arg0;
+	NSString *path;
+
+	path=[TerminalViewShellPrefs shell];
+	if ([TerminalViewShellPrefs loginShell])
+		arg0=[@"-" stringByAppendingString: path];
+	else
+		arg0=path;
+	[self runProgram: path
+		withArguments: nil
+		initialInput: nil
+		arg0: arg0];
 }
 
 @end
