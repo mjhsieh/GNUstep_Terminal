@@ -642,8 +642,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	int new_scroll;
 	int mult;
 
-	NSLog(@"scrollWheel: %@",e);
-
 	if ([e modifierFlags]&NSShiftKeyMask)
 		mult=1;
 	else if ([e modifierFlags]&NSControlKeyMask)
