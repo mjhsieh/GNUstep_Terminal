@@ -1,177 +1,226 @@
 /***
 Swedish.lproj/Localizable.strings
-updated by make_strings 2002-06-16 18:34:52 +0200
+updated by make_strings 2002-09-19 19:16:42 +0200
 add comments above this one
 ***/
 
 
 /*** Keys found in multiple places ***/
 
-/* File: ServicesParameterWindowController.m:92 */
-/* File: ServicesPrefs.m:663 */
+/* File: ServicesParameterWindowController.m:98 */
+/* File: ServicesPrefs.m:653 */
 "Command line:" = "Kommandorad:";
 
 
 /*** Unmatched/untranslated keys ***/
 
-/* File: TerminalView.m:1493 */
+/* File: TerminalView.m:1707 */
 /* Flag: untranslated */
 "Unable to open pipe for input: %m." = "Unable to open pipe for input: %m.";
 
 
 /*** Strings from PreferencesWindowController.m ***/
-/* File: PreferencesWindowController.m:72 */
+/* File: PreferencesWindowController.m:78 */
 "Apply and save" = "Verkställ och spara";
-/* File: PreferencesWindowController.m:116 */
+/* File: PreferencesWindowController.m:122 */
 "Preferences" = "Inställningar";
-/* File: PreferencesWindowController.m:64 */
+/* File: PreferencesWindowController.m:70 */
 "Revert" = "Återställ";
 
 
 /*** Strings from Services.m ***/
-/* File: Services.m:147 */
+/* File: Services.m:152 */
 "Service aborted by user." = "Tjänsten avbröts av användaren.";
-/* File: Services.m:55 */
+/* File: Services.m:60 */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
 = "Det finns ingen terminaltjänst '%@'.\nDin tjänstlista är troligen gammal.\nKör 'make_services' för att uppdatera den.";
 
 
 /*** Strings from ServicesParameterWindowController.m ***/
-/* File: ServicesParameterWindowController.m:60 */
+/* File: ServicesParameterWindowController.m:66 */
 "Cancel" = "Avbryt";
-/* File: ServicesParameterWindowController.m:68 */
+/* File: ServicesParameterWindowController.m:74 */
 "OK" = "OK";
-/* File: ServicesParameterWindowController.m:112 */
+/* File: ServicesParameterWindowController.m:118 */
 "Parameter for service %@" = "Parameter fär tjänst %@";
 
 
 /*** Strings from ServicesPrefs.m ***/
-/* File: ServicesPrefs.m:579 */
+/* File: ServicesPrefs.m:585 */
 "Accept types" = "Acceptera typer";
-/* File: ServicesPrefs.m:493 */
+/* File: ServicesPrefs.m:499 */
 "Add" = "Lägg till";
-/* File: ServicesPrefs.m:342 */
+/* File: ServicesPrefs.m:348 */
 "Error importing services" = "Fel vid importering av tjänster";
-/* File: ServicesPrefs.m:395 */
+/* File: ServicesPrefs.m:401 */
 "Export services" = "Exportera tjänster";
-/* File: ServicesPrefs.m:517 */
+/* File: ServicesPrefs.m:523 */
 "Export..." = "Exportera...";
-/* File: ServicesPrefs.m:588 */
+/* File: ServicesPrefs.m:594 */
 "Filenames" = "Filnamn";
-/* File: ServicesPrefs.m:543 */
+/* File: ServicesPrefs.m:549 */
 "Ignore output" = "Ignorera utdata";
-/* File: ServicesPrefs.m:248 */
+/* File: ServicesPrefs.m:254 */
 "Import services" = "Importera tjänster";
-/* File: ServicesPrefs.m:509 */
+/* File: ServicesPrefs.m:515 */
 "Import..." = "Importera...";
-/* File: ServicesPrefs.m:553 */
+/* File: ServicesPrefs.m:559 */
 "Input in stdin" = "Indata till stdin";
-/* File: ServicesPrefs.m:554 */
+/* File: ServicesPrefs.m:560 */
 "Input on command line" = "Indata på kommandoraden";
-/* File: ServicesPrefs.m:643 */
+/* File: ServicesPrefs.m:640 */
 "Key:" = "Tangent:";
-/* File: ServicesPrefs.m:623 */
+/* File: ServicesPrefs.m:627 */
 "Name:" = "Namn:";
-/* File: ServicesPrefs.m:552 */
+/* File: ServicesPrefs.m:558 */
 "No input" = "Ingen indata";
-/* File: ServicesPrefs.m:596 */
+/* File: ServicesPrefs.m:602 */
 "Plain text" = "Vanlig text";
-/* File: ServicesPrefs.m:501 */
+/* File: ServicesPrefs.m:507 */
 "Remove" = "Ta bort";
-/* File: ServicesPrefs.m:544 */
+/* File: ServicesPrefs.m:550 */
 "Return output" = "Returnera utdata";
-/* File: ServicesPrefs.m:562 */
+/* File: ServicesPrefs.m:568 */
 "Run in background" = "Kör i bakgrunden";
-/* File: ServicesPrefs.m:564 */
+/* File: ServicesPrefs.m:570 */
 "Run in idle window" = "Kör i ledigt fönster";
-/* File: ServicesPrefs.m:563 */
+/* File: ServicesPrefs.m:569 */
 "Run in new window" = "Kör i nytt fönster";
-/* File: ServicesPrefs.m:462 */
+/* File: ServicesPrefs.m:468 */
 "Terminal services" = "Terminaltjänster";
-/* File: ServicesPrefs.m:467 */
+/* File: ServicesPrefs.m:473 */
 "Terminal\nservices" = "Terminal-\ntjänster";
-/* File: ServicesPrefs.m:343 */
+/* File: ServicesPrefs.m:349 */
 "The file '%@' doesn't contain valid terminal services."
 = "Filen '%@' innehåller inte giltiga terminaltjänster.";
-/* File: ServicesPrefs.m:229 */
+/* File: ServicesPrefs.m:235 */
 "Unnamed service" = "Icke namngiven tjänst";
 
 
+/*** Strings from TerminalParser_LinuxPrefs.m ***/
+/* File: TerminalParser_LinuxPrefs.m:103 */
+"'linux' terminal parser" = "'linux' terminal-emulator";
+/* File: TerminalParser_LinuxPrefs.m:108 */
+"'linux'\nparser" = "'linux'\nemulator";
+/* File: TerminalParser_LinuxPrefs.m:43 */
+"Chinese" = "Kinesiska";
+/* File: TerminalParser_LinuxPrefs.m:44 */
+"Custom, leave unchanged" = "Egen, lämna oförändrad";
+/* File: TerminalParser_LinuxPrefs.m:42 */
+"East Europe, latin2" = "Östra europa, latin2";
+/* File: TerminalParser_LinuxPrefs.m:151 */
+"Input character set:" = "Input-teckenuppsättning:";
+/* File: TerminalParser_LinuxPrefs.m:40 */
+"UTF-8" = "UTF-8";
+/* File: TerminalParser_LinuxPrefs.m:41 */
+"West Europe, latin1" = "Västra europa, latin1";
+
+
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:1505 */
+/* File: TerminalView.m:1719 */
 "Unable to fork: %m." = "Kunde inte starta ny process: %m.";
-/* File: TerminalView.m:1383 */
+/* File: TerminalView.m:1572 */
 "[Process exited]" = "[Processen avslutade]";
 
 
 /*** Strings from TerminalViewPrefs.m ***/
-/* File: TerminalViewPrefs.m:277 */
+/* File: TerminalViewPrefs.m:305 */
 "Bold font:" = "Fett typsnitt:";
-/* File: TerminalViewPrefs.m:248 */
+/* File: TerminalViewPrefs.m:282 */
 "Color:" = "Färg:";
-/* File: TerminalViewPrefs.m:218 */
+/* File: TerminalViewPrefs.m:261 */
 "Cursor" = "Markör";
-/* File: TerminalViewPrefs.m:190 */
-/* File: TerminalViewPrefs.m:185 */
+/* File: TerminalViewPrefs.m:214 */
+/* File: TerminalViewPrefs.m:209 */
 "Display" = "Uppritning";
-/* File: TerminalViewPrefs.m:239 */
+/* File: TerminalViewPrefs.m:275 */
 "Filled block" = "Fyllt block";
-/* File: TerminalViewPrefs.m:240 */
+/* File: TerminalViewPrefs.m:276 */
 "Inverted block" = "Inverterat block";
-/* File: TerminalViewPrefs.m:237 */
+/* File: TerminalViewPrefs.m:582 */
+/* File: TerminalViewPrefs.m:577 */
+"Keyboard" = "Tangentbord";
+/* File: TerminalViewPrefs.m:273 */
 "Line" = "Streck";
-/* File: TerminalViewPrefs.m:311 */
+/* File: TerminalViewPrefs.m:332 */
 "Normal font:" = "Normalt typsnitt:";
-/* File: TerminalViewPrefs.m:329 */
-/* File: TerminalViewPrefs.m:295 */
+/* File: TerminalViewPrefs.m:344 */
+/* File: TerminalViewPrefs.m:317 */
 "Pick font..." = "Välj typsnitt...";
-/* File: TerminalViewPrefs.m:452 */
-/* File: TerminalViewPrefs.m:447 */
+/* File: TerminalViewPrefs.m:239 */
+"Scroll-back length in lines:" = "Scroll-back längd i rader:";
+/* File: TerminalViewPrefs.m:626 */
+"Send a double escape for the escape key.\n\nThis means that the escape key will be\nrecognized faster by many programs, but\nyou can't use it as a substitute for meta."
+= "Skicka dubbel-escape för escape-tangenten.\n\nDetta innebär att escape tangenten\nkommer att kännas igen snabbare av mänga\nprogram, men du kommer inte kunda använda\nden som ersättning för meta.";
+/* File: TerminalViewPrefs.m:462 */
+/* File: TerminalViewPrefs.m:467 */
 "Shell" = "Skal";
-/* File: TerminalViewPrefs.m:487 */
+/* File: TerminalViewPrefs.m:502 */
 "Shell:" = "Skal:";
-/* File: TerminalViewPrefs.m:473 */
+/* File: TerminalViewPrefs.m:490 */
 "Start as login-shell" = "Starta som login-skal";
-/* File: TerminalViewPrefs.m:238 */
+/* File: TerminalViewPrefs.m:274 */
 "Stroked block" = "Ihåligt block";
-/* File: TerminalViewPrefs.m:225 */
+/* File: TerminalViewPrefs.m:266 */
 "Style:" = "Stil:";
+/* File: TerminalViewPrefs.m:609 */
+"Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard."
+= "Behandla kommand-tangenten som meta.\n\nObservera att med denna inställningen\nkommer du inte kunna komma ät menyn\nmed tangentbordet.";
 
 
 /*** Strings from TerminalWindow.m ***/
-/* File: TerminalWindow.m:178 */
-/* File: TerminalWindow.m:174 */
+/* File: TerminalWindow.m:191 */
+/* File: TerminalWindow.m:187 */
 " (idle)" = " (ledig)";
 
 
+/*** Strings from TerminalWindowPrefs.m ***/
+/* File: TerminalWindowPrefs.m:192 */
+"Add top and bottom border" = "Lägg till undre och övre kant";
+/* File: TerminalWindowPrefs.m:143 */
+"Close new windows when idle" = "Stäng inaktiva nya fönster";
+/* File: TerminalWindowPrefs.m:156 */
+"Default size" = "Standardstorlek";
+/* File: TerminalWindowPrefs.m:144 */
+"Don't close new windows" = "Stäng inte nya fönster";
+/* File: TerminalWindowPrefs.m:169 */
+"Height:" = "Höjd:";
+/* File: TerminalWindowPrefs.m:112 */
+"Terminal Window" = "Terminal Fönster";
+/* File: TerminalWindowPrefs.m:117 */
+"Terminal\nWindow" = "Terminal\nFönster";
+/* File: TerminalWindowPrefs.m:160 */
+"Width:" = "Bredd:";
+
+
 /*** Strings from main.m ***/
-/* File: main.m:127 */
+/* File: main.m:157 */
 "Benchmark" = "Benchmark";
-/* File: main.m:156 */
+/* File: main.m:186 */
 "Close" = "Stäng";
-/* File: main.m:145 */
+/* File: main.m:175 */
 "Copy" = "Kopiera";
-/* File: main.m:142 */
-"Cut" = "Klipp";
-/* File: main.m:151 */
-"Edit" = "Redigera";
-/* File: main.m:168 */
-"Hide" = "Göm";
-/* File: main.m:129 */
-"Info" = "Info";
-/* File: main.m:123 */
-"Info..." = "Info...";
-/* File: main.m:134 */
-"New window" = "Nytt fönster";
-/* File: main.m:148 */
-"Paste" = "Klistra";
-/* File: main.m:125 */
-"Preferences..." = "Inställningar...";
 /* File: main.m:172 */
-"Quit" = "Avsluta";
-/* File: main.m:164 */
-"Services" = "Tjänster";
-/* File: main.m:137 */
-"Terminal" = "Terminal";
+"Cut" = "Klipp";
+/* File: main.m:181 */
+"Edit" = "Redigera";
+/* File: main.m:198 */
+"Hide" = "Göm";
 /* File: main.m:159 */
+"Info" = "Info";
+/* File: main.m:153 */
+"Info..." = "Info...";
+/* File: main.m:164 */
+"New window" = "Nytt fönster";
+/* File: main.m:178 */
+"Paste" = "Klistra";
+/* File: main.m:155 */
+"Preferences..." = "Inställningar...";
+/* File: main.m:202 */
+"Quit" = "Avsluta";
+/* File: main.m:194 */
+"Services" = "Tjänster";
+/* File: main.m:167 */
+"Terminal" = "Terminal";
+/* File: main.m:189 */
 "Windows" = "Fönster";

@@ -1,172 +1,221 @@
 /***
 English.lproj/Localizable.strings
-updated by make_strings 2002-06-16 18:34:52 +0200
+updated by make_strings 2002-09-19 19:16:42 +0200
 add comments above this one
 ***/
 
 
 /*** Keys found in multiple places ***/
 
-/* File: ServicesParameterWindowController.m:92 */
-/* File: ServicesPrefs.m:663 */
+/* File: ServicesParameterWindowController.m:98 */
+/* File: ServicesPrefs.m:653 */
 "Command line:" = "Command line:";
 
 
 /*** Strings from PreferencesWindowController.m ***/
-/* File: PreferencesWindowController.m:72 */
+/* File: PreferencesWindowController.m:78 */
 "Apply and save" = "Apply and save";
-/* File: PreferencesWindowController.m:116 */
+/* File: PreferencesWindowController.m:122 */
 "Preferences" = "Preferences";
-/* File: PreferencesWindowController.m:64 */
+/* File: PreferencesWindowController.m:70 */
 "Revert" = "Revert";
 
 
 /*** Strings from Services.m ***/
-/* File: Services.m:147 */
+/* File: Services.m:152 */
 "Service aborted by user." = "Service aborted by user.";
-/* File: Services.m:55 */
+/* File: Services.m:60 */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
 = "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it.";
 
 
 /*** Strings from ServicesParameterWindowController.m ***/
-/* File: ServicesParameterWindowController.m:60 */
+/* File: ServicesParameterWindowController.m:66 */
 "Cancel" = "Cancel";
-/* File: ServicesParameterWindowController.m:68 */
+/* File: ServicesParameterWindowController.m:74 */
 "OK" = "OK";
-/* File: ServicesParameterWindowController.m:112 */
+/* File: ServicesParameterWindowController.m:118 */
 "Parameter for service %@" = "Parameter for service %@";
 
 
 /*** Strings from ServicesPrefs.m ***/
-/* File: ServicesPrefs.m:579 */
+/* File: ServicesPrefs.m:585 */
 "Accept types" = "Accept types";
-/* File: ServicesPrefs.m:493 */
+/* File: ServicesPrefs.m:499 */
 "Add" = "Add";
-/* File: ServicesPrefs.m:342 */
+/* File: ServicesPrefs.m:348 */
 "Error importing services" = "Error importing services";
-/* File: ServicesPrefs.m:395 */
+/* File: ServicesPrefs.m:401 */
 "Export services" = "Export services";
-/* File: ServicesPrefs.m:517 */
+/* File: ServicesPrefs.m:523 */
 "Export..." = "Export...";
-/* File: ServicesPrefs.m:588 */
+/* File: ServicesPrefs.m:594 */
 "Filenames" = "Filenames";
-/* File: ServicesPrefs.m:543 */
+/* File: ServicesPrefs.m:549 */
 "Ignore output" = "Ignore output";
-/* File: ServicesPrefs.m:248 */
+/* File: ServicesPrefs.m:254 */
 "Import services" = "Import services";
-/* File: ServicesPrefs.m:509 */
+/* File: ServicesPrefs.m:515 */
 "Import..." = "Import...";
-/* File: ServicesPrefs.m:553 */
+/* File: ServicesPrefs.m:559 */
 "Input in stdin" = "Input in stdin";
-/* File: ServicesPrefs.m:554 */
+/* File: ServicesPrefs.m:560 */
 "Input on command line" = "Input on command line";
-/* File: ServicesPrefs.m:643 */
+/* File: ServicesPrefs.m:640 */
 "Key:" = "Key:";
-/* File: ServicesPrefs.m:623 */
+/* File: ServicesPrefs.m:627 */
 "Name:" = "Name:";
-/* File: ServicesPrefs.m:552 */
+/* File: ServicesPrefs.m:558 */
 "No input" = "No input";
-/* File: ServicesPrefs.m:596 */
+/* File: ServicesPrefs.m:602 */
 "Plain text" = "Plain text";
-/* File: ServicesPrefs.m:501 */
+/* File: ServicesPrefs.m:507 */
 "Remove" = "Remove";
-/* File: ServicesPrefs.m:544 */
+/* File: ServicesPrefs.m:550 */
 "Return output" = "Return output";
-/* File: ServicesPrefs.m:562 */
+/* File: ServicesPrefs.m:568 */
 "Run in background" = "Run in background";
-/* File: ServicesPrefs.m:564 */
+/* File: ServicesPrefs.m:570 */
 "Run in idle window" = "Run in idle window";
-/* File: ServicesPrefs.m:563 */
+/* File: ServicesPrefs.m:569 */
 "Run in new window" = "Run in new window";
-/* File: ServicesPrefs.m:462 */
+/* File: ServicesPrefs.m:468 */
 "Terminal services" = "Terminal services";
-/* File: ServicesPrefs.m:467 */
+/* File: ServicesPrefs.m:473 */
 "Terminal\nservices" = "Terminal\nservices";
-/* File: ServicesPrefs.m:343 */
+/* File: ServicesPrefs.m:349 */
 "The file '%@' doesn't contain valid terminal services."
 = "The file '%@' doesn't contain valid terminal services.";
-/* File: ServicesPrefs.m:229 */
+/* File: ServicesPrefs.m:235 */
 "Unnamed service" = "Unnamed service";
 
 
+/*** Strings from TerminalParser_LinuxPrefs.m ***/
+/* File: TerminalParser_LinuxPrefs.m:103 */
+"'linux' terminal parser" = "'linux' terminal parser";
+/* File: TerminalParser_LinuxPrefs.m:108 */
+"'linux'\nparser" = "'linux'\nparser";
+/* File: TerminalParser_LinuxPrefs.m:43 */
+"Chinese" = "Chinese";
+/* File: TerminalParser_LinuxPrefs.m:44 */
+"Custom, leave unchanged" = "Custom, leave unchanged";
+/* File: TerminalParser_LinuxPrefs.m:42 */
+"East Europe, latin2" = "East Europe, latin2";
+/* File: TerminalParser_LinuxPrefs.m:151 */
+"Input character set:" = "Input character set:";
+/* File: TerminalParser_LinuxPrefs.m:40 */
+"UTF-8" = "UTF-8";
+/* File: TerminalParser_LinuxPrefs.m:41 */
+"West Europe, latin1" = "West Europe, latin1";
+
+
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:1505 */
+/* File: TerminalView.m:1719 */
 "Unable to fork: %m." = "Unable to fork: %m.";
-/* File: TerminalView.m:1493 */
+/* File: TerminalView.m:1707 */
 "Unable to open pipe for input: %m." = "Unable to open pipe for input: %m.";
-/* File: TerminalView.m:1383 */
+/* File: TerminalView.m:1572 */
 "[Process exited]" = "[Process exited]";
 
 
 /*** Strings from TerminalViewPrefs.m ***/
-/* File: TerminalViewPrefs.m:277 */
+/* File: TerminalViewPrefs.m:305 */
 "Bold font:" = "Bold font:";
-/* File: TerminalViewPrefs.m:248 */
+/* File: TerminalViewPrefs.m:282 */
 "Color:" = "Color:";
-/* File: TerminalViewPrefs.m:218 */
+/* File: TerminalViewPrefs.m:261 */
 "Cursor" = "Cursor";
-/* File: TerminalViewPrefs.m:190 */
-/* File: TerminalViewPrefs.m:185 */
+/* File: TerminalViewPrefs.m:214 */
+/* File: TerminalViewPrefs.m:209 */
 "Display" = "Display";
-/* File: TerminalViewPrefs.m:239 */
+/* File: TerminalViewPrefs.m:275 */
 "Filled block" = "Filled block";
-/* File: TerminalViewPrefs.m:240 */
+/* File: TerminalViewPrefs.m:276 */
 "Inverted block" = "Inverted block";
-/* File: TerminalViewPrefs.m:237 */
+/* File: TerminalViewPrefs.m:582 */
+/* File: TerminalViewPrefs.m:577 */
+"Keyboard" = "Keyboard";
+/* File: TerminalViewPrefs.m:273 */
 "Line" = "Line";
-/* File: TerminalViewPrefs.m:311 */
+/* File: TerminalViewPrefs.m:332 */
 "Normal font:" = "Normal font:";
-/* File: TerminalViewPrefs.m:329 */
-/* File: TerminalViewPrefs.m:295 */
+/* File: TerminalViewPrefs.m:344 */
+/* File: TerminalViewPrefs.m:317 */
 "Pick font..." = "Pick font...";
-/* File: TerminalViewPrefs.m:452 */
-/* File: TerminalViewPrefs.m:447 */
+/* File: TerminalViewPrefs.m:239 */
+"Scroll-back length in lines:" = "Scroll-back length in lines:";
+/* File: TerminalViewPrefs.m:626 */
+"Send a double escape for the escape key.\n\nThis means that the escape key will be\nrecognized faster by many programs, but\nyou can't use it as a substitute for meta."
+= "Send a double escape for the escape key.\n\nThis means that the escape key will be\nrecognized faster by many programs, but\nyou can't use it as a substitute for meta.";
+/* File: TerminalViewPrefs.m:467 */
+/* File: TerminalViewPrefs.m:462 */
 "Shell" = "Shell";
-/* File: TerminalViewPrefs.m:487 */
+/* File: TerminalViewPrefs.m:502 */
 "Shell:" = "Shell:";
-/* File: TerminalViewPrefs.m:473 */
+/* File: TerminalViewPrefs.m:490 */
 "Start as login-shell" = "Start as login-shell";
-/* File: TerminalViewPrefs.m:238 */
+/* File: TerminalViewPrefs.m:274 */
 "Stroked block" = "Stroked block";
-/* File: TerminalViewPrefs.m:225 */
+/* File: TerminalViewPrefs.m:266 */
 "Style:" = "Style:";
+/* File: TerminalViewPrefs.m:609 */
+"Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard."
+= "Treat the command key as meta.\n\nNote that with this enabled, you won't be\nable to access menu entries with the\nkeyboard.";
 
 
 /*** Strings from TerminalWindow.m ***/
-/* File: TerminalWindow.m:178 */
-/* File: TerminalWindow.m:174 */
+/* File: TerminalWindow.m:191 */
+/* File: TerminalWindow.m:187 */
 " (idle)" = " (idle)";
 
 
+/*** Strings from TerminalWindowPrefs.m ***/
+/* File: TerminalWindowPrefs.m:192 */
+"Add top and bottom border" = "Add top and bottom border";
+/* File: TerminalWindowPrefs.m:143 */
+"Close new windows when idle" = "Close new windows when idle";
+/* File: TerminalWindowPrefs.m:156 */
+"Default size" = "Default size";
+/* File: TerminalWindowPrefs.m:144 */
+"Don't close new windows" = "Don't close new windows";
+/* File: TerminalWindowPrefs.m:169 */
+"Height:" = "Height:";
+/* File: TerminalWindowPrefs.m:112 */
+"Terminal Window" = "Terminal Window";
+/* File: TerminalWindowPrefs.m:117 */
+"Terminal\nWindow" = "Terminal\nWindow";
+/* File: TerminalWindowPrefs.m:160 */
+"Width:" = "Width:";
+
+
 /*** Strings from main.m ***/
-/* File: main.m:127 */
+/* File: main.m:157 */
 "Benchmark" = "Benchmark";
-/* File: main.m:156 */
+/* File: main.m:186 */
 "Close" = "Close";
-/* File: main.m:145 */
+/* File: main.m:175 */
 "Copy" = "Copy";
-/* File: main.m:142 */
-"Cut" = "Cut";
-/* File: main.m:151 */
-"Edit" = "Edit";
-/* File: main.m:168 */
-"Hide" = "Hide";
-/* File: main.m:129 */
-"Info" = "Info";
-/* File: main.m:123 */
-"Info..." = "Info...";
-/* File: main.m:134 */
-"New window" = "New window";
-/* File: main.m:148 */
-"Paste" = "Paste";
-/* File: main.m:125 */
-"Preferences..." = "Preferences...";
 /* File: main.m:172 */
-"Quit" = "Quit";
-/* File: main.m:164 */
-"Services" = "Services";
-/* File: main.m:137 */
-"Terminal" = "Terminal";
+"Cut" = "Cut";
+/* File: main.m:181 */
+"Edit" = "Edit";
+/* File: main.m:198 */
+"Hide" = "Hide";
 /* File: main.m:159 */
+"Info" = "Info";
+/* File: main.m:153 */
+"Info..." = "Info...";
+/* File: main.m:164 */
+"New window" = "New window";
+/* File: main.m:178 */
+"Paste" = "Paste";
+/* File: main.m:155 */
+"Preferences..." = "Preferences...";
+/* File: main.m:202 */
+"Quit" = "Quit";
+/* File: main.m:194 */
+"Services" = "Services";
+/* File: main.m:167 */
+"Terminal" = "Terminal";
+/* File: main.m:189 */
 "Windows" = "Windows";
