@@ -41,8 +41,8 @@ static void get_zombies(void)
 	GSHbox *hb;
 	float fx,fy;
 	int scroller_width;
-	NSRect	contentRect, windowRect;
-	NSSize	contentSize, minSize;
+	NSRect contentRect,windowRect;
+	NSSize contentSize,minSize;
 
 	font=[TerminalView terminalFont];
 	fx=[font boundingRectForFont].size.width;
@@ -57,7 +57,8 @@ static void get_zombies(void)
 	// add the borders to the size
 	contentSize.width += 8;
 	minSize.width += 8;
-	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"]) {
+	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"])
+	{
 		contentSize.height += 8;
 		minSize.height += 8;
 	}
