@@ -1229,11 +1229,25 @@ Handle master_fd
 		size=read(master_fd,buf,1);
 		if (size<=0)
 		{
+			NSString *msg;
+			int i,c;
+			unichar ch;
+
 //			get_zombies();
 			[[NSNotificationCenter defaultCenter]
 				postNotificationName: TerminalViewBecameIdleNotification
 				object: self];
 			[self closeProgram];
+
+			msg=_(@"[Process exited]\n");
+			c=[msg length];
+			for (i=0;i<c;i++)
+			{
+				ch=[msg characterAtIndex: i];
+				if (ch<256)
+					[tp processByte: ch];
+			}
+
 			break;
 		}
 //		printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
