@@ -275,6 +275,8 @@ general
 
 	NSDebugLLog(@"Application",@"openFile: '%@'",filename);
 
+	[NSApp activateIgnoringOtherApps: YES];
+
 	twc=[TerminalWindowController newTerminalWindow];
 	[[twc terminalView] runProgram: filename
 		withArguments: nil
