@@ -1,5 +1,9 @@
+/*
+German translation by Chris B. Vetter
+*/
+
 /***
-Swedish.lproj/Localizable.strings
+German.lproj/Localizable.strings
 updated by make_strings 2002-06-07 00:47:44 +0200
 add comments above this one
 ***/
@@ -7,34 +11,34 @@ add comments above this one
 
 /*** Strings from TerminalView.m ***/
 /* File: TerminalView.m:817 */
-"Unable to spawn process: %m." = "Kunde inte starta process: %m.";
+"Unable to spawn process: %m." = "Unable to spawn process: %m.";
 
 
 /*** Strings from main.m ***/
 /* File: main.m:210 */
-"Close" = "Stäng";
+"Close" = "Schließen";
 /* File: main.m:196 */
-"Copy" = "Kopiera";
+"Copy" = "Kopieren";
 /* File: main.m:199 */
-"Cut" = "Klipp";
+"Cut" = "Ausschneiden";
 /* File: main.m:205 */
-"Edit" = "Redigera";
+"Edit" = "Bearbeiten";
 /* File: main.m:222 */
-"Hide" = "Göm";
+"Hide" = "Ausblenden";
 /* File: main.m:183 */
 /* File: main.m:181 */
 "Info" = "Info";
 /* File: main.m:188 */
-"New window" = "Nytt fönster";
+"New window" = "Neues Fenster";
 /* File: main.m:202 */
-"Paste" = "Klistra";
+"Paste" = "Einfügen";
 /* File: main.m:179 */
-"Preferences..." = "Inställningar...";
+"Preferences..." = "Grundeinstellungen...";
 /* File: main.m:226 */
-"Quit" = "Avsluta";
+"Quit" = "Beenden";
 /* File: main.m:218 */
-"Services" = "Tjänster";
+"Services" = "Dienste";
 /* File: main.m:191 */
 "Terminal" = "Terminal";
 /* File: main.m:213 */
-"Windows" = "Fönster";
+"Windows" = "Fenster";
