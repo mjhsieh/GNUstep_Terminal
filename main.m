@@ -19,6 +19,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSBundle.h>
+#include <Foundation/NSNotification.h>
 #include <gnustep/base/Unicode.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSView.h>
@@ -53,6 +54,9 @@ typedef struct
 	unsigned char color;
 	unsigned char attr;
 } screen_char_t;
+
+
+static NSString *TerminalViewEndOfInput=@"TerminalViewEndOfInput";
 
 @interface TerminalView : NSView <RunLoopEvents>
 {
@@ -1361,7 +1365,14 @@ while (1)
 }
 
 	size=read(master_fd,buf,1);
-	if (size<=0) return;
+	if (size==0) return;
+	if (size<0)
+	{
+		[[NSNotificationCenter defaultCenter]
+			postNotificationName: TerminalViewEndOfInput
+			object: self];
+		return;
+	}
 //	printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
 
 	[self processChar: buf[0]];
@@ -1556,7 +1567,20 @@ while (1)
 
 	[win release];
 
+	[[NSNotificationCenter defaultCenter]
+		addObserver: self
+		selector: @selector(close)
+		name: TerminalViewEndOfInput
+		object: tv];
+
 	return self;
+}
+
+-(void) dealloc
+{
+	[[NSNotificationCenter defaultCenter]
+		removeObserver: self];
+	[super dealloc];
 }
 
 -(void) windowWillClose: (NSNotification *)n
