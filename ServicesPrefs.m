@@ -161,8 +161,6 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		i=[[d objectForKey: Type] intValue];
 		if (i<0 || i>2) i=0;
 		[pb_type selectItemAtIndex: i];
-		if (i!=0)
-			[pb_output setEnabled: NO];
 
 		i=[[d objectForKey: Input] intValue];
 		if (i<0 || i>2) i=0;
