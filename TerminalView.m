@@ -67,6 +67,7 @@ NSString
 
 
 @interface TerminalView (scrolling)
+-(void) _updateScroller;
 -(void) _scrollTo: (int)new_scroll  update: (BOOL)update;
 -(void) setScroller: (NSScroller *)sc;
 @end
@@ -882,6 +883,20 @@ Scrolling
 
 @implementation TerminalView (scrolling)
 
+-(void) _updateScroller
+{
+	if (sb_length)
+	{
+		[scroller setEnabled: YES];
+		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+			knobProportion: sy/(float)(sy+sb_length)];
+	}
+	else
+	{
+		[scroller setEnabled: NO];
+	}
+}
+
 -(void) _scrollTo: (int)new_scroll  update: (BOOL)update
 {
 	if (new_scroll>0)
@@ -895,11 +910,7 @@ Scrolling
 
 	if (update)
 	{
-		if (sb_length)
-			[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-				knobProportion: sy/(float)(sy+sb_length)];
-		else
-			[scroller setFloatValue: 1.0 knobProportion: 1.0];
+		[self _updateScroller];
 	}
 
 	draw_all=YES;
@@ -954,11 +965,7 @@ Scrolling
 {
 	[scroller setTarget: nil];
 	ASSIGN(scroller,sc);
-	if (sb_length)
-		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-			knobProportion: sy/(float)(sy+sb_length)];
-	else
-		[scroller setFloatValue: 1.0 knobProportion: 1.0];
+	[self _updateScroller];
 	[scroller setTarget: self];
 	[scroller setAction: @selector(_updateScroll:)];
 }
@@ -1547,11 +1554,7 @@ Handle master_fd
 	{
 		NSRect dr;
 
-		if (sb_length)
-			[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-				knobProportion: sy/(float)(sy+sb_length)];
-		else
-			[scroller setFloatValue: 1.0 knobProportion: 1.0];
+		[self _updateScroller];
 
 //		NSLog(@"dirty=(%i %i)-(%i %i)\n",dirty.x0,dirty.y0,dirty.x1,dirty.y1);
 		dr.origin.x=dirty.x0*fx;
@@ -1881,11 +1884,7 @@ improve? */
 	if (cursor_x>sx) cursor_x=sx-1;
 	if (cursor_y>sy) cursor_y=sy-1;
 
-	if (sb_length)
-		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-			knobProportion: sy/(float)(sy+sb_length)];
-	else
-		[scroller setFloatValue: 1.0 knobProportion: 1.0];
+	[self _updateScroller];
 
 	[tp setTerminalScreenWidth: sx height: sy];
 
