@@ -1175,6 +1175,11 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	if (y<0 || y>=sy) return;
 	if (x0<0 || x0>=sx) return;
 
+	if (current_y==y)
+	{
+		SCREEN(current_x,current_y).attr|=0x80; /* TODO? */
+	}
+
 	s=&SCREEN(x0,y);
 	x1=x0+delta;
 	c=sx-x0;
