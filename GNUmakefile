@@ -12,7 +12,7 @@ APP_NAME = Terminal
 PACKAGE_NAME = Terminal
 CVS_MODULE_NAME = terminal
 CVS_OPTIONS = -d alexm@subversions.gnu.org:/cvsroot/terminal
-VERSION = 0.9.3
+VERSION = 0.9.4
 
 ADDITIONAL_OBJCFLAGS += -Wall -O2 -D$(subst -,_,$(GNUSTEP_HOST_OS))
 
