@@ -1308,12 +1308,21 @@ Selection, copy/paste/services
 	types: (NSArray *)t
 {
 	int i;
+	NSString *s;
+
+	s=[self _selectionAsString];
+	if (!s)
+	{
+		NSBeep();
+		return NO;
+	}
+
 	[pb declareTypes: t  owner: self];
 	for (i=0;i<[t count];i++)
 	{
 		if ([[t objectAtIndex: i] isEqual: NSStringPboardType])
 		{
-			[pb setString: [self _selectionAsString]
+			[pb setString: s
 				forType: NSStringPboardType];
 			return YES;
 		}
@@ -1481,10 +1490,8 @@ Selection, copy/paste/services
 
 	if (selection.length)
 	{
-		NSString *str=[self _selectionAsString];
-		if (str && [str length])
-			[self writeSelectionToPasteboard: [NSPasteboard pasteboardWithName: @"Selection"]
-				types: [NSArray arrayWithObject: NSStringPboardType]];
+		[self writeSelectionToPasteboard: [NSPasteboard pasteboardWithName: @"Selection"]
+			types: [NSArray arrayWithObject: NSStringPboardType]];
 	}
 }
 
