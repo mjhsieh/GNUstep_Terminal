@@ -203,7 +203,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 			total_draw++;
 			[self _setAttrs: SCREEN(ix,iy) : ix*fx:(sy-1-iy)*fy : cur];
 
-			if (SCREEN(ix,iy).ch!=0 && SCREEN(ix,iy).ch!=32)
+			if (SCREEN(ix,iy).ch!=0)
 			{
 				dlen=sizeof(buf)-1;
 				GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
@@ -380,37 +380,37 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	current_x=cursor_x;
 	current_y=cursor_y;
 
-while (1)
-{
-{
-	fd_set s;
-	struct timeval tv;
-	FD_ZERO(&s);
-	FD_SET(master_fd,&s);
-	tv.tv_sec=0;
-	tv.tv_usec=0;
-	if (!select(master_fd+1,&s,NULL,NULL,&tv)) break;
-}
-
-	size=read(master_fd,buf,1);
-	if (size==0) break;
-	if (size<0)
+	while (1)
 	{
-//		get_zombies();
-		[[NSNotificationCenter defaultCenter]
-			postNotificationName: TerminalViewEndOfInputNotification
-			object: self];
-		break;
+	{
+		fd_set s;
+		struct timeval tv;
+		FD_ZERO(&s);
+		FD_SET(master_fd,&s);
+		tv.tv_sec=0;
+		tv.tv_usec=0;
+		if (!select(master_fd+1,&s,NULL,NULL,&tv)) break;
 	}
-//	printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
+
+		size=read(master_fd,buf,1);
+		if (size==0) break;
+		if (size<0)
+		{
+//			get_zombies();
+			[[NSNotificationCenter defaultCenter]
+				postNotificationName: TerminalViewEndOfInputNotification
+				object: self];
+			break;
+		}
+//		printf("got %i bytes, %02x '%c'\n",size,buf[0],buf[0]);
 
 
-	[tp processByte: buf[0]];
+		[tp processByte: buf[0]];
 
-	total++;
-	if (total>=8192)
-		break; /* give other things a chance */
-}
+		total++;
+		if (total>=8192)
+			break; /* give other things a chance */
+	}
 
 	if (cursor_x!=current_x || cursor_y!=current_y)
 	{
@@ -648,6 +648,8 @@ while (1)
 	}
 	s=&SCREEN(x,y);
 	ch.attr|=0x80;
+	if (ch.ch==' ')
+		ch.ch=0;
 	for (i=0;i<c;i++)
 		*s++=ch;
 	ADD_DIRTY(x,y,c,1);
@@ -670,6 +672,8 @@ while (1)
 	}
 	s=&SCREEN(ofs,0);
 	ch.attr|=0x80;
+	if (ch.ch==' ')
+		ch.ch=0;
 	for (i=0;i<c;i++)
 		*s++=ch;
 	ADD_DIRTY(0,0,sx,sy); /* TODO */
@@ -707,7 +711,7 @@ while (1)
 		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
 		[self unlockFocus];
 	}
-	ADD_DIRTY(0,0,sx,sy);
+	ADD_DIRTY(0,0,sx,sy); /* TODO */
 }
 
 -(void) ts_scrollDown: (int)t:(int)b  rows: (int)nr
@@ -743,7 +747,7 @@ while (1)
 		DPScomposite(GSCurrentContext(),x0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
 		[self unlockFocus];
 	}
-	ADD_DIRTY(0,0,sx,sy);
+	ADD_DIRTY(0,0,sx,sy); /* TODO */
 }
 
 -(void) ts_shiftRow: (int)y  at: (int)x0  delta: (int)delta
@@ -769,14 +773,30 @@ while (1)
 		c=sx-x1;
 	d=&SCREEN(x1,y);
 	memmove(d,s,sizeof(screen_char_t)*c);
-	draw_all=YES;
-	ADD_DIRTY(0,0,sx,sy);
-	/* TODO!! */
+	{
+		float cx0,y0,w,h,dx,dy;
+
+		cx0=x0*fx;
+		w=fx*c;
+		dx=x1*fx;
+
+		y0=y*fy;
+		h=fy;
+		dy=y0;
+
+		y0=sy*fy-y0-h;
+		dy=sy*fy-dy-h;
+		[self lockFocus];
+		DPScomposite(GSCurrentContext(),cx0,y0,w,h,[self gState],dx,dy,NSCompositeCopy);
+		[self unlockFocus];
+	}
+	ADD_DIRTY(0,y,sx,1);
 }
 
 -(screen_char_t) ts_getCharAt: (int)x:(int)y
 {
 	NSDebugLLog(@"ts",@"getCharAt: %i:%i",x,y);
+	/* TODO: map 0 back to ' '? */
 	return SCREEN(x,y);
 }
 

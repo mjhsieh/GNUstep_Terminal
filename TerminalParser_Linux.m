@@ -337,10 +337,6 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	[self _update_attr];
 }
 
-#if 0
-
-#endif
-
 
 #define scrup(foo,t,b,nr,indirect_scroll) do { \
 	int scrup_nr=nr; \
@@ -366,30 +362,6 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	[ts ts_putChar: video_erase_char  count: step  offset: t*width]; \
 } while (0)
 
-
-#if 0
-
-#define insert_char(foo,nr) do { \
-	screen_char_t *p, *q = &SCREEN(x,y); \
- \
-	p = q + width - nr - x; \
-	while (--p >= q) \
-		p[nr]=*p; \
-	memset(q, video_erase_char, nr*sizeof(screen_char_t)); \
-} while (0)
-
-#define delete_char(foo,nr) do { \
-	unsigned int i = x; \
-	screen_char_t *p = &SCREEN(x,y); \
- \
-	while (++i <= width - nr) { \
-		*p=p[nr]; \
-		p++; \
-	} \
-	memset(p, video_erase_char, nr*sizeof(screen_char_t)); \
-} while (0)
-
-#endif
 
 #define insert_char(foo,nr) do { \
 	[ts ts_shiftRow: y  at: x  delta: nr]; \
@@ -587,7 +559,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 #define lf() do { \
 	if (y+1==bottom) \
 	{ \
-		scrup(foo,top,bottom,1,YES); \
+		scrup(foo,top,bottom,1,(top==0 && bottom==height)?YES:NO); \
 	} \
 	else if (y<height-1) \
 	{ \
