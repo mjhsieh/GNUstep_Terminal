@@ -1189,9 +1189,172 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 }
 
 
+-(void) sendString: (NSString *)s
+{
+	int l=[s length];
+	unsigned int ucs;
+	int i;
+
+	if (iconv_input_state)
+	{
+		unsigned int *inp;
+		int insize;
+		char *outp;
+		char buf[16+1];
+		int outsize;
+		int ret;
+	
+		for (i=0;i<l;i++)
+		{
+			ucs=htonl([s characterAtIndex: i]);
+			inp=&ucs;
+			insize=4;
+			outsize=sizeof(buf)-1;
+			outp=buf;
+			ret=iconv(iconv_input_state,(char **)&inp,&insize,&outp,&outsize);
+			if (outsize!=sizeof(buf)-1)
+			{
+				*outp=0;
+				[ts ts_sendCString: buf];
+			}
+			else
+				NSBeep();
+		}
+	}
+	else
+	{
+		unsigned char buf[2];
+		buf[1]=0;
+		for (i=0;i<l;i++)
+		{
+			ucs=[s characterAtIndex: i];
+			if (ucs<256)
+			{
+				buf[0]=ucs;
+				[ts ts_sendCString: buf];
+			}
+			else
+				NSBeep();
+		}
+	}
+}
+
+/* TODO */
+#include "TerminalViewPrefs.h"
+#include <AppKit/NSEvent.h>
+
+-(void) handleKeyEvent: (NSEvent *)e
+{
+	NSString *s=[e charactersIgnoringModifiers];
+	unsigned int mask=[e modifierFlags];
+	unichar ch,ch2;
+
+	const char *str;
+	NSString *nstr;
+
+	if ([s length]>1)
+	{
+		s=[e characters];
+		NSDebugLLog(@"key",@" writing '%@'\n",s);
+		[self sendString: s];
+		return;
+	}
+
+	ch=[s characterAtIndex: 0];
+	str=NULL;
+	nstr=nil;
+	ch2=0;
+	switch (ch)
+	{
+	case '\e':
+		if ([TerminalViewKeyboardPrefs doubleEscape])
+			str="\e\e";
+		else
+			str="\e";
+		break;
+
+	case NSUpArrowFunctionKey   : str="\e[A"; break;
+	case NSDownArrowFunctionKey : str="\e[B"; break;
+	case NSLeftArrowFunctionKey : str="\e[D"; break;
+	case NSRightArrowFunctionKey: str="\e[C"; break;
+
+	case NSF1FunctionKey : str="\e[[A"; break;
+	case NSF2FunctionKey : str="\e[[B"; break;
+	case NSF3FunctionKey : str="\e[[C"; break;
+	case NSF4FunctionKey : str="\e[[D"; break;
+	case NSF5FunctionKey : str="\e[[E"; break;
+
+	case NSF6FunctionKey : str="\e[17~"; break;
+	case NSF7FunctionKey : str="\e[18~"; break;
+	case NSF8FunctionKey : str="\e[19~"; break;
+	case NSF9FunctionKey : str="\e[20~"; break;
+	case NSF10FunctionKey: str="\e[21~"; break;
+	case NSF11FunctionKey: str="\e[23~"; break;
+	case NSF12FunctionKey: str="\e[24~"; break;
+
+	case NSF13FunctionKey: str="\e[25~"; break;
+	case NSF14FunctionKey: str="\e[26~"; break;
+	case NSF15FunctionKey: str="\e[28~"; break;
+	case NSF16FunctionKey: str="\e[29~"; break;
+	case NSF17FunctionKey: str="\e[31~"; break;
+	case NSF18FunctionKey: str="\e[32~"; break;
+	case NSF19FunctionKey: str="\e[33~"; break;
+	case NSF20FunctionKey: str="\e[34~"; break;
+
+	case NSHomeFunctionKey    : str="\e[1~"; break;
+	case NSInsertFunctionKey  : str="\e[2~"; break;
+	case NSDeleteFunctionKey  : str="\e[3~"; break;
+	case NSEndFunctionKey     : str="\e[4~"; break;
+	case NSPageUpFunctionKey  :
+		str="\e[5~";
+		break;
+	case NSPageDownFunctionKey:
+		str="\e[6~";
+		break;
+
+	case 8: ch2=0x7f; break;
+	case 3: ch2=0x0d; break;
+
+	default:
+		nstr=[e characters];;
+		break;
+	}
+
+	if (mask&(NSAlternateKeyMask|NSCommandKeyMask))
+	{
+		NSDebugLLog(@"key",@"  meta");
+		[ts ts_sendCString: "\e"];
+	}
+
+	if (nstr)
+	{
+		NSDebugLLog(@"key",@"  send NSString '%@'",nstr);
+		[self sendString: nstr];
+	}
+	else if (str)
+	{
+		NSDebugLLog(@"key",@"  send '%s'",str);
+		[ts ts_sendCString: str];
+	}
+	else if (ch2>256)
+	{
+		NSDebugLLog(@"key",@"  couldn't send %04x",ch2);
+		NSBeep();
+	}
+	else if (ch2>0)
+	{
+		unsigned char tmp[2];
+		tmp[0]=ch2;
+		tmp[1]=0;
+		NSDebugLLog(@"key",@"  send %02x",ch2);
+		[ts ts_sendCString: tmp];
+	}
+}
+
+
 - initWithTerminalScreen: (id<TerminalScreen>)ats  width: (int)w  height: (int)h
 {
-	const char *in_charset;
+	const char *iconv_charset;
 
 	if (!(self=[super init])) return nil;
 	ts=ats;
@@ -1202,16 +1365,25 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	color=def_color=0x07;
 	[self _reset_terminal];
 
-	in_charset=[TerminalParser_LinuxPrefs inputCharacterSet];
+	iconv_charset=[TerminalParser_LinuxPrefs characterSet];
 
-	if (strcmp(in_charset,"iso-8859-1"))
+	if (strcmp(iconv_charset,"iso-8859-1"))
 	{
-		iconv_state=iconv_open("ucs-4",in_charset);
+		iconv_state=iconv_open("ucs-4",iconv_charset);
 		if (iconv_state==(iconv_t)-1)
 		{
 			iconv_state=NULL;
 			NSLog(@"Warning: unable to create iconv handle for conversion from '%s'!",
-				in_charset);
+				iconv_charset);
+			NSLog(@"Falling back to iso-8859-1 (latin1).");
+		}
+
+		iconv_input_state=iconv_open(iconv_charset,"ucs-4");
+		if (iconv_input_state==(iconv_t)-1)
+		{
+			iconv_input_state=NULL;
+			NSLog(@"Warning: unable to create iconv handle for conversion to '%s'!",
+				iconv_charset);
 			NSLog(@"Falling back to iso-8859-1 (latin1).");
 		}
 	}
@@ -1223,12 +1395,13 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 {
 	if (iconv_state)
 		iconv_close(iconv_state);
+	if (iconv_input_state)
+		iconv_close(iconv_input_state);
 	[super dealloc];
 }
 
 -(void) setTerminalScreenWidth: (int)w height: (int)h
 {
-//	x+=w-width;
 	y+=h-height;
 
 	width=w;

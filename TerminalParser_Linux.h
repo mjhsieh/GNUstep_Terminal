@@ -65,6 +65,7 @@ enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 	int saved_G0,saved_G1;
 
 	iconv_t iconv_state;
+	iconv_t iconv_input_state;
 }
 @end
 

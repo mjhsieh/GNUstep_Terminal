@@ -69,10 +69,6 @@ NSString
 -(void) setScroller: (NSScroller *)sc;
 @end
 
-@interface TerminalView (keyboard)
--(void) _sendString: (NSString *)s; /* TODO: move? */
-@end
-
 @interface TerminalView (selection)
 -(void) _clearSelection;
 @end
@@ -958,119 +954,28 @@ Keyboard events
 
 @implementation TerminalView (keyboard)
 
--(void) _sendString: (NSString *)s
-{
-	int i;
-	unsigned char tmp;
-	unichar ch;
-	if (master_fd==-1)
-		return;
-	for (i=0;i<[s length];i++)
-	{
-		ch=[s characterAtIndex: i];
-		if (ch>256)
-			NSBeep();
-		else
-		{
-			tmp=ch;
-			write(master_fd,&tmp,1);
-		}
-	}
-}
-
-
 -(void) keyDown: (NSEvent *)e
 {
-/* TODO: what do we do with non-ascii characters? */
 	NSString *s=[e charactersIgnoringModifiers];
-	unsigned int mask=[e modifierFlags];
-	unichar ch,ch2;
-	unsigned char tmp;
-
-	const char *str;
-	NSString *nstr;
 
 	NSDebugLLog(@"key",@"got key flags=%08x  repeat=%i '%@' '%@' %4i %04x %i %04x %i\n",
 		[e modifierFlags],[e isARepeat],[e characters],[e charactersIgnoringModifiers],[e keyCode],
 		[[e characters] characterAtIndex: 0],[[e characters] length],
 		[[e charactersIgnoringModifiers] characterAtIndex: 0],[[e charactersIgnoringModifiers] length]);
 
-	if ([s length]>1)
+	if ([s length]==1 && ([e modifierFlags]&NSShiftKeyMask))
 	{
-		s=[e characters];
-		NSDebugLLog(@"key",@" writing '%@'\n",s);
-		[self _sendString: s];
-		return;
-	}
-
-	ch=[s characterAtIndex: 0];
-	str=NULL;
-	nstr=nil;
-	ch2=0;
-	switch (ch)
-	{
-	case '\e':
-		if ([TerminalViewKeyboardPrefs doubleEscape])
-			str="\e\e";
-		else
-			str="\e";
-		break;
-
-	case NSUpArrowFunctionKey   : str="\e[A"; break;
-	case NSDownArrowFunctionKey : str="\e[B"; break;
-	case NSLeftArrowFunctionKey : str="\e[D"; break;
-	case NSRightArrowFunctionKey: str="\e[C"; break;
-
-	case NSF1FunctionKey : str="\e[[A"; break;
-	case NSF2FunctionKey : str="\e[[B"; break;
-	case NSF3FunctionKey : str="\e[[C"; break;
-	case NSF4FunctionKey : str="\e[[D"; break;
-	case NSF5FunctionKey : str="\e[[E"; break;
-
-	case NSF6FunctionKey : str="\e[17~"; break;
-	case NSF7FunctionKey : str="\e[18~"; break;
-	case NSF8FunctionKey : str="\e[19~"; break;
-	case NSF9FunctionKey : str="\e[20~"; break;
-	case NSF10FunctionKey: str="\e[21~"; break;
-	case NSF11FunctionKey: str="\e[23~"; break;
-	case NSF12FunctionKey: str="\e[24~"; break;
-
-	case NSF13FunctionKey: str="\e[25~"; break;
-	case NSF14FunctionKey: str="\e[26~"; break;
-	case NSF15FunctionKey: str="\e[28~"; break;
-	case NSF16FunctionKey: str="\e[29~"; break;
-	case NSF17FunctionKey: str="\e[31~"; break;
-	case NSF18FunctionKey: str="\e[32~"; break;
-	case NSF19FunctionKey: str="\e[33~"; break;
-	case NSF20FunctionKey: str="\e[34~"; break;
-
-	case NSHomeFunctionKey    : str="\e[1~"; break;
-	case NSInsertFunctionKey  : str="\e[2~"; break;
-	case NSDeleteFunctionKey  : str="\e[3~"; break;
-	case NSEndFunctionKey     : str="\e[4~"; break;
-	case NSPageUpFunctionKey  :
-		if (mask&NSShiftKeyMask)
+		unichar ch=[s characterAtIndex: 0];
+		if (ch==NSPageUpFunctionKey)
 		{
 			[self _scrollTo: current_scroll-sy+1  update: YES];
 			return;
 		}
-		str="\e[5~";
-		break;
-	case NSPageDownFunctionKey:
-		if (mask&NSShiftKeyMask)
+		if (ch==NSPageDownFunctionKey)
 		{
 			[self _scrollTo: current_scroll+sy-1  update: YES];
 			return;
 		}
-		str="\e[6~";
-		break;
-
-	case 8: ch2=0x7f; break;
-	case 3: ch2=0x0d; break;
-
-	default:
-		nstr=[e characters];;
-		break;
 	}
 
 	/* don't check until we get here so we handle scrollback page-up/down
@@ -1078,33 +983,7 @@ Keyboard events
 	if (master_fd==-1)
 		return;
 
-	if (mask&(NSAlternateKeyMask|NSCommandKeyMask))
-	{
-		NSDebugLLog(@"key",@"  meta");
-		write(master_fd,"\e",1);
-	}
-
-	if (nstr)
-	{
-		NSDebugLLog(@"key",@"  send NSString '%@'",nstr);
-		[self _sendString: nstr];
-	}
-	else if (str)
-	{
-		NSDebugLLog(@"key",@"  send '%s'",str);
-		[self ts_sendCString: str];
-	}
-	else if (ch2>256)
-	{
-		NSDebugLLog(@"key",@"  couldn't send %04x",ch2);
-		NSBeep();
-	}
-	else if (ch2>0)
-	{
-		tmp=ch2;
-		NSDebugLLog(@"key",@"  send %02x",ch2);
-		write(master_fd,&tmp,1);
-	}
+	[tp handleKeyEvent: e];
 }
 
 -(BOOL) acceptsFirstResponder
@@ -1318,7 +1197,7 @@ Selection, copy/paste/services
 		return;
 	str=[pb stringForType: NSStringPboardType];
 	if (str)
-		[self _sendString: str];
+		[tp sendString: str];
 }
 
 -(BOOL) writeSelectionToPasteboard: (NSPasteboard *)pb
@@ -1524,7 +1403,7 @@ Selection, copy/paste/services
 		return;
 	str=[pb stringForType: NSStringPboardType];
 	if (str)
-		[self _sendString: str];
+		[tp sendString: str];
 }
 
 @end

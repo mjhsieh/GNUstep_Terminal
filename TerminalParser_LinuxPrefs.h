@@ -20,10 +20,10 @@ extern NSString *TerminalParser_LinuxPrefsDidChangeNotification;
 @interface TerminalParser_LinuxPrefs : NSObject <PrefBox>
 {
 	GSVbox *top;
-	NSPopUpButton *pb_inputCharacterSet;
+	NSPopUpButton *pb_characterSet;
 }
 
-+(const char *) inputCharacterSet;
++(const char *) characterSet;
 
 @end
 

@@ -24,10 +24,10 @@ static NSUserDefaults *ud;
 static NSString
 	*TerminalParser_LinuxPrefsDidChangeNotification=
 		@"TerminalParser_LinuxPrefsDidChangeNotification",
-	*InputCharacterSetKey=@"Linux_InputCharacterSet";
+	*CharacterSetKey=@"Linux_CharacterSet";
 
 
-static NSString *inputCharacterSet;
+static NSString *characterSet;
 
 
 typedef struct
@@ -54,15 +54,15 @@ static character_set_choice_t cs_choices[]={
 	{
 		ud=[NSUserDefaults standardUserDefaults];
 
-		inputCharacterSet=[ud stringForKey: InputCharacterSetKey];
-		if (!inputCharacterSet)
-			inputCharacterSet=@"iso-8859-1";
+		characterSet=[ud stringForKey: CharacterSetKey];
+		if (!characterSet)
+			characterSet=@"iso-8859-1";
 	}
 }
 
-+(const char *) inputCharacterSet
++(const char *) characterSet
 {
-	return [inputCharacterSet cString];
+	return [characterSet cString];
 }
 
 
@@ -72,11 +72,11 @@ static character_set_choice_t cs_choices[]={
 
 	if (!top) return;
 
-	i=[pb_inputCharacterSet indexOfSelectedItem];
+	i=[pb_characterSet indexOfSelectedItem];
 	if (cs_choices[i].name!=nil)
 	{
-		inputCharacterSet=cs_choices[i].name;
-		[ud setObject: inputCharacterSet  forKey: InputCharacterSetKey];
+		characterSet=cs_choices[i].name;
+		[ud setObject: characterSet  forKey: CharacterSetKey];
 
 		[[NSNotificationCenter defaultCenter]
 			postNotificationName: TerminalParser_LinuxPrefsDidChangeNotification
@@ -91,10 +91,10 @@ static character_set_choice_t cs_choices[]={
 	for (i=0,c=cs_choices;c->name;i++,c++)
 	{
 		if (c->name &&
-		    [c->name caseInsensitiveCompare: inputCharacterSet]==NSOrderedSame)
+		    [c->name caseInsensitiveCompare: characterSet]==NSOrderedSame)
 			break;
 	}
-	[pb_inputCharacterSet selectItemAtIndex: i];
+	[pb_characterSet selectItemAtIndex: i];
 }
 
 
@@ -131,7 +131,7 @@ static character_set_choice_t cs_choices[]={
 			int i;
 			character_set_choice_t *c;
 
-			pb_inputCharacterSet=pb=[[NSPopUpButton alloc] init];
+			pb_characterSet=pb=[[NSPopUpButton alloc] init];
 			[pb setAutoresizingMask: NSViewMinXMargin|NSViewMaxXMargin];
 			[pb setAutoenablesItems: NO];
 			for (i=0,c=cs_choices;c->display_name;i++,c++)
@@ -148,7 +148,7 @@ static character_set_choice_t cs_choices[]={
 			[top addView: pb enablingYResizing: NO];
 			DESTROY(pb);
 
-			f=[NSTextField newLabel: _(@"Input character set:")];
+			f=[NSTextField newLabel: _(@"Character set:")];
 			[top addView: f enablingYResizing: NO];
 			DESTROY(f);
 		}

@@ -60,6 +60,8 @@ complete. (TODO check this) */
 - initWithTerminalScreen: (id<TerminalScreen>)ats  width: (int)w  height: (int)h;
 -(void) processByte: (unsigned char)c;
 -(void) setTerminalScreenWidth: (int)w height: (int)h;
+-(void) handleKeyEvent: (NSEvent *)e;
+-(void) sendString: (NSString *)str;
 @end
 
 
