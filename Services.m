@@ -264,8 +264,6 @@ of the License. See COPYING or main.m for more information.
 
 		NSDebugLLog(@"service",@"got window %@",twc);
 
-		[twc showWindow: self];
-
 		[[twc terminalView] runProgram: @"/bin/sh"
 			withArguments: [NSArray arrayWithObjects: @"-c",cmdline,nil]
 			initialInput: input==INPUT_STDIN?data:nil];
