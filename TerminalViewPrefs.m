@@ -122,11 +122,17 @@ static int scrollBackLines;
 
 +(NSFont *) terminalFont
 {
+	NSFont *f=[terminalFont screenFont];
+	if (f)
+		return f;
 	return terminalFont;
 }
 
 +(NSFont *) boldTerminalFont
 {
+	NSFont *f=[boldTerminalFont screenFont];
+	if (f)
+		return f;
 	return boldTerminalFont;
 }
 

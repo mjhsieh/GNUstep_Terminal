@@ -1923,18 +1923,11 @@ improve? */
 	{
 		NSSize s;
 		NSRect r;
-		NSFont *f;
 
 		font=[TerminalViewDisplayPrefs terminalFont];
-		f=[font screenFont];
-		if (f)
-			font=f;
 		[font retain];
 
 		boldFont=[TerminalViewDisplayPrefs boldTerminalFont];
-		f=[boldFont screenFont];
-		if (f)
-			boldFont=f;
 		[boldFont retain];
 
 		r=[font boundingRectForFont];
