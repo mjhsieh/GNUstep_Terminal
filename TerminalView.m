@@ -208,8 +208,6 @@ static void set_foreground(NSGraphicsContext *gc,
 {
 	int ix,iy;
 	unsigned char buf[8];
-	unsigned char *pbuf=buf;
-	int dlen;
 	NSGraphicsContext *cur=GSCurrentContext();
 	int x0,y0,x1,y1;
 	NSFont *f,*current_font=nil;
@@ -268,6 +266,8 @@ static void set_foreground(NSGraphicsContext *gc,
 				DPSgrestore(cur); \
 				DPSrectstroke(cur,scr_x,scr_y,fx,fy); \
 */
+
+/* ~400 cycles/cell on average */
 #define R(scr_x,scr_y,fx,fy) DPSrectfill(cur,scr_x,scr_y,fx,fy)
 			start_x=-1;
 			for (ix=x0;ix<x1;ix++,ch++)
@@ -296,7 +296,6 @@ static void set_foreground(NSGraphicsContext *gc,
 							start_x=scr_x;
 						}
 
-						total_draw++;
 						l_color=color;
 						l_attr=ch->attr&0x03;
 						set_foreground(cur,l_color,l_attr);
@@ -313,7 +312,6 @@ static void set_foreground(NSGraphicsContext *gc,
 							start_x=scr_x;
 						}
 
-						total_draw++;
 						l_color=color;
 						l_attr=ch->attr&0x03;
 						set_background(cur,l_color,l_attr);
@@ -330,7 +328,6 @@ static void set_foreground(NSGraphicsContext *gc,
 				R(start_x,scr_y,scr_x-start_x,fy);
 			}
 		}
-
 		for (iy=y0;iy<y1;iy++)
 		{
 			ry=iy+current_scroll;
@@ -350,6 +347,7 @@ static void set_foreground(NSGraphicsContext *gc,
 
 				scr_x=ix*fx;
 
+				/* ~1700 cycles/change */
 				if (ch->attr&0x02 || (ch->ch!=0 && ch->ch!=32))
 				{
 					if (!(ch->attr&0x8))
@@ -357,7 +355,6 @@ static void set_foreground(NSGraphicsContext *gc,
 						color=ch->color&0xf;
 						if (color!=l_color || (ch->attr&0x03)!=l_attr)
 						{
-							total_draw++;
 							l_color=color;
 							l_attr=ch->attr&0x03;
 							set_foreground(cur,l_color,l_attr);
@@ -368,7 +365,6 @@ static void set_foreground(NSGraphicsContext *gc,
 						color=ch->color&0xf0;
 						if (color!=l_color)
 						{
-							total_draw++;
 							l_color=color;
 							l_attr=ch->attr&0x03;
 							set_background(cur,l_color,l_attr);
@@ -378,6 +374,7 @@ static void set_foreground(NSGraphicsContext *gc,
 
 				if (ch->ch!=0 && ch->ch!=32)
 				{
+					total_draw++;
 					if ((ch->attr&3)==2)
 					{
 						encoding=boldFont_encoding;
@@ -390,22 +387,56 @@ static void set_foreground(NSGraphicsContext *gc,
 					}
 					if (f!=current_font)
 					{
+					/* ~190 cycles/change */
 						[f set];
 						current_font=f;
 					}
 
-					if (ch->ch>=0x80)
 					{
-						dlen=sizeof(buf)-1;
-						GSFromUnicode(&pbuf,&dlen,&ch->ch,1,encoding,NULL,GSUniTerminate);
+						unichar uch=ch->ch;
+						if (uch>=0x10000)
+							buf[0]=0;
+						else if (uch>=0x800)
+						{
+							buf[2]=(uch&0x3f)|0x80;
+							uch>>=6;
+							buf[1]=(uch&0x3f)|0x80;
+							uch>>=6;
+							buf[0]=(uch&0x0f)|0xe0;
+							buf[3]=0;
+						}
+						else if (uch>=0x80)
+						{
+							buf[1]=(uch&0x3f)|0x80;
+							uch>>=6;
+							buf[0]=(uch&0x1f)|0xc0;
+							buf[2]=0;
+						}
+						else
+						{
+							buf[0]=uch;
+							buf[1]=0;
+						}
 					}
-					else
-					{
-						buf[0]=ch->ch;
-						buf[1]=0;
-					}
+					/* ~580 cycles */
 					DPSmoveto(cur,scr_x+fx0,scr_y+fy0);
+					/* baseline here for mc-case 0.65 */
+					/* ~3800 cycles */
 					DPSshow(cur,buf);
+
+					/* ~95 cycles to ARTGState -DPSshow:... */
+					/* ~343 cycles to isEmpty */
+					/* ~593 cycles to currentpoint */
+					/* ~688 cycles to transform */
+					/* ~1152 cycles to FTFont -drawString:... */
+					/* ~1375 cycles to -drawString:... setup */
+					/* ~1968 cycles cmap lookup */
+					/* ~2718 cycles sbit lookup */
+					/* ~~2750 cycles blit setup */
+					/* ~3140 cycles blit loop, empty call */
+					/* ~3140 cycles blit loop, setup */
+					/* ~3325 cycles blit loop, no write */
+					/* ~3800 cycles total */
 				}
 
 				if (ch->attr&0x4)
