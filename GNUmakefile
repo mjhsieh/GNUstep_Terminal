@@ -30,6 +30,7 @@ Terminal_OBJC_FILES = \
 	TerminalViewPrefs.m \
 	\
 	TerminalParser_Linux.m \
+	TerminalParser_LinuxPrefs.m \
 	\
 	PreferencesWindowController.m \
 	autokeyviewchain.m \

@@ -15,11 +15,15 @@ lots borrowed from linux/drivers/char/console.c, GNU GPL:ed
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
+#include <netinet/in.h>
+
 #include <Foundation/NSString.h>
 #include <Foundation/NSDebug.h>
 #include <AppKit/NSGraphics.h>
 
 #include "TerminalParser_Linux.h"
+
+#include "TerminalParser_LinuxPrefs.h"
 
 
 #include "charmaps.h"
@@ -1069,35 +1073,112 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 				return;
 			}
 		}
+		else if (!iconv_state || translate!=translate_maps[0])
+		{
+			if (toggle_meta)
+				c|=0x80;
+			unich=translate[c];
+		}
 		else
-		{
-			unich=translate[toggle_meta ? (c|0x80) : c];
-		}
 
-		if (x>=width && decawm)
-		{
-			cr();
-			lf();
-		}
+#define PUTCH \
+	if (x>=width && decawm) \
+	{ \
+		cr(); \
+		lf(); \
+	} \
+	[ts ts_putChar: ch  count: 1  at: x:y]; \
+	if (x<width) \
+	{ \
+		x++; \
+		[ts ts_goto: x:y]; \
+	}
+
 		{
 			screen_char_t ch;
-			ch.ch=unich;
+
+			char *inp;
+			int in_size;
+			char *outp;
+			int out_size;
+
+			int ret;
+
+			if (toggle_meta)
+				c|=0x80;
+
+			/* TODO: there might be other cases where we should clear the
+			buffer */
+			if (input_buf_len==sizeof(input_buf))
+			{
+				NSLog(@"Warning: iconv() input buffer overrun!");
+				input_buf_len=0;
+			}
+			input_buf[input_buf_len++]=c;
+
 			ch.color=color;
 			ch.attr=(intensity)|(underline<<2)|(reverse<<3)|(blink<<4);
-			[ts ts_putChar: ch  count: 1  at: x:y];
+
+			inp=(char *)input_buf;
+			in_size=input_buf_len;
+
+			do
+			{
+				outp=(char *)&unich;
+				out_size=4;
+
+				ret=iconv(iconv_state,&inp,&in_size,&outp,&out_size);
+
+				if (out_size==0)
+				{
+					ch.ch=ntohl(unich);
+					PUTCH
+				}
+				if (ret>=0)
+					break;
+
+				if (errno==EILSEQ)
+				{ /* illegal input sequence. skip one byte and try again. */
+					in_size--;
+					inp++;
+				}
+
+				if (errno==EINVAL)
+				{ /* incomplete input sequence. wait for more input. */
+					break;
+				}
+
+				/* keep going while there's more input and the error was lack
+				of output space */
+			} while (in_size>0 && errno==E2BIG);
+
+			/* adjust the buffer */
+			if (in_size!=input_buf_len)
+			{
+				if (in_size)
+					memmove(input_buf,inp,in_size);
+				input_buf_len=in_size;
+			}
+			return;
 		}
-		if (x<width)
+
 		{
-			x++;
-			[ts ts_goto: x:y];
+			screen_char_t ch;
+			ch.color=color;
+			ch.attr=(intensity)|(underline<<2)|(reverse<<3)|(blink<<4);
+			ch.ch=unich;
+			PUTCH
 		}
 		return;
+#undef PUTCH
 	}
 }
 
 
 - initWithTerminalScreen: (id<TerminalScreen>)ats  width: (int)w  height: (int)h
 {
+	const char *in_charset;
+
 	if (!(self=[super init])) return nil;
 	ts=ats;
 
@@ -1107,7 +1188,27 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	color=def_color=0x07;
 	[self _reset_terminal];
 
+	in_charset=[TerminalParser_LinuxPrefs inputCharacterSet];
+
+	if (strcmp(in_charset,"iso-8859-1"))
+	{
+		iconv_state=iconv_open("ucs-4",in_charset);
+		if (iconv_state==(iconv_t)-1)
+		{
+			iconv_state=NULL;
+			NSLog(@"Warning: unable to create iconv handle for conversion from '%s'!",
+				in_charset);
+			NSLog(@"Falling back to iso-8859-1 (latin1).");
+		}
+	}
+
 	return self;
+}
+
+-(void) dealloc
+{
+	iconv_close(iconv_state);
+	[super dealloc];
 }
 
 -(void) setTerminalScreenWidth: (int)w height: (int)h

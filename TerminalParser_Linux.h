@@ -12,6 +12,8 @@ of the License. See COPYING or main.m for more information.
 #ifndef LinuxParser_h
 #define LinuxParser_h
 
+#include <iconv.h>
+
 #include "Terminal.h"
 
 @interface TerminalParser_Linux : NSObject <TerminalParser>
@@ -27,6 +29,9 @@ of the License. See COPYING or main.m for more information.
 
 	unsigned int unich;
 	int utf_count;
+
+	unsigned char input_buf[16];
+	int input_buf_len;
 
 #define TITLE_BUF_SIZE 255
 	char title_buf[TITLE_BUF_SIZE+1];
@@ -58,6 +63,8 @@ enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 	int saved_x,saved_y;
 	unsigned int s_intensity,s_underline,s_blink,s_reverse,s_charset,s_color;
 	int saved_G0,saved_G1;
+
+	iconv_t iconv_state;
 }
 @end
 

@@ -98,6 +98,7 @@ general
 @class TerminalViewKeyboardPrefs;
 @class TerminalServicesPrefs;
 @class TerminalWindowPrefs;
+@class TerminalParser_LinuxPrefs;
 
 -(void) openPreferences: (id)sender
 {
@@ -123,6 +124,10 @@ general
 		DESTROY(pb);
 
 		pb=[[TerminalServicesPrefs alloc] init];
+		[pwc addPrefBox: pb];
+		DESTROY(pb);
+
+		pb=[[TerminalParser_LinuxPrefs alloc] init];
 		[pwc addPrefBox: pb];
 		DESTROY(pb);
 	}
