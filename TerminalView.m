@@ -414,6 +414,7 @@ static void set_foreground(NSGraphicsContext *gc,
 						current_font=f;
 					}
 
+					if (encoding==NSUTF8StringEncoding)
 					{
 						unichar uch=ch->ch;
 						if (uch>=0x10000)
@@ -438,6 +439,21 @@ static void set_foreground(NSGraphicsContext *gc,
 						{
 							buf[0]=uch;
 							buf[1]=0;
+						}
+					}
+					else
+					{
+						unichar uch=ch->ch;
+						if (uch<=0x80)
+						{
+							buf[0]=uch;
+							buf[1]=0;
+						}
+						else
+						{
+							unsigned char *pbuf=buf;
+							int dlen=sizeof(buf)-1;
+							GSFromUnicode(&pbuf,&dlen,&uch,1,encoding,NULL,GSUniTerminate);
 						}
 					}
 					/* ~580 cycles */
