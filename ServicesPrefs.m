@@ -271,13 +271,13 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			[hb addView: b  enablingXResizing: NO];
 			DESTROY(b);
 
-			b=[[NSButton alloc] init];
+/* TODO			b=[[NSButton alloc] init];
 			[b setTitle: _(@"Export...")];
 			[b setTarget: self];
 			[b setAction: @selector(_exportServices:)];
 			[b sizeToFit];
 			[hb addView: b  enablingXResizing: NO];
-			DESTROY(b);
+			DESTROY(b);*/
 
 			[top addView: hb enablingYResizing: NO];
 			DESTROY(hb);
