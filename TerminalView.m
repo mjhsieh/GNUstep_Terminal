@@ -26,6 +26,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <Foundation/NSNotification.h>
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSUserDefaults.h>
+#include <Foundation/NSCharacterSet.h>
 #include <gnustep/base/Unicode.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSPasteboard.h>
@@ -1095,7 +1096,7 @@ Selection, copy/paste/services
 	NSString *tmp;
 	unichar buf[32];
 	unichar ch;
-	int len;
+	int len,ws_len;
 	int i,j;
 
 	if (selection.length==0)
@@ -1106,9 +1107,44 @@ Selection, copy/paste/services
 	len=0;
 	for (i=selection.location;i<j;i++)
 	{
-		if (i%sx==0 && i>selection.location)
+		ws_len=0;
+		while (1)
 		{
-			buf[len++]='\n';
+			if (i<0)
+				ch=sbuf[ofs+i].ch;
+			else
+				ch=screen[i].ch;
+
+			if (ch!=' ' && ch!=0)
+				break;
+			ws_len++;
+			i++;
+
+			if (i%sx==0)
+			{
+				if (i>j)
+				{
+					ws_len=0; /* make sure we break out of the outer loop */
+					break;
+				}
+				if (len)
+				{
+					tmp=[[NSString alloc] initWithCharacters: buf length: len];
+					[mstr appendString: tmp];
+					DESTROY(tmp);
+					len=0;
+				}
+				[mstr appendString: @"\n"];
+				ws_len=0;
+				continue;
+			}
+		}
+
+		i-=ws_len;
+
+		for (;i<j && ws_len;i++,ws_len--)
+		{
+			buf[len++]=' ';
 			if (len==32)
 			{
 				tmp=[[NSString alloc] initWithCharacters: buf length: 32];
@@ -1117,20 +1153,16 @@ Selection, copy/paste/services
 				len=0;
 			}
 		}
-		if (i<0)
-			ch=sbuf[ofs+i].ch;
-		else
-			ch=screen[i].ch;
-		if (ch)
+		if (i>=j)
+			break;
+
+		buf[len++]=ch;
+		if (len==32)
 		{
-			buf[len++]=ch;
-			if (len==32)
-			{
-				tmp=[[NSString alloc] initWithCharacters: buf length: 32];
-				[mstr appendString: tmp];
-				DESTROY(tmp);
-				len=0;
-			}
+			tmp=[[NSString alloc] initWithCharacters: buf length: 32];
+			[mstr appendString: tmp];
+			DESTROY(tmp);
+			len=0;
 		}
 	}
 
@@ -1143,6 +1175,7 @@ Selection, copy/paste/services
 
 	return AUTORELEASE(mstr);
 }
+
 
 -(void) _setSelection: (struct selection_range)s
 {
@@ -1283,14 +1316,90 @@ Selection, copy/paste/services
 }
 
 
+-(struct selection_range) _selectionRangeAt: (int)pos  granularity: (int)g
+{
+	struct selection_range s;
+
+	if (g==3)
+	{ /* select lines */
+		int l=floor(pos/(float)sx);
+		s.location=l*sx;
+		s.length=sx;
+		return s;
+	}
+
+	if (g==2)
+	{
+		int ofs=max_scrollback*sx;
+		unichar ch,ch2;
+		NSCharacterSet *cs;
+		int i,j;
+
+		if (pos<0)
+			ch=sbuf[ofs+pos].ch;
+		else
+			ch=screen[pos].ch;
+		if (ch==0) ch=' ';
+
+		cs=[NSCharacterSet alphanumericCharacterSet];
+		if (![cs characterIsMember: ch])
+			cs=[NSCharacterSet punctuationCharacterSet];
+		if (![cs characterIsMember: ch])
+			cs=[NSCharacterSet whitespaceCharacterSet];
+		if (![cs characterIsMember: ch])
+		{
+			s.location=pos;
+			s.length=1;
+			return s;
+		}
+
+		j=floor(pos/(float)sx);
+		j*=sx;
+		for (i=pos-1;i>=j;i--)
+		{
+			if (i<0)
+				ch2=sbuf[ofs+i].ch;
+			else
+				ch2=screen[i].ch;
+			if (ch2==0) ch2=' ';
+
+			if (![cs characterIsMember: ch2])
+				break;
+		}
+		s.location=i+1;
+
+		j+=sx;
+		for (i=pos+1;i<j;i++)
+		{
+			if (i<0)
+				ch2=sbuf[ofs+i].ch;
+			else
+				ch2=screen[i].ch;
+			if (ch2==0) ch2=' ';
+
+			if (![cs characterIsMember: ch2])
+				break;
+		}
+		s.length=i-s.location;
+		return s;
+	}
+
+	s.location=pos;
+	s.length=0;
+	return s;
+}
+
 -(void) mouseDown: (NSEvent *)e
 {
 	int ofs0,ofs1,first;
 	NSPoint p;
 	struct selection_range s;
+	int g;
+	struct selection_range r0,r1;
 
 	first=YES;
 	ofs0=0; /* get compiler to shut up */
+	g=[e clickCount];
 	while ([e type]!=NSLeftMouseUp)
 	{
 		p=[e locationInWindow];
@@ -1305,21 +1414,28 @@ Selection, copy/paste/services
 		p.y=sy-p.y+current_scroll;
 		ofs1=((int)p.x)+((int)p.y)*sx;
 
+		r1=[self _selectionRangeAt: ofs1  granularity: g];
 		if (first)
 		{
 			ofs0=ofs1;
 			first=0;
+			r0=r1;
 		}
+
+		NSDebugLLog(@"select",@"ofs %i %i (%i+%i) (%i+%i)\n",
+			ofs0,ofs1,
+			r0.location,r0.length,
+			r1.location,r1.length);
 
 		if (ofs1>ofs0)
 		{
-			s.location=ofs0;
-			s.length=ofs1-ofs0;
+			s.location=r0.location;
+			s.length=r1.location+r1.length-r0.location;
 		}
 		else
 		{
-			s.location=ofs1;
-			s.length=ofs0-ofs1;
+			s.location=r1.location;
+			s.length=r0.location+r0.length-r1.location;
 		}
 
 		[self _setSelection: s];
