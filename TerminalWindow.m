@@ -11,6 +11,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSScroller.h>
 #include <AppKit/GSHbox.h>
+#include <AppKit/PSOperators.h>
 
 #include "TerminalWindow.h"
 
@@ -27,6 +28,22 @@ static void get_zombies(void)
 //		printf("got %i\n",pid);
 	}
 }
+
+
+@interface BlackView : NSView
+@end
+
+@implementation BlackView
+-(BOOL) isOpaque
+{
+	return YES;
+}
+-(void) drawRect: (NSRect)r
+{
+	PSsetgray(0.0);
+	PSrectfill(r.origin.x,r.origin.y,r.size.width,r.size.height);
+}
+@end
 
 
 @implementation TerminalWindowController
@@ -56,16 +73,23 @@ static void get_zombies(void)
 	[win setDelegate: self];
 
 	[win setResizeIncrements: NSMakeSize(fx,fy)];
-	[win setContentSize: NSMakeSize(fx*(80+scroller_width),fy*25+1)];
+	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*25+1)];
 
 	hb=[[GSHbox alloc] init];
 
-	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,[NSScroller scrollerWidth]-1,fy)];
+	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,[NSScroller scrollerWidth],fy)];
 	[scroller setArrowsPosition: NSScrollerArrowsMaxEnd];
 	[scroller setEnabled: YES];
 	[scroller setAutoresizingMask: NSViewHeightSizable];
 	[hb addView: scroller  enablingXResizing: NO];
 	[scroller release];
+
+	{
+		NSView *v=[[BlackView alloc] initWithFrame: NSMakeRect(0,0,(scroller_width*fx-[NSScroller scrollerWidth])/2,fy)];
+		[v setAutoresizingMask: NSViewHeightSizable];
+		[hb addView: v  enablingXResizing: NO];
+		DESTROY(v);
+	}
 
 	tv=[[TerminalView alloc] init];
 	[tv setIgnoreResize: YES];
