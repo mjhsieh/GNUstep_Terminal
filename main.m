@@ -264,6 +264,23 @@ general
 	return NSTerminateCancel;
 }
 
+
+-(BOOL) application: (NSApplication *)sender
+	openFile: (NSString *)filename
+{
+	TerminalWindowController *twc;
+
+	NSDebugLLog(@"Application",@"openFile: '%@'",filename);
+
+	twc=[TerminalWindowController newTerminalWindow];
+	[[twc terminalView] runProgram: filename
+		withArguments: nil
+		initialInput: nil];
+
+	return YES;
+}
+
+
 @end
 
 
