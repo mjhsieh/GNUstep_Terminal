@@ -16,6 +16,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <AppKit/GSHbox.h>
 #include <AppKit/NSSavePanel.h>
 #include <AppKit/NSOpenPanel.h>
+#include "Label.h"
 
 #include "ServicesPrefs.h"
 
@@ -618,15 +619,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			[t setXResizingEnabled: NO forColumn: 0];
 			[t setXResizingEnabled: YES forColumn: 1];
 
-			f=[[NSTextField alloc] init];
+			f=[NSTextField newLabel: _(@"Name:")];
 			[f setAutoresizingMask: NSViewMinXMargin];
-			[f setStringValue: _(@"Name:")];
-			[f setEditable: NO];
-			[f setDrawsBackground: NO];
-			[f setBordered: NO];
-			[f setBezeled: NO];
-			[f setSelectable: NO];
-			[f sizeToFit];
 			[f setAutoresizingMask: 0];
 			[t putView: f atRow: 2 column: 0 withXMargins: 2 yMargins: 2];
 			DESTROY(f);
@@ -638,15 +632,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			DESTROY(f);
 
 
-			f=[[NSTextField alloc] init];
+			f=[NSTextField newLabel: _(@"Key:")];
 			[f setAutoresizingMask: NSViewMinXMargin];
-			[f setStringValue: _(@"Key:")];
-			[f setEditable: NO];
-			[f setDrawsBackground: NO];
-			[f setBordered: NO];
-			[f setBezeled: NO];
-			[f setSelectable: NO];
-			[f sizeToFit];
 			[f setAutoresizingMask: 0];
 			[t putView: f atRow: 1 column: 0 withXMargins: 2 yMargins: 2];
 			DESTROY(f);
@@ -658,15 +645,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			DESTROY(f);
 
 
-			f=[[NSTextField alloc] init];
+			f=[NSTextField newLabel: _(@"Command line:")];
 			[f setAutoresizingMask: NSViewMinXMargin];
-			[f setStringValue: _(@"Command line:")];
-			[f setEditable: NO];
-			[f setDrawsBackground: NO];
-			[f setBordered: NO];
-			[f setBezeled: NO];
-			[f setSelectable: NO];
-			[f sizeToFit];
 			[f setAutoresizingMask: 0];
 			[t putView: f atRow: 0 column: 0 withXMargins: 2 yMargins: 2];
 			DESTROY(f);

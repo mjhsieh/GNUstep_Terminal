@@ -14,6 +14,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <AppKit/NSBox.h>
 #include <AppKit/GSVbox.h>
 #include <AppKit/GSHbox.h>
+#include "Label.h"
 
 #include "TerminalViewPrefs.h"
 
@@ -201,6 +202,7 @@ static NSColor *cursorColor;
 	{
 		top=[[GSVbox alloc] init];
 		[top setDefaultMinYMargin: 4];
+		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
 
 		{
 			NSTextField *f;
@@ -220,15 +222,8 @@ static NSColor *cursorColor;
 				t=[[GSTable alloc] initWithNumberOfRows: 2 numberOfColumns: 2];
 				[t setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
 
-				f=[[NSTextField alloc] init];
+				f=[NSTextField newLabel: _(@"Style:")];
 				[f setAutoresizingMask: NSViewMinXMargin|NSViewMinYMargin|NSViewMaxYMargin];
-				[f setStringValue: _(@"Style:")];
-				[f setEditable: NO];
-				[f setDrawsBackground: NO];
-				[f setBordered: NO];
-				[f setBezeled: NO];
-				[f setSelectable: NO];
-				[f sizeToFit];
 				[t putView: f  atRow: 0 column: 0  withXMargins: 2 yMargins: 2];
 				DESTROY(f);
 
@@ -243,15 +238,8 @@ static NSColor *cursorColor;
 				DESTROY(pb);
 
 
-				f=[[NSTextField alloc] init];
+				f=[NSTextField newLabel: _(@"Color:")];
 				[f setAutoresizingMask: NSViewMinXMargin|NSViewMinYMargin|NSViewMaxYMargin];
-				[f setStringValue: _(@"Color:")];
-				[f setEditable: NO];
-				[f setDrawsBackground: NO];
-				[f setBordered: NO];
-				[f setBezeled: NO];
-				[f setSelectable: NO];
-				[f sizeToFit];
 				[t putView: f  atRow: 1 column: 0  withXMargins: 2 yMargins: 2];
 				DESTROY(f);
 
@@ -273,14 +261,7 @@ static NSColor *cursorColor;
 			[hb setDefaultMinXMargin: 4];
 			[hb setAutoresizingMask: NSViewWidthSizable];
 
-			f=[[NSTextField alloc] init];
-			[f setStringValue: _(@"Bold font:")];
-			[f setEditable: NO];
-			[f setDrawsBackground: NO];
-			[f setBordered: NO];
-			[f setBezeled: NO];
-			[f setSelectable: NO];
-			[f sizeToFit];
+			f=[NSTextField newLabel: _(@"Bold font:")];
 			[f setAutoresizingMask: 0];
 			[hb addView: f  enablingXResizing: NO];
 			DESTROY(f);
@@ -307,14 +288,7 @@ static NSColor *cursorColor;
 			[hb setDefaultMinXMargin: 4];
 			[hb setAutoresizingMask: NSViewWidthSizable];
 
-			f=[[NSTextField alloc] init];
-			[f setStringValue: _(@"Normal font:")];
-			[f setEditable: NO];
-			[f setDrawsBackground: NO];
-			[f setBordered: NO];
-			[f setBezeled: NO];
-			[f setSelectable: NO];
-			[f sizeToFit];
+			f=[NSTextField newLabel: _(@"Normal font:")];
 			[f setAutoresizingMask: 0];
 			[hb addView: f  enablingXResizing: NO];
 			DESTROY(f);
@@ -464,6 +438,8 @@ static BOOL loginShell;
 		top=[[GSVbox alloc] init];
 		[top setDefaultMinYMargin: 4];
 
+		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+
 		{
 			NSTextField *f;
 			NSButton *b;
@@ -482,14 +458,8 @@ static BOOL loginShell;
 			[top addView: f enablingYResizing: NO];
 			DESTROY(f);
 
-			f=[[NSTextField alloc] init];
+			f=[NSTextField newLabel: _(@"Shell:")];
 			[f setAutoresizingMask: NSViewWidthSizable];
-			[f setStringValue: _(@"Shell:")];
-			[f setEditable: NO];
-			[f setDrawsBackground: NO];
-			[f setBordered: NO];
-			[f setBezeled: NO];
-			[f setSelectable: NO];
 			[f sizeToFit];
 			[top addView: f enablingYResizing: NO];
 			DESTROY(f);

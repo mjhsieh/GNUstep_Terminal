@@ -124,10 +124,11 @@ static BOOL addYBorders;
 		top=[[GSVbox alloc] init];
 		[top setDefaultMinYMargin: 8];
 
+		[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
+
 		{
 			NSTextField *f;
 
-			[top addView: [[[NSView alloc] init] autorelease] enablingYResizing: YES];
 
 			{
 				NSPopUpButton *pb;
