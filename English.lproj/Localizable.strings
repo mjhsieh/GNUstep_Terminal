@@ -1,6 +1,6 @@
 /***
 English.lproj/Localizable.strings
-updated by make_strings 2002-06-12 18:10:18 +0200
+updated by make_strings 2002-06-13 01:12:09 +0200
 add comments above this one
 ***/
 
@@ -8,7 +8,7 @@ add comments above this one
 /*** Keys found in multiple places ***/
 
 /* File: ServicesParameterWindowController.m:92 */
-/* File: ServicesPrefs.m:650 */
+/* File: ServicesPrefs.m:657 */
 "Command line:" = "Command line:";
 
 /* File: TerminalView.m:1359 */
@@ -27,9 +27,9 @@ add comments above this one
 
 
 /*** Strings from Services.m ***/
-/* File: Services.m:146 */
+/* File: Services.m:147 */
 "Service aborted by user." = "Service aborted by user.";
-/* File: Services.m:54 */
+/* File: Services.m:55 */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
 = "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it.";
 
@@ -44,51 +44,51 @@ add comments above this one
 
 
 /*** Strings from ServicesPrefs.m ***/
-/* File: ServicesPrefs.m:566 */
+/* File: ServicesPrefs.m:573 */
 "Accept types" = "Accept types";
-/* File: ServicesPrefs.m:480 */
+/* File: ServicesPrefs.m:487 */
 "Add" = "Add";
-/* File: ServicesPrefs.m:329 */
+/* File: ServicesPrefs.m:336 */
 "Error importing services" = "Error importing services";
-/* File: ServicesPrefs.m:382 */
+/* File: ServicesPrefs.m:389 */
 "Export services" = "Export services";
-/* File: ServicesPrefs.m:504 */
+/* File: ServicesPrefs.m:511 */
 "Export..." = "Export...";
-/* File: ServicesPrefs.m:575 */
+/* File: ServicesPrefs.m:582 */
 "Filenames" = "Filenames";
-/* File: ServicesPrefs.m:530 */
+/* File: ServicesPrefs.m:537 */
 "Ignore output" = "Ignore output";
 /* File: ServicesPrefs.m:242 */
 "Import services" = "Import services";
-/* File: ServicesPrefs.m:496 */
+/* File: ServicesPrefs.m:503 */
 "Import..." = "Import...";
-/* File: ServicesPrefs.m:540 */
+/* File: ServicesPrefs.m:547 */
 "Input in stdin" = "Input in stdin";
-/* File: ServicesPrefs.m:541 */
+/* File: ServicesPrefs.m:548 */
 "Input on command line" = "Input on command line";
-/* File: ServicesPrefs.m:630 */
+/* File: ServicesPrefs.m:637 */
 "Key:" = "Key:";
-/* File: ServicesPrefs.m:610 */
+/* File: ServicesPrefs.m:617 */
 "Name:" = "Name:";
-/* File: ServicesPrefs.m:539 */
+/* File: ServicesPrefs.m:546 */
 "No input" = "No input";
-/* File: ServicesPrefs.m:583 */
+/* File: ServicesPrefs.m:590 */
 "Plain text" = "Plain text";
-/* File: ServicesPrefs.m:488 */
+/* File: ServicesPrefs.m:495 */
 "Remove" = "Remove";
-/* File: ServicesPrefs.m:531 */
+/* File: ServicesPrefs.m:538 */
 "Return output" = "Return output";
-/* File: ServicesPrefs.m:549 */
+/* File: ServicesPrefs.m:556 */
 "Run in background" = "Run in background";
-/* File: ServicesPrefs.m:551 */
+/* File: ServicesPrefs.m:558 */
 "Run in idle window" = "Run in idle window";
-/* File: ServicesPrefs.m:550 */
+/* File: ServicesPrefs.m:557 */
 "Run in new window" = "Run in new window";
-/* File: ServicesPrefs.m:449 */
+/* File: ServicesPrefs.m:456 */
 "Terminal services" = "Terminal services";
-/* File: ServicesPrefs.m:454 */
+/* File: ServicesPrefs.m:461 */
 "Terminal\nservices" = "Terminal\nservices";
-/* File: ServicesPrefs.m:330 */
+/* File: ServicesPrefs.m:337 */
 "The file '%@' doesn't contain valid terminal services."
 = "The file '%@' doesn't contain valid terminal services.";
 /* File: ServicesPrefs.m:223 */
@@ -151,13 +151,14 @@ add comments above this one
 /* File: main.m:161 */
 "Hide" = "Hide";
 /* File: main.m:122 */
-/* File: main.m:120 */
 "Info" = "Info";
+/* File: main.m:118 */
+"Info..." = "Info...";
 /* File: main.m:127 */
 "New window" = "New window";
 /* File: main.m:141 */
 "Paste" = "Paste";
-/* File: main.m:118 */
+/* File: main.m:120 */
 "Preferences..." = "Preferences...";
 /* File: main.m:165 */
 "Quit" = "Quit";

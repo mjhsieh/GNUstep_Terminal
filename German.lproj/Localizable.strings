@@ -4,7 +4,7 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-12 18:10:18 +0200
+updated by make_strings 2002-06-13 01:12:09 +0200
 add comments above this one
 ***/
 
@@ -12,42 +12,13 @@ add comments above this one
 /*** Keys found in multiple places ***/
 
 /* File: ServicesParameterWindowController.m:92 */
-/* File: ServicesPrefs.m:650 */
+/* File: ServicesPrefs.m:657 */
 "Command line:" = "Befehlszeile:";
 
 /* File: TerminalView.m:1359 */
 /* File: TerminalView.m:1360 */
 /* File: main.m:130 */
 "Terminal" = "Terminal";
-
-/* File: TerminalWindow.m:145 */
-/* Flag: untranslated */
-/* File: TerminalWindow.m:149 */
-/* Flag: untranslated */
-" (idle)" = " (idle)";
-
-
-/*** Unmatched/untranslated keys ***/
-
-/* File: ServicesPrefs.m:550 */
-/* Flag: untranslated */
-"Run in new window" = "Run in new window";
-
-/* File: ServicesPrefs.m:551 */
-/* Flag: untranslated */
-"Run in idle window" = "Run in idle window";
-
-/* File: TerminalView.m:1242 */
-/* Flag: untranslated */
-"[Process exited]\n" = "[Process exited]\n";
-
-/* File: TerminalView.m:1393 */
-/* Flag: untranslated */
-"Unable to open pipe for input: %m." = "Unable to open pipe for input: %m.";
-
-/* File: TerminalView.m:1405 */
-/* Flag: untranslated */
-"Unable to fork: %m." = "Unable to fork: %m.";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -60,11 +31,11 @@ add comments above this one
 
 
 /*** Strings from Services.m ***/
-/* File: Services.m:146 */
+/* File: Services.m:147 */
 "Service aborted by user." = "Dienst vom Benutzer unterbrochen.";
-/* File: Services.m:54 */
+/* File: Services.m:55 */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
-= "Es gibt keinen Terminal-Dienst namens '%@";
+= "Es gibt keinen Terminal-Dienst namens '%@.\nDie Dienste sind vermutlich nicht auf neuestem Stand.\nStarte 'make_services' zum Aktualisieren";
 
 
 /*** Strings from ServicesParameterWindowController.m ***/
@@ -77,47 +48,51 @@ add comments above this one
 
 
 /*** Strings from ServicesPrefs.m ***/
-/* File: ServicesPrefs.m:566 */
+/* File: ServicesPrefs.m:573 */
 "Accept types" = "Typen akzeptieren";
-/* File: ServicesPrefs.m:480 */
+/* File: ServicesPrefs.m:487 */
 "Add" = "Hinzufügen";
-/* File: ServicesPrefs.m:329 */
+/* File: ServicesPrefs.m:336 */
 "Error importing services" = "Fehler beim Importieren von Diensten";
-/* File: ServicesPrefs.m:382 */
+/* File: ServicesPrefs.m:389 */
 "Export services" = "Dienste exportieren";
-/* File: ServicesPrefs.m:504 */
+/* File: ServicesPrefs.m:511 */
 "Export..." = "Export...";
-/* File: ServicesPrefs.m:575 */
+/* File: ServicesPrefs.m:582 */
 "Filenames" = "Dateinamen";
-/* File: ServicesPrefs.m:530 */
+/* File: ServicesPrefs.m:537 */
 "Ignore output" = "Ausgabe ignorieren";
 /* File: ServicesPrefs.m:242 */
 "Import services" = "Dienste importieren";
-/* File: ServicesPrefs.m:496 */
+/* File: ServicesPrefs.m:503 */
 "Import..." = "Import...";
-/* File: ServicesPrefs.m:540 */
+/* File: ServicesPrefs.m:547 */
 "Input in stdin" = "Eingabe in 'stdin'";
-/* File: ServicesPrefs.m:541 */
+/* File: ServicesPrefs.m:548 */
 "Input on command line" = "Eingabe in Befehlszeile";
-/* File: ServicesPrefs.m:630 */
+/* File: ServicesPrefs.m:637 */
 "Key:" = "Schlüssel:";
-/* File: ServicesPrefs.m:610 */
+/* File: ServicesPrefs.m:617 */
 "Name:" = "Name:";
-/* File: ServicesPrefs.m:539 */
+/* File: ServicesPrefs.m:546 */
 "No input" = "Keine Eingabe";
-/* File: ServicesPrefs.m:583 */
+/* File: ServicesPrefs.m:590 */
 "Plain text" = "Normaler Text";
-/* File: ServicesPrefs.m:488 */
+/* File: ServicesPrefs.m:495 */
 "Remove" = "Entfernen";
-/* File: ServicesPrefs.m:531 */
+/* File: ServicesPrefs.m:538 */
 "Return output" = "Ausgabe zurückgeben";
-/* File: ServicesPrefs.m:549 */
+/* File: ServicesPrefs.m:556 */
 "Run in background" = "Im Hintergrund laufen";
-/* File: ServicesPrefs.m:449 */
+/* File: ServicesPrefs.m:558 */
+"Run in idle window" = "In unbenutztem Fenster starten";
+/* File: ServicesPrefs.m:557 */
+"Run in new window" = "In neuem Fenster starten";
+/* File: ServicesPrefs.m:456 */
 "Terminal services" = "Terminal-Dienste";
-/* File: ServicesPrefs.m:454 */
+/* File: ServicesPrefs.m:461 */
 "Terminal\nservices" = "Terminal\nDienste";
-/* File: ServicesPrefs.m:330 */
+/* File: ServicesPrefs.m:337 */
 "The file '%@' doesn't contain valid terminal services."
 = "Die Datei '%@' beinhaltet keine gültigen Terminal-Dienste.";
 /* File: ServicesPrefs.m:223 */
@@ -125,8 +100,15 @@ add comments above this one
 
 
 /*** Strings from TerminalView.m ***/
+/* File: TerminalView.m:1405 */
+"Unable to fork: %m." = "Kann keinen neuen Prozess starten: %m.";
+/* File: TerminalView.m:1393 */
+"Unable to open pipe for input: %m."
+= "Kann Pipe nicht zur Eingabe benutzen: %m.";
 /* File: TerminalView.m:1332 */
 "Unable to spawn process: %m." = "Kann keinen Prozess erzeugen: %m.";
+/* File: TerminalView.m:1242 */
+"[Process exited]\n" = "[Prozess beendet]\n";
 
 
 /*** Strings from TerminalViewPrefs.m ***/
@@ -156,6 +138,12 @@ add comments above this one
 "Style:" = "Stil:";
 
 
+/*** Strings from TerminalWindow.m ***/
+/* File: TerminalWindow.m:149 */
+/* File: TerminalWindow.m:145 */
+" (idle)" = " (unbenutzt)";
+
+
 /*** Strings from main.m ***/
 /* File: main.m:149 */
 "Close" = "Schließen";
@@ -168,13 +156,14 @@ add comments above this one
 /* File: main.m:161 */
 "Hide" = "Ausblenden";
 /* File: main.m:122 */
-/* File: main.m:120 */
 "Info" = "Info";
+/* File: main.m:118 */
+"Info..." = "Info...";
 /* File: main.m:127 */
 "New window" = "Neues Fenster";
 /* File: main.m:141 */
 "Paste" = "Einfügen";
-/* File: main.m:118 */
+/* File: main.m:120 */
 "Preferences..." = "Grundeinstellungen...";
 /* File: main.m:165 */
 "Quit" = "Beenden";

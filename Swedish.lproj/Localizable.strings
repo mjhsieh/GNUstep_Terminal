@@ -1,6 +1,6 @@
 /***
 Swedish.lproj/Localizable.strings
-updated by make_strings 2002-06-12 18:10:18 +0200
+updated by make_strings 2002-06-13 01:12:09 +0200
 add comments above this one
 ***/
 
@@ -8,7 +8,7 @@ add comments above this one
 /*** Keys found in multiple places ***/
 
 /* File: ServicesParameterWindowController.m:92 */
-/* File: ServicesPrefs.m:650 */
+/* File: ServicesPrefs.m:657 */
 "Command line:" = "Kommandorad:";
 
 /* File: TerminalView.m:1359 */
@@ -18,10 +18,6 @@ add comments above this one
 
 
 /*** Unmatched/untranslated keys ***/
-
-/* File: ServicesPrefs.m:551 */
-/* Flag: untranslated */
-"Run in idle window" = "Kör i ledigt fönster";
 
 /* File: TerminalView.m:1393 */
 /* Flag: untranslated */
@@ -42,9 +38,9 @@ add comments above this one
 
 
 /*** Strings from Services.m ***/
-/* File: Services.m:146 */
+/* File: Services.m:147 */
 "Service aborted by user." = "Tjänsten avbröts av användaren.";
-/* File: Services.m:54 */
+/* File: Services.m:55 */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
 = "Det finns ingen terminaltjänst '%@'.\nDin tjänstlista är troligen gammal.\nKör 'make_services' för att uppdatera den.";
 
@@ -59,49 +55,51 @@ add comments above this one
 
 
 /*** Strings from ServicesPrefs.m ***/
-/* File: ServicesPrefs.m:566 */
+/* File: ServicesPrefs.m:573 */
 "Accept types" = "Acceptera typer";
-/* File: ServicesPrefs.m:480 */
+/* File: ServicesPrefs.m:487 */
 "Add" = "Lägg till";
-/* File: ServicesPrefs.m:329 */
+/* File: ServicesPrefs.m:336 */
 "Error importing services" = "Fel vid importering av tjänster";
-/* File: ServicesPrefs.m:382 */
+/* File: ServicesPrefs.m:389 */
 "Export services" = "Exportera tjänster";
-/* File: ServicesPrefs.m:504 */
+/* File: ServicesPrefs.m:511 */
 "Export..." = "Exportera...";
-/* File: ServicesPrefs.m:575 */
+/* File: ServicesPrefs.m:582 */
 "Filenames" = "Filnamn";
-/* File: ServicesPrefs.m:530 */
+/* File: ServicesPrefs.m:537 */
 "Ignore output" = "Ignorera utdata";
 /* File: ServicesPrefs.m:242 */
 "Import services" = "Importera tjänster";
-/* File: ServicesPrefs.m:496 */
+/* File: ServicesPrefs.m:503 */
 "Import..." = "Importera...";
-/* File: ServicesPrefs.m:540 */
+/* File: ServicesPrefs.m:547 */
 "Input in stdin" = "Indata till stdin";
-/* File: ServicesPrefs.m:541 */
+/* File: ServicesPrefs.m:548 */
 "Input on command line" = "Indata på kommandoraden";
-/* File: ServicesPrefs.m:630 */
+/* File: ServicesPrefs.m:637 */
 "Key:" = "Tangent:";
-/* File: ServicesPrefs.m:610 */
+/* File: ServicesPrefs.m:617 */
 "Name:" = "Namn:";
-/* File: ServicesPrefs.m:539 */
+/* File: ServicesPrefs.m:546 */
 "No input" = "Ingen indata";
-/* File: ServicesPrefs.m:583 */
+/* File: ServicesPrefs.m:590 */
 "Plain text" = "Vanlig text";
-/* File: ServicesPrefs.m:488 */
+/* File: ServicesPrefs.m:495 */
 "Remove" = "Ta bort";
-/* File: ServicesPrefs.m:531 */
+/* File: ServicesPrefs.m:538 */
 "Return output" = "Returnera utdata";
-/* File: ServicesPrefs.m:549 */
+/* File: ServicesPrefs.m:556 */
 "Run in background" = "Kör i bakgrunden";
-/* File: ServicesPrefs.m:550 */
+/* File: ServicesPrefs.m:558 */
+"Run in idle window" = "Kör i ledigt fönster";
+/* File: ServicesPrefs.m:557 */
 "Run in new window" = "Kör i nytt fönster";
-/* File: ServicesPrefs.m:449 */
+/* File: ServicesPrefs.m:456 */
 "Terminal services" = "Terminaltjänster";
-/* File: ServicesPrefs.m:454 */
+/* File: ServicesPrefs.m:461 */
 "Terminal\nservices" = "Terminal-\ntjänster";
-/* File: ServicesPrefs.m:330 */
+/* File: ServicesPrefs.m:337 */
 "The file '%@' doesn't contain valid terminal services."
 = "Filen '%@' innehåller inte giltiga terminaltjänster.";
 /* File: ServicesPrefs.m:223 */
@@ -160,13 +158,14 @@ add comments above this one
 /* File: main.m:161 */
 "Hide" = "Göm";
 /* File: main.m:122 */
-/* File: main.m:120 */
 "Info" = "Info";
+/* File: main.m:118 */
+"Info..." = "Info...";
 /* File: main.m:127 */
 "New window" = "Nytt fönster";
 /* File: main.m:141 */
 "Paste" = "Klistra";
-/* File: main.m:118 */
+/* File: main.m:120 */
 "Preferences..." = "Inställningar...";
 /* File: main.m:165 */
 "Quit" = "Avsluta";
