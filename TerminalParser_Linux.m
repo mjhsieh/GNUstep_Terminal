@@ -1,5 +1,5 @@
 /*
-copyrqsqight 2002 Alexander Malmberg <alexander@malmberg.org>
+copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 */
 
 #include <Foundation/NSString.h>
