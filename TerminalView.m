@@ -1925,7 +1925,7 @@ improve? */
 			font=f;
 		[font retain];
 
-		boldFont=[[TerminalViewDisplayPrefs boldTerminalFont] retain];
+		boldFont=[TerminalViewDisplayPrefs boldTerminalFont];
 		f=[boldFont screenFont];
 		if (f)
 			boldFont=f;
