@@ -1199,6 +1199,9 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 }
 
 
+/*
+Translates '\n' to '\r' when sending.
+*/
 -(void) sendString: (NSString *)s
 {
 	int l=[s length];
@@ -1217,6 +1220,8 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		for (i=0;i<l;i++)
 		{
 			ucs=htonl([s characterAtIndex: i]);
+			if (ucs=='\n') ucs='\r';
+
 			inp=&ucs;
 			insize=4;
 			outsize=sizeof(buf);
@@ -1236,6 +1241,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		for (i=0;i<l;i++)
 		{
 			ucs=[s characterAtIndex: i];
+			if (ucs=='\n') ucs='\r';
 			if (ucs<256)
 			{
 				buf=ucs;
