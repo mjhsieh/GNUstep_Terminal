@@ -21,6 +21,10 @@ lots borrowed from linux/drivers/char/console.c, GNU GPL:ed
 #include <Foundation/NSDebug.h>
 #include <AppKit/NSGraphics.h>
 
+/* TODO */
+#include "TerminalViewPrefs.h"
+#include <AppKit/NSEvent.h>
+
 #include "TerminalParser_Linux.h"
 
 #include "TerminalParser_LinuxPrefs.h"
@@ -1238,10 +1242,6 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		}
 	}
 }
-
-/* TODO */
-#include "TerminalViewPrefs.h"
-#include <AppKit/NSEvent.h>
 
 -(void) handleKeyEvent: (NSEvent *)e
 {
