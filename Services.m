@@ -329,7 +329,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 	d=[NSDictionary dictionaryWithContentsOfFile:
 		[[NSBundle mainBundle] pathForResource: @"DefaultTerminalServices"
-			ofType: @"plist"]];
+			ofType: @"svcs"]];
 	d=[d objectForKey: @"TerminalServices"];
 	return d;
 }

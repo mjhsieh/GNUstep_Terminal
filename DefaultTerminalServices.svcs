@@ -1,4 +1,5 @@
 {
+    Description = "Default terminal services";
     TerminalServices = {
 	"Arithmetic Calculation" = {
 	    Commandline = "echo \"%s\" | bc";
