@@ -10,15 +10,14 @@ of the License. See COPYING or main.m for more information.
 #include <math.h>
 #include <sys/wait.h>
 
-#include <Foundation/NSString.h>
 #include <Foundation/NSBundle.h>
 #include <Foundation/NSDebug.h>
 #include <Foundation/NSNotification.h>
+#include <Foundation/NSString.h>
 #include <Foundation/NSUserDefaults.h>
-#include <AppKit/NSWindow.h>
 #include <AppKit/NSScroller.h>
+#include <AppKit/NSWindow.h>
 #include <AppKit/GSHbox.h>
-#include <AppKit/PSOperators.h>
 
 #include "TerminalWindow.h"
 
@@ -36,6 +35,9 @@ static void get_zombies(void)
 //		printf("got %i\n",pid);
 	}
 }
+
+
+static int num_instances;
 
 
 @implementation TerminalWindowController
@@ -84,6 +86,8 @@ static void get_zombies(void)
 		backing: NSBackingStoreRetained
 		defer: YES];
 	if (!(self=[super initWithWindow: win])) return nil;
+
+	num_instances++;
 
 	windowRect = [win frame];
 	minSize.width += windowRect.size.width - contentSize.width;
@@ -153,6 +157,7 @@ static void get_zombies(void)
 
 -(void) dealloc
 {
+	num_instances--;
 	[[NSNotificationCenter defaultCenter]
 		removeObserver: self];
 	[super dealloc];
@@ -237,6 +242,11 @@ static NSMutableArray *idle_list;
 	if ([idle_list count])
 		return [idle_list objectAtIndex: 0];
 	return [[self alloc] init];
+}
+
++(int) numberOfActiveWindows
+{
+	return num_instances-[idle_list count];
 }
 
 @end

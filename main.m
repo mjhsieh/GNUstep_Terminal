@@ -15,14 +15,15 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <Foundation/NSRunLoop.h>
 #include <Foundation/NSBundle.h>
-#include <Foundation/NSUserDefaults.h>
-#include <Foundation/NSProcessInfo.h>
 #include <Foundation/NSDebug.h>
+#include <Foundation/NSProcessInfo.h>
+#include <Foundation/NSRunLoop.h>
+#include <Foundation/NSUserDefaults.h>
 #include <AppKit/NSApplication.h>
-#include <AppKit/NSView.h>
 #include <AppKit/NSMenu.h>
+#include <AppKit/NSPanel.h>
+#include <AppKit/NSView.h>
 
 
 #include "TerminalWindow.h"
@@ -243,6 +244,24 @@ general
 	}
 	else
 		[self openWindow: self];
+}
+
+
+-(NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication *)sender
+{
+	if (![TerminalWindowController numberOfActiveWindows])
+		return NSTerminateNow;
+
+	if (NSRunAlertPanel(
+		_(@"Quit?"),
+		_(@"There are active windows. Quitting will close them."),
+		_(@"Don't quit"),
+		_(@"Quit anyway"),
+		nil)==NSAlertAlternateReturn)
+	{
+		return NSTerminateNow;
+	}
+	return NSTerminateCancel;
 }
 
 @end

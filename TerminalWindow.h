@@ -23,6 +23,8 @@ of the License. See COPYING or main.m for more information.
 +(TerminalWindowController *) newTerminalWindow;
 +(TerminalWindowController *) idleTerminalWindow;
 
++(int) numberOfActiveWindows;
+
 - init;
 
 -(TerminalView *) terminalView;
