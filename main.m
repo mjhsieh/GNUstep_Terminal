@@ -105,10 +105,11 @@ enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 
 #define SCREEN(x,y) (screen[(y)*sx+(x)])
 
--(void) _setAttrs: (screen_char_t)sch
+-(void) _setAttrs: (screen_char_t)sch : (float)x0 : (float)y0
 {
+	int fg,bg;
 static const float col[16][3]={
-{0.00, 0.00, 0.00},
+{0.90, 0.70, 0.20},
 {0.00, 0.00, 0.66},
 {0.00, 0.66, 0.00},
 {0.00, 0.66, 0.66},
@@ -128,8 +129,18 @@ static const float col[16][3]={
 {1.00, 1.00, 0.00},
 {1.00, 1.00, 1.00},
 };
-	if (sch.attr&3 && sch.color<8) sch.color+=8;
-	PSsetrgbcolor(col[sch.color][0],col[sch.color][1],col[sch.color][2]);
+	fg=sch.color&0x0f;
+	bg=sch.color&0xf0;
+
+	if (bg)
+	{
+		PSsetrgbcolor(col[bg][0],col[bg][1],col[bg][2]);
+		PSrectfill(x0,y0,fx,fy);
+	}
+
+	if (sch.attr&3 && fg<8) fg+=8;
+	PSsetrgbcolor(col[fg][0],col[fg][1],col[fg][2]);
+
 }
 
 -(void) drawRect: (NSRect)r
@@ -143,14 +154,15 @@ static const float col[16][3]={
 	DPSsetgray(cur,0.0);
 	DPSrectfill(cur,r.origin.x,r.origin.y,r.size.width,r.size.height);
 
+//	DPSsetgray(cur,1.0);
 	[font set];
-	buf[1]=0;
+
 	for (ix=0;ix<sx;ix++)
 		for (iy=0;iy<sy;iy++)
 		{
 			if (SCREEN(ix,iy).ch)
 			{
-				[self _setAttrs: SCREEN(ix,iy)];
+				[self _setAttrs: SCREEN(ix,iy) : ix*fx:(sy-1-iy)*fy];
 
 				dlen=sizeof(buf)-1;
 				GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
