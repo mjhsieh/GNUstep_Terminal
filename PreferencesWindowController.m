@@ -122,7 +122,7 @@ of the License. See COPYING or main.m for more information.
 	[win setDelegate: self];
 	[win setTitle: _(@"Preferences")];
 
-	[win setMinSize: NSMakeSize(360,430)];
+	[win setMinSize: NSMakeSize(410,430)];
 	[win setFrameUsingName: @"Preferences"];
 	[win setFrameAutosaveName: @"Preferences"];
 
