@@ -66,8 +66,37 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	}
 	else if (input==2)
 	{
-		cmdline=[[cmdline stringByAppendingString: @" "]
-			stringByAppendingString: [pb stringForType: NSStringPboardType]];
+		int i,c=[cmdline length];
+		unichar ch;
+		NSMutableString *str=[cmdline mutableCopy];
+
+		for (i=0;i<c-1;i++)
+		{
+			ch=[str characterAtIndex: i];
+			if (ch!='%')
+				continue;
+			ch=[str characterAtIndex: i+1];
+			if (ch=='%')
+			{
+				[str replaceCharactersInRange: NSMakeRange(i,1)
+					withString: @""];
+				continue;
+			}
+			if (ch=='s')
+				break;
+		}
+
+		if (i==c-1)
+		{
+			[str appendString: @" "];
+			[str appendString: [pb stringForType: NSStringPboardType]];
+		}
+		else
+		{
+			[str replaceCharactersInRange: NSMakeRange(i,2)
+				withString: [pb stringForType: NSStringPboardType]];
+		}
+		cmdline=[str autorelease];
 	}
 
 	switch (type)
