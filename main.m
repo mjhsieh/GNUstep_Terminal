@@ -1474,7 +1474,7 @@ while (1)
 		const char *shell=getenv("SHELL");
 		if (!shell) shell="/bin/sh";
 		putenv("TERM=linux");
-		execl(shell,shell);
+		execl(shell,shell,NULL);
 		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
 		exit(1);
 	}
