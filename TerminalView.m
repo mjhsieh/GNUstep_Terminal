@@ -305,6 +305,31 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 }
 
 
+-(void) _scrollTo: (int)new_scroll  update: (BOOL)update
+{
+	if (new_scroll>0)
+		new_scroll=0;
+	if (new_scroll<-sb_length)
+		new_scroll=-sb_length;
+
+	if (new_scroll==current_scroll)
+		return;
+	current_scroll=new_scroll;
+
+	if (update)
+	{
+		if (sb_length)
+			[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+				knobProportion: sy/(float)(sy+sb_length)];
+		else
+			[scroller setFloatValue: 1.0 knobProportion: 1.0];
+	}
+
+	draw_all=YES;
+	[self setNeedsDisplay: YES];
+}
+
+
 -(void) _sendString: (NSString *)s
 {
 	int i;
@@ -382,8 +407,22 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	case NSInsertFunctionKey  : str="\e[2~"; break;
 	case NSDeleteFunctionKey  : str="\e[3~"; break;
 	case NSEndFunctionKey     : str="\e[4~"; break;
-	case NSPageUpFunctionKey  : str="\e[5~"; break;
-	case NSPageDownFunctionKey: str="\e[6~"; break;
+	case NSPageUpFunctionKey  :
+		if (mask&NSShiftKeyMask)
+		{
+			[self _scrollTo: current_scroll-sy+1  update: YES];
+			return;
+		}
+		str="\e[5~";
+		break;
+	case NSPageDownFunctionKey:
+		if (mask&NSShiftKeyMask)
+		{
+			[self _scrollTo: current_scroll+sy-1  update: YES];
+			return;
+		}
+		str="\e[6~";
+		break;
 
 	case 8: ch2=0x7f; break;
 	case 3: ch2=0x0d; break;
@@ -682,23 +721,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		mult=5;
 
 	new_scroll=current_scroll-delta*mult;
-	if (new_scroll>0)
-		new_scroll=0;
-	if (new_scroll<-sb_length)
-		new_scroll=-sb_length;
-
-	if (new_scroll==current_scroll)
-		return;
-	current_scroll=new_scroll;
-
-	if (sb_length)
-		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-			knobProportion: sy/(float)(sy+sb_length)];
-	else
-		[scroller setFloatValue: 1.0 knobProportion: 1.0];
-
-	draw_all=YES;
-	[self setNeedsDisplay: YES];
+	[self _scrollTo: new_scroll  update: YES];
 }
 
 
@@ -1034,26 +1057,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	else
 		return;
 
-	if (new_scroll>0)
-		new_scroll=0;
-	if (new_scroll<-sb_length)
-		new_scroll=-sb_length;
-
-	if (new_scroll!=current_scroll)
-	{
-		current_scroll=new_scroll;
-		draw_all=YES;
-		[self setNeedsDisplay: YES];
-
-		if (update)
-		{
-			if (sb_length)
-				[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
-					knobProportion: sy/(float)(sy+sb_length)];
-			else
-				[scroller setFloatValue: 1.0 knobProportion: 1.0];
-		}
-	}
+	[self _scrollTo: new_scroll  update: update];
 }
 
 -(void) setScroller: (NSScroller *)sc
