@@ -8,13 +8,14 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #ifdef freebsd
 #  include <sys/types.h>
 #  include <sys/ioctl.h>
-#  include <sys/time.h>
 #  include <termios.h>
 #  include <libutil.h>
 #  include <pcap.h>
 #else
 #  include <termio.h>
 #endif
+#include <sys/time.h>
+#include <sys/types.h>
 #include <unistd.h>
 #ifndef freebsd
 #  include <pty.h>
@@ -955,13 +956,46 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 -(void) _updateScroll: (id)sender
 {
 	int new_scroll;
-	float f=[scroller floatValue];
-	new_scroll=(f-1.0)*sb_length;
+	int part=[scroller hitPart];
+	BOOL update=YES;
+
+	if (part==NSScrollerKnob ||
+	    part==NSScrollerKnobSlot)
+	{
+		float f=[scroller floatValue];
+		new_scroll=(f-1.0)*sb_length;
+		update=NO;
+	}
+	else if (part==NSScrollerDecrementLine)
+		new_scroll=current_scroll-1;
+	else if (part==NSScrollerDecrementPage)
+		new_scroll=current_scroll-sy/2;
+	else if (part==NSScrollerIncrementLine)
+		new_scroll=current_scroll+1;
+	else if (part==NSScrollerIncrementPage)
+		new_scroll=current_scroll+sy/2;
+	else
+		return;
+
+	if (new_scroll>0)
+		new_scroll=0;
+	if (new_scroll<-sb_length)
+		new_scroll=-sb_length;
+
 	if (new_scroll!=current_scroll)
 	{
 		current_scroll=new_scroll;
 		draw_all=YES;
 		[self setNeedsDisplay: YES];
+
+		if (update)
+		{
+			if (sb_length)
+				[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
+					knobProportion: sy/(float)(sy+sb_length)];
+			else
+				[scroller setFloatValue: 1.0 knobProportion: 1.0];
+		}
 	}
 }
 
