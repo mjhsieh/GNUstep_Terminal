@@ -117,6 +117,8 @@ enum { ESnormal, ESesc, ESsquare, ESgetpars, ESgotpars, ESfunckey,
 
 -(void) _default_attr;
 
+-(void) sendCString: (const char *)msg;
+
 @end
 
 @implementation TerminalView
@@ -194,25 +196,16 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	if (re)
 	{
 		float t;
+#define SWAP(x,y) t=x; x=y; y=t;
 
-		t=bh;
-		bh=h;
-		h=t;
-
-		t=bs;
-		bs=s;
-		s=t;
-
-		t=bb;
-		bb=b;
-		b=t;
+		SWAP(h,bh)
+		SWAP(s,bs)
+		SWAP(b,bb)
+#undef SWAP
 	}
 
-	if (bb>0)
-	{
-		PSsethsbcolor(bh,bs,bb);
-		PSrectfill(x0,y0,fx,fy);
-	}
+	PSsethsbcolor(bh,bs,bb);
+	PSrectfill(x0,y0,fx,fy);
 
 	PSsethsbcolor(h,s,b);
 
@@ -255,11 +248,94 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 -(void) keyDown: (NSEvent *)e
 {
-	NSString *s=[e characters];
-	unichar uc=[s characterAtIndex: 0];
-	write(master_fd,&uc,1);
-//	printf("got key '%@'\n",e);
+/* TODO: what do we do with non-ascii characters? */
+	NSString *s=[e charactersIgnoringModifiers];
+	unsigned int mask=[e modifierFlags];
+	unichar ch,ch2;
+	const char *str;
 
+/*	NSLog(@"got key flags=%08x  repeat=%i '%@' '%@' %4i %04x %i %04x %i\n",
+		[e modifierFlags],[e isARepeat],[e characters],[e charactersIgnoringModifiers],[e keyCode],
+		[[e characters] characterAtIndex: 0],[[e characters] length],
+		[[e charactersIgnoringModifiers] characterAtIndex: 0],[[e charactersIgnoringModifiers] length]);*/
+
+	if ([s length]>1)
+	{
+		int i;
+		s=[e characters];
+		for (i=0;i<[s length];i++)
+		{
+			unichar uc=[s characterAtIndex: 0];
+			if (uc>256)
+				NSBeep();
+			else
+				write(master_fd,&uc,1);
+		}
+		return;
+	}
+
+	ch=[s characterAtIndex: 0];
+	str=NULL;
+	ch2=0;
+	switch (ch)
+	{
+	case NSUpArrowFunctionKey   : str="\e[A"; break;
+	case NSDownArrowFunctionKey : str="\e[B"; break;
+	case NSLeftArrowFunctionKey : str="\e[D"; break;
+	case NSRightArrowFunctionKey: str="\e[C"; break;
+
+	case NSF1FunctionKey : str="\e[[A"; break;
+	case NSF2FunctionKey : str="\e[[B"; break;
+	case NSF3FunctionKey : str="\e[[C"; break;
+	case NSF4FunctionKey : str="\e[[D"; break;
+	case NSF5FunctionKey : str="\e[[E"; break;
+
+	case NSF6FunctionKey : str="\e[17~"; break;
+	case NSF7FunctionKey : str="\e[18~"; break;
+	case NSF8FunctionKey : str="\e[19~"; break;
+	case NSF9FunctionKey : str="\e[20~"; break;
+	case NSF10FunctionKey: str="\e[21~"; break;
+	case NSF11FunctionKey: str="\e[23~"; break;
+	case NSF12FunctionKey: str="\e[24~"; break;
+
+	case NSF13FunctionKey: str="\e[25~"; break;
+	case NSF14FunctionKey: str="\e[26~"; break;
+	case NSF15FunctionKey: str="\e[28~"; break;
+	case NSF16FunctionKey: str="\e[29~"; break;
+	case NSF17FunctionKey: str="\e[31~"; break;
+	case NSF18FunctionKey: str="\e[32~"; break;
+	case NSF19FunctionKey: str="\e[33~"; break;
+	case NSF20FunctionKey: str="\e[34~"; break;
+
+	case NSHomeFunctionKey    : str="\e[1~"; break;
+	case NSInsertFunctionKey  : str="\e[2~"; break;
+	case NSDeleteFunctionKey  : str="\e[3~"; break;
+	case NSEndFunctionKey     : str="\e[4~"; break;
+	case NSPageUpFunctionKey  : str="\e[5~"; break;
+	case NSPageDownFunctionKey: str="\e[6~"; break;
+
+	default:
+	{
+		int i;
+		s=[e characters];
+		for (i=0;i<[s length];i++)
+		{
+			unichar uc=[s characterAtIndex: 0];
+			if (uc>256)
+				NSBeep();
+			else
+				write(master_fd,&uc,1);
+		}
+		return;
+	}
+	}
+
+	if (str)
+		[self sendCString: str];
+	else if (ch2>256)
+		NSBeep();
+	else if (ch2>0)
+		write(master_fd,&ch2,1);
 }
 
 -(BOOL) acceptsFirstResponder
@@ -552,32 +628,32 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		}
 }
 
-#define scrup(foo,t,b,pnr) do { \
+#define scrup(foo,t,b,nr) do { \
 	screen_char_t *d, *s; \
-	int nr=pnr; \
+	int scrup_nr=nr; \
  \
-	if (t+nr >= b) \
-		nr = b - t - 1; \
-	if (b > video_num_lines || t >= b || nr < 1) \
+	if (t+scrup_nr >= b) \
+		scrup_nr = b - t - 1; \
+	if (b > video_num_lines || t >= b || scrup_nr < 1) \
 		return; \
 	d = &SCREEN(0,t); \
-	s = &SCREEN(0,t+nr); \
-	memmove(d, s, (b-t-nr) * sx*sizeof(screen_char_t)); \
-	memset(d + (b-t-nr) * video_num_columns, video_erase_char, sizeof(screen_char_t)*sx*nr); \
+	s = &SCREEN(0,t+scrup_nr); \
+	memmove(d, s, (b-t-scrup_nr) * sx*sizeof(screen_char_t)); \
+	memset(d + (b-t-scrup_nr) * video_num_columns, video_erase_char, sizeof(screen_char_t)*sx*scrup_nr); \
 } while (0)
 
-#define scrdown(foo,t,b,pnr) do { \
+#define scrdown(foo,t,b,nr) do { \
 	screen_char_t *s; \
 	unsigned int step; \
-	int nr=pnr; \
+	int scrdown_nr=nr; \
  \
-	if (t+nr >= b) \
-		nr = b - t - 1; \
-	if (b > video_num_lines || t >= b || nr < 1) \
+	if (t+scrdown_nr >= b) \
+		scrdown_nr = b - t - 1; \
+	if (b > video_num_lines || t >= b || scrdown_nr < 1) \
 		return; \
 	s = &SCREEN(0,t); \
-	step = video_num_columns * nr; \
-	memmove(s + step, s, (b-t-nr)*sx*sizeof(screen_char_t)); \
+	step = video_num_columns * scrdown_nr; \
+	memmove(s + step, s, (b-t-scrdown_nr)*sx*sizeof(screen_char_t)); \
 	memset(s, video_erase_char, sizeof(screen_char_t)*step); \
 } while (0)
 
@@ -602,8 +678,6 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 	memset(p, video_erase_char, nr*sizeof(screen_char_t)); \
 } while (0)
 
-#define insert_line(foo,nr) do { scrdown(foo,y,bottom,nr); } while (0)
-#define delete_line(foo,nr) do { scrup(foo,y,bottom,nr); } while (0)
 
 
 -(void) _csi_at: (unsigned int)nr
@@ -621,7 +695,8 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		nr = video_num_lines - y;
 	else if (!nr)
 		nr = 1;
-	insert_line(currcons, nr);
+
+	scrdown(foo,y,bottom,nr);
 }
 
 -(void) _csi_P: (unsigned int)nr
@@ -639,7 +714,7 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		nr = video_num_lines - y;
 	else if (!nr)
 		nr=1;
-	delete_line(currcons, nr);
+	scrup(foo,y,bottom,nr);
 }
 
 #define set_kbd(foo)
@@ -1385,6 +1460,7 @@ while (1)
 	{
 		const char *shell=getenv("SHELL");
 		if (!shell) shell="/bin/sh";
+		putenv("TERM=linux");
 		execl(shell,shell);
 		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
 		exit(1);
@@ -1459,21 +1535,29 @@ while (1)
 	fy=[font boundingRectForFont].size.height;
 
 	win=[[NSWindow alloc] initWithContentRect: NSMakeRect(100,100,fx*80,fy*24)
-		styleMask: /*NSClosableWindowMask|*/NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
+		styleMask: NSClosableWindowMask|NSTitledWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask
 		backing: NSBackingStoreRetained
 		defer: YES];
 	if (!(self=[super initWithWindow: win])) return nil;
 
 	[win setTitle: @"Terminal"];
+	[win setDelegate: self];
 
 	tv=[[TerminalView alloc] init];
 	[win setContentView: tv];
 	[tv release];
+	[win makeFirstResponder: tv];
 
 	[win release];
 
 	return self;
 }
+
+-(void) windowWillClose: (NSNotification *)n
+{
+	[self autorelease];
+}
+
 @end
 
 
@@ -1496,7 +1580,6 @@ while (1)
 
 @interface Terminal : NSObject
 {
-	TerminalWindowController *twc;
 }
 
 @end
@@ -1517,7 +1600,6 @@ while (1)
 
 -(void) applicationWillTerminate: (NSNotification *)n
 {
-	DESTROY(twc);
 }
 
 
@@ -1534,6 +1616,14 @@ while (1)
 	[m addItemWithTitle: _(@"Info")
 		action: @selector(orderFrontStandardInfoPanel:)];
 	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Info")]];
+	[m release];
+
+	/* 'Terminal' menu */
+	m=[[NSMenu alloc] init];
+	[m addItemWithTitle: _(@"New window")
+		action: @selector(openWindow:)
+		keyEquivalent: @"n"];
+	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Terminal")]];
 	[m release];
 
 	/* 'Edit' menu */
@@ -1576,10 +1666,16 @@ while (1)
 	[menu release];
 }
 
--(void) applicationDidFinishLaunching: (NSNotification *)n
+-(void) openWindow: (id)sender
 {
+	TerminalWindowController *twc;
 	twc=[[TerminalWindowController alloc] init];
 	[twc showWindow: self];
+}
+
+-(void) applicationDidFinishLaunching: (NSNotification *)n
+{
+	[self openWindow: self];
 }
 
 @end
