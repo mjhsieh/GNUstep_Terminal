@@ -537,13 +537,15 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 					update_attr(currcons);
 			}
 			break;
+#endif
 		case 8:	/* store colors as defaults */
-			def_color = attr;
-			if (hi_font_mask == 0x100)
-				def_color >>= 1;
-			default_attr(currcons);
-			update_attr(currcons);
+			def_color = color;
+/*			if (hi_font_mask == 0x100)
+				def_color >>= 1;*/
+			[self _default_attr];
+			[self _update_attr];
 			break;
+#if 0
 		case 9:	/* set blanking interval */
 			blankinterval = ((par[1] < 60) ? par[1] : 60) * 60 * HZ;
 			poke_blanked_console();
