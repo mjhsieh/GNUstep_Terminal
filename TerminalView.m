@@ -350,7 +350,7 @@ static void set_foreground(NSGraphicsContext *gc,
 
 				scr_x=ix*fx;
 
-				if (ch->ch!=0 && ch->ch!=32)
+				if (ch->attr&0x02 || (ch->ch!=0 && ch->ch!=32))
 				{
 					if (!(ch->attr&0x8))
 					{
@@ -374,7 +374,10 @@ static void set_foreground(NSGraphicsContext *gc,
 							set_background(cur,l_color,l_attr);
 						}
 					}
+				}
 
+				if (ch->ch!=0 && ch->ch!=32)
+				{
 					if ((ch->attr&3)==2)
 					{
 						encoding=boldFont_encoding;
@@ -404,6 +407,9 @@ static void set_foreground(NSGraphicsContext *gc,
 					DPSmoveto(cur,scr_x+fx0,scr_y+fy0);
 					DPSshow(cur,buf);
 				}
+
+				if (ch->attr&0x4)
+					DPSrectfill(cur,scr_x,scr_y,fx,1);
 
 				if (ch->attr&0x40)
 					DPScompositerect(cur,scr_x,scr_y,fx,fy,NSCompositeHighlight);
