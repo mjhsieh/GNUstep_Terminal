@@ -108,6 +108,7 @@ TerminalScreen protocol implementation and rendering methods
 #define SCREEN(x,y) (screen[(y)*sx+(x)])
 
 
+/* handle accumulated pending scrolls with a single composite */
 -(void) _handlePendingScroll: (BOOL)lockFocus
 {
 	float x0,y0,w,h,dx,dy;
@@ -229,6 +230,7 @@ static void set_foreground(NSGraphicsContext *gc,
 	if (pending_scroll)
 		[self _handlePendingScroll: NO];
 
+	/* draw the black border around the view if needed*/
 	{
 		float a,b;
 		DPSsetgray(cur,0.0);
@@ -247,6 +249,7 @@ static void set_foreground(NSGraphicsContext *gc,
 			DPSrectfill(cur,r.origin.x,a,r.size.width,b-a);
 	}
 
+	/* figure out what character cells might need redrawing */
 	r.origin.x-=border_x;
 	r.origin.y-=border_y;
 
@@ -272,8 +275,12 @@ static void set_foreground(NSGraphicsContext *gc,
 		screen_char_t *ch;
 		float scr_y,scr_x,start_x;
 
+		/* setting the color is slow, so we try to avoid it */
 		unsigned char l_color,l_attr,color;
 
+		/* Fill the background of dirty cells. Since the background doesn't
+		change that often, runs of dirty cells with the same background color
+		are combined and drawn with a single rectfill. */
 		l_color=0;
 		l_attr=0;
 		set_foreground(cur,l_color,l_attr);
@@ -356,6 +363,8 @@ static void set_foreground(NSGraphicsContext *gc,
 				R(start_x,scr_y,scr_x-start_x,fy);
 			}
 		}
+
+		/* now draw any dirty characters */
 		for (iy=y0;iy<y1;iy++)
 		{
 			ry=iy+current_scroll;
@@ -420,6 +429,8 @@ static void set_foreground(NSGraphicsContext *gc,
 						current_font=f;
 					}
 
+					/* we short-circuit utf8 for performance with back-art */
+					/* TODO: short-circuit latin1 too? */
 					if (encoding==NSUTF8StringEncoding)
 					{
 						unichar uch=ch->ch;
@@ -483,9 +494,11 @@ static void set_foreground(NSGraphicsContext *gc,
 					/* ~3800 cycles total */
 				}
 
+				/* underline */
 				if (ch->attr&0x4)
 					DPSrectfill(cur,scr_x,scr_y,fx,1);
 
+				/* invert */
 				if (ch->attr&0x40)
 					DPScompositerect(cur,scr_x,scr_y,fx,fy,NSCompositeHighlight);
 			}

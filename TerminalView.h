@@ -65,6 +65,8 @@ struct selection_range
 	loops fairly often to process other events */
 	int num_scrolls;
 
+	/* To avoid doing lots of scrolling compositing, we combine multiple
+	full-screen scrolls. pending_scroll is the combined pending line delta */
 	int pending_scroll;
 
 	BOOL ignore_resize;
