@@ -172,7 +172,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 		NSDebugLLog(@"service",@"launching");
 		[t launch];
 
-		if (data)
+		if (data && input==INPUT_STDIN)
 		{
 			NSDebugLLog(@"service",@"writing data");
 			[in writeData: [data dataUsingEncoding: NSUTF8StringEncoding]];
@@ -258,7 +258,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 		[[twc terminalView] runProgram: @"/bin/sh"
 			withArguments: [NSArray arrayWithObjects: @"-c",cmdline,nil]
-			initialInput: data];
+			initialInput: input==INPUT_STDIN?data:nil];
 	}
 		break;
 
