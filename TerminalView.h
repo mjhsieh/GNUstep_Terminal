@@ -63,7 +63,6 @@ struct selection_range
 
 	/* scrolling by compositing takes a long while, so we break out of such
 	loops fairly often to process other events */
-	/* TODO: collect scrolls and do the compositing in drawRect */
 	int num_scrolls;
 
 	int pending_scroll;

@@ -1773,7 +1773,8 @@ misc. stuff
 
 //	NSLog(@"copy %i+%i %i  (%ix%i)-(%ix%i)\n",start,num,copy_sx,sx,sy,nsx,nsy);
 
-/* TODO: handle resizing and scrollback */
+/* TODO: handle resizing and scrollback
+improve? */
 	for (iy=-sb_length;iy<sy;iy++)
 	{
 		screen_char_t *src,*dst;
