@@ -1207,7 +1207,8 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 
 -(void) dealloc
 {
-	iconv_close(iconv_state);
+	if (iconv_state)
+		iconv_close(iconv_state);
 	[super dealloc];
 }
 
