@@ -987,6 +987,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		const char *shell=getenv("SHELL");
 		if (!shell) shell="/bin/sh";
 		putenv("TERM=linux");
+		putenv("TERM_PROGRAM=GNUstep_Terminal");
 		execl(shell,shell,NULL);
 		fprintf(stderr,"Unable to spawn shell '%s': %m!",shell);
 		exit(1);
