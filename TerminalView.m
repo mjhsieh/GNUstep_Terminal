@@ -543,6 +543,41 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 }
 
 
+-(BOOL) writeSelectionToPasteboard: (NSPasteboard *)pb
+	types: (NSArray *)t
+{
+	int i;
+	[pb declareTypes: t  owner: self];
+	for (i=0;i<[t count];i++)
+	{
+		if ([[t objectAtIndex: i] isEqual: NSStringPboardType])
+		{
+			[pb setString: [self _selectionAsString]
+				forType: NSStringPboardType];
+			return YES;
+		}
+	}
+	return NO;
+}
+
+-(BOOL) readSelectionFromPasteboard: (NSPasteboard *)pb
+{ /* TODO: is it really necessary to implement this? */
+	return YES;
+}
+
+-(id) validRequestorForSendType: (NSString *)st
+	returnType: (NSString *)rt
+{
+	if (!selection.length)
+		return nil;
+	if (st!=nil && ![st isEqual: NSStringPboardType])
+		return nil;
+	if (rt!=nil)
+		return nil;
+	return self;
+}
+
+
 -(void) mouseDown: (NSEvent *)e
 {
 	int ofs0,ofs1,first;
@@ -561,7 +596,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		if (p.x>=sx) p.x=sx-1;
 		p.y=ceil(p.y/fy);
 		if (p.y<0) p.y=0;
-		if (p.y>=sy) p.x=sy-1;
+		if (p.y>sy) p.y=sy;
 		p.y=sy-p.y+current_scroll;
 		ofs1=((int)p.x)+((int)p.y)*sx;
 
@@ -595,6 +630,14 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 
 -(BOOL) acceptsFirstResponder
+{
+	return YES;
+}
+-(BOOL) becomeFirstResponder
+{
+	return YES;
+}
+-(BOOL) resignFirstResponder
 {
 	return YES;
 }
@@ -1171,6 +1214,13 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 {
 	NSDebugLLog(@"ts",@"getCharAt: %i:%i",x,y);
 	return SCREEN(x,y);
+}
+
+
++(void) registerPasteboardTypes
+{
+	NSArray *types=[NSArray arrayWithObject: NSStringPboardType];
+	[NSApp registerServicesMenuSendTypes: types returnTypes: nil];
 }
 
 @end

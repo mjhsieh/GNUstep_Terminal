@@ -172,6 +172,8 @@ static void get_zombies(void)
 {
 	NSMenu *menu,*m/*,*m2*/;
 
+	[TerminalView registerPasteboardTypes];
+
 	menu=[[NSMenu alloc] init];
 
 	/* 'Info' menu */

@@ -71,6 +71,8 @@ struct selection_range
 
 +(NSFont *) terminalFont;
 
++(void) registerPasteboardTypes;
+
 @end
 
 
