@@ -5,6 +5,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSBundle.h>
 #include <Foundation/NSUserDefaults.h>
+#include <Foundation/NSProcessInfo.h>
 #include <Foundation/NSDebug.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSView.h>
@@ -200,8 +201,25 @@ general
 
 -(void) applicationDidFinishLaunching: (NSNotification *)n
 {
+	NSArray *args=[[NSProcessInfo processInfo] arguments];
+
 	[NSApp setServicesProvider: [[TerminalServices alloc] init]];
-	[self openWindow: self];
+
+	if ([args count]>1)
+	{
+		TerminalWindowController *twc;
+		NSString *cmdline;
+
+		args=[args subarrayWithRange: NSMakeRange(1,[args count]-1)];
+		cmdline=[args componentsJoinedByString: @" "];
+
+		twc=[TerminalWindowController newTerminalWindow];
+		[[twc terminalView] runProgram: @"/bin/sh"
+			withArguments: [NSArray arrayWithObjects: @"-c",cmdline,nil]
+			initialInput: nil];
+	}
+	else
+		[self openWindow: self];
 }
 
 @end
