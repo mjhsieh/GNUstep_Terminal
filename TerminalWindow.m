@@ -8,6 +8,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <Foundation/NSString.h>
 #include <Foundation/NSDebug.h>
 #include <Foundation/NSNotification.h>
+#include <Foundation/NSUserDefaults.h>
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSScroller.h>
 #include <AppKit/GSHbox.h>
@@ -62,6 +63,11 @@ static void get_zombies(void)
 	[win setBackgroundColor: [NSColor blackColor]];
 
 	hb=[[GSHbox alloc] init];
+	if ([[NSUserDefaults standardUserDefaults] boolForKey: @"AddYBorders"])
+	{
+		[hb setMinYBorder: floor(fy/2-0.5)];
+		[hb setMaxYBorder: floor(fy/2-0.5)];
+	}
 
 	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,[NSScroller scrollerWidth],fy)];
 	[scroller setArrowsPosition: NSScrollerArrowsMaxEnd];
