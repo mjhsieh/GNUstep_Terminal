@@ -68,9 +68,6 @@ static void get_zombies(void)
 	[win setResizeIncrements: NSMakeSize(fx,fy)];
 	[win setContentSize: NSMakeSize(fx*(80+scroller_width)+1,fy*25+1)];
 
-	/* TODO: this doesn't seem to work properly */
-	[win setMinSize: NSMakeSize((scroller_width+4)*fx,fy*4)];
-
 	hb=[[GSHbox alloc] init];
 
 	scroller=[[NSScroller alloc] initWithFrame: NSMakeRect(0,0,scroller_width*fx-1,fy)];
