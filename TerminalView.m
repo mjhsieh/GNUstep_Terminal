@@ -1912,8 +1912,19 @@ improve? */
 	{
 		NSSize s;
 		NSRect r;
-		font=[[TerminalViewDisplayPrefs terminalFont] retain];
+		NSFont *f;
+
+		font=[TerminalViewDisplayPrefs terminalFont];
+		f=[font screenFont];
+		if (f)
+			font=f;
+		[font retain];
+
 		boldFont=[[TerminalViewDisplayPrefs boldTerminalFont] retain];
+		f=[boldFont screenFont];
+		if (f)
+			boldFont=f;
+		[boldFont retain];
 
 		r=[font boundingRectForFont];
 		s=[TerminalView characterCellSize];
