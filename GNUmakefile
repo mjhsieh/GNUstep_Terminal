@@ -1,4 +1,4 @@
-# copyright 2002 Alexander Malmberg <alexander@malmberg.org>
+# copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 #
 # This file is a part of Terminal.app. Terminal.app is free software; you
 # can redistribute it and/or modify it under the terms of the GNU General
@@ -15,6 +15,12 @@ CVS_OPTIONS = -d alexm@subversions.gnu.org:/cvsroot/terminal
 VERSION = 0.9.3
 
 ADDITIONAL_OBJCFLAGS += -Wall -O2 -D$(subst -,_,$(GNUSTEP_HOST_OS))
+
+# Useful warnings:
+#	-W -Wformat=2 -Wno-sign-compare -Wpointer-arith \
+#	-Wbad-function-cast -Wcast-align -Wwrite-strings -Wstrict-prototypes \
+#	-Wmissing-prototypes -Wmissing-declarations \
+#	-Wnested-externs -Wno-unused-parameter
 
 Terminal_OBJC_FILES = \
 	main.m \

@@ -1,5 +1,5 @@
 /*
-copyright 2002 Alexander Malmberg <alexander@malmberg.org>
+copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

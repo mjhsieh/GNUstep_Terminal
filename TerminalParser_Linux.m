@@ -1,5 +1,5 @@
 /*
-copyright 2002 Alexander Malmberg <alexander@malmberg.org>
+copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 
 This file is a part of Terminal.app. Terminal.app is free software; you
 can redistribute it and/or modify it under the terms of the GNU General
@@ -446,9 +446,13 @@ static unsigned char color_table[] = { 0, 4, 2, 6, 1, 5, 3, 7,
 		if (ques) switch(par[i]) {	/* DEC private modes set/reset */
 			case 1:			/* Cursor keys send ^[Ox/^[[x */
 				if (on_off)
+				{
 					set_kbd(decckm);
+				}
 				else
+				{
 					clr_kbd(decckm);
+				}
 				break;
 			case 3:	/* 80/132 mode switch unimplemented */
 				NSDebugLLog(@"term",@"ignore _set_mode 3");
