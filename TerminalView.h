@@ -30,7 +30,7 @@ struct selection_range
 {
 	NSScroller *scroller;
 
-	NSFont *font;
+	NSFont *font,*boldFont;
 	float fx,fy,fx0,fy0;
 
 	struct
@@ -62,7 +62,11 @@ struct selection_range
 	loops fairly often to process other events */
 	/* TODO: collect scrolls and do the compositing in drawRect */
 	int num_scrolls;
+
+	BOOL ignore_resize;
 }
+
+-(void) setIgnoreResize: (BOOL)ignore;
 
 -(void) setScroller: (NSScroller *)sc;
 

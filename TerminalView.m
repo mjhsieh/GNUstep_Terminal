@@ -36,6 +36,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 #include "TerminalView.h"
 
+#include "TerminalViewPrefs.h"
+
 
 @interface NSView (unlockfocus)
 -(void) unlockFocusNeedsFlush: (BOOL)flush;
@@ -53,7 +55,7 @@ NSString
 			dirty.x0=(ax0); \
 			dirty.y0=(ay0); \
 			dirty.x1=(ax0)+(asx); \
-			dirty.y1=(ay0)+(asx); \
+			dirty.y1=(ay0)+(asy); \
 		} \
 		else \
 		{ \
@@ -168,6 +170,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	int dlen;
 	NSGraphicsContext *cur=GSCurrentContext();
 	int x0,y0,x1,y1;
+	NSFont *f,*current_font=nil;
 
 	int total_draw=0;
 
@@ -194,8 +197,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		DPSrectfill(cur,r.origin.x,r.origin.y,r.size.width,r.size.height);
 	}
 
-	[font set];
-
 	if (current_scroll)
 	{
 		int ry;
@@ -221,6 +222,17 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 					dlen=sizeof(buf)-1;
 					GSFromUnicode(&pbuf,&dlen,&ch->ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
 					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
+
+					if ((ch->attr&3)==2)
+						f=boldFont;
+					else
+						f=font;
+					if (f!=current_font)
+					{
+						[f set];
+						current_font=f;
+					}
+
 					DPSshow(cur,buf);
 				}
 
@@ -228,11 +240,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 					DPScompositerect(cur,ix*fx,(sy-1-iy)*fy,fx,fy,NSCompositeHighlight);
 			}
 
-/*		DPSsetrgbcolor(cur,0.5,0.5,1.0);
-		DPSsetalpha(cur,0.5);
-		DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);*/
-		DPSsetrgbcolor(cur,0.2,0.2,1.0);
-		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
 	}
 	else
 	{
@@ -250,17 +257,41 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 					dlen=sizeof(buf)-1;
 					GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,NSUTF8StringEncoding,NULL,GSUniTerminate);
 					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
+
+					if ((SCREEN(ix,iy).attr&3)==2)
+						f=boldFont;
+					else
+						f=font;
+					if (f!=current_font)
+					{
+						[f set];
+						current_font=f;
+					}
+
 					DPSshow(cur,buf);
 				}
 
 				if (SCREEN(ix,iy).attr&0x40)
 					DPScompositerect(cur,ix*fx,(sy-1-iy)*fy,fx,fy,NSCompositeHighlight);
 			}
-/*		DPSsetrgbcolor(cur,0.5,0.5,1.0);
-		DPSsetalpha(cur,0.5);
-		DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y)*fy,fx,fy);*/
-		DPSsetrgbcolor(cur,0.2,0.2,1.0);
+	}
+
+	[[TerminalViewDisplayPrefs cursorColor] set];
+	switch ([TerminalViewDisplayPrefs cursorStyle])
+	{
+	case CURSOR_LINE:
+		DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy*0.1);
+		break;
+	case CURSOR_BLOCK_STROKE:
 		DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
+		break;
+	case CURSOR_BLOCK_FILL:
+		DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
+		break;
+	case CURSOR_BLOCK_INVERT:
+		DPScompositerect(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy,
+			NSCompositeHighlight);
+		break;
 	}
 
 	NSDebugLLog(@"draw",@"total_draw=%i",total_draw);
@@ -796,7 +827,8 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	int nsx,nsy;
 	struct winsize ws;
 	screen_char_t *nscreen,*nsbuf;
-	int iy,start,num,copy_sx;
+	int iy,ny;
+	int copy_sx;
 
 	nsx=size.width/fx;
 	nsy=size.height/fy;
@@ -806,10 +838,23 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		nsx,nsy,
 		nsx*fx,nsy*fy);
 
+	if (ignore_resize)
+	{
+		NSDebugLLog(@"term",@"ignored");
+		return;
+	}
+
 	if (nsx<1) nsx=1;
 	if (nsy<1) nsy=1;
 
-	if (nsx==sx && nsy==sy) return;
+	if (nsx==sx && nsy==sy)
+	{
+		/* Do a complete redraw anyway. Even though we don't really need it,
+		the resize ight have caused other things to overwrite our part of the
+		window. */
+		draw_all=YES;
+		return;
+	}
 
 	[self _clearSelection]; /* TODO? */
 
@@ -823,11 +868,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	memset(nscreen,0,sizeof(screen_char_t)*nsx*nsy);
 	memset(nsbuf,0,sizeof(screen_char_t)*nsx*max_scrollback);
 
-	num=nsy;
-	if (num>sy)
-		num=sy;
-	start=sy-num;
-
 	copy_sx=sx;
 	if (copy_sx>nsx)
 		copy_sx=nsx;
@@ -835,15 +875,31 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 //	NSLog(@"copy %i+%i %i  (%ix%i)-(%ix%i)\n",start,num,copy_sx,sx,sy,nsx,nsy);
 
 /* TODO: handle resizing and scrollback */
-	for (iy=start;iy<start+num;iy++)
+	for (iy=-sb_length;iy<sy;iy++)
 	{
-		memcpy(&nscreen[nsx*(iy-start)],&screen[sx*iy],copy_sx*sizeof(screen_char_t));
+		screen_char_t *src,*dst;
+		ny=iy-sy+nsy;
+		if (ny<-max_scrollback)
+			continue;
+
+		if (iy<0)
+			src=&sbuf[sx*(max_scrollback+iy)];
+		else
+			src=&screen[sx*iy];
+
+		if (ny<0)
+			dst=&nsbuf[nsx*(max_scrollback+ny)];
+		else
+			dst=&nscreen[nsx*ny];
+
+		memcpy(dst,src,copy_sx*sizeof(screen_char_t));
 	}
 
-	for (iy=0;iy<max_scrollback;iy++)
-	{
-		memcpy(&nsbuf[nsx*iy],&sbuf[sx*iy],copy_sx*sizeof(screen_char_t));
-	}
+	sb_length=sb_length+sy-nsy;
+	if (sb_length>max_scrollback)
+		sb_length=max_scrollback;
+	if (sb_length<0)
+		sb_length=0;
 
 	sx=nsx;
 	sy=nsy;
@@ -855,13 +911,13 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	if (cursor_x>sx) cursor_x=sx-1;
 	if (cursor_y>sy) cursor_y=sy-1;
 
-	[tp setTerminalScreenWidth: sx height: sy];
-
 	if (sb_length)
 		[scroller setFloatValue: (current_scroll+sb_length)/(float)(sb_length)
 			knobProportion: sy/(float)(sy+sb_length)];
 	else
 		[scroller setFloatValue: 1.0 knobProportion: 1.0];
+
+	[tp setTerminalScreenWidth: sx height: sy];
 
 	ws.ws_row=nsy;
 	ws.ws_col=nsx;
@@ -892,7 +948,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	struct winsize ws;
 
 	sx=80;
-	sy=24;
+	sy=25;
 
 	ws.ws_row=sy;
 	ws.ws_col=sx;
@@ -919,6 +975,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 	{
 		NSRect r;
 		font=[TerminalView terminalFont];
+		boldFont=[TerminalViewDisplayPrefs boldTerminalFont];
 		r=[font boundingRectForFont];
 		fx=r.size.width;
 		fy=r.size.height;
@@ -1054,13 +1111,7 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 +(NSFont *) terminalFont
 {
-	NSUserDefaults *ud=[NSUserDefaults standardUserDefaults];
-	if ([ud stringForKey: @"TerminalFont"])
-	{
-		return [NSFont fontWithName: [ud stringForKey: @"TerminalFont"]
-			size: [ud floatForKey: @"TerminalFontSize"]];
-	}
-	return [NSFont userFixedPitchFontOfSize: 0];
+	return [TerminalViewDisplayPrefs terminalFont];
 }
 
 
@@ -1294,6 +1345,12 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 {
 	NSDebugLLog(@"ts",@"getCharAt: %i:%i",x,y);
 	return SCREEN(x,y);
+}
+
+
+-(void) setIgnoreResize: (BOOL)ignore
+{
+	ignore_resize=ignore;
 }
 
 
