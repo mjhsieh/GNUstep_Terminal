@@ -4,7 +4,7 @@ German translation by Chris B. Vetter
 
 /***
 German.lproj/Localizable.strings
-updated by make_strings 2002-06-13 02:32:39 +0200
+updated by make_strings 2002-06-13 22:03:41 +0200
 add comments above this one
 ***/
 
@@ -15,10 +15,17 @@ add comments above this one
 /* File: ServicesPrefs.m:657 */
 "Command line:" = "Befehlszeile:";
 
-/* File: TerminalView.m:1361 */
-/* File: TerminalView.m:1362 */
-/* File: main.m:130 */
+/* File: TerminalView.m:1488 */
+/* File: TerminalView.m:1489 */
+/* File: main.m:132 */
 "Terminal" = "Terminal";
+
+
+/*** Unmatched/untranslated keys ***/
+
+/* File: main.m:122 */
+/* Flag: untranslated */
+"Benchmark" = "Benchmark";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -100,14 +107,14 @@ add comments above this one
 
 
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:1407 */
+/* File: TerminalView.m:1534 */
 "Unable to fork: %m." = "Kann keinen neuen Prozess starten: %m.";
-/* File: TerminalView.m:1395 */
+/* File: TerminalView.m:1522 */
 "Unable to open pipe for input: %m."
 = "Kann Pipe nicht zur Eingabe benutzen: %m.";
-/* File: TerminalView.m:1334 */
+/* File: TerminalView.m:1461 */
 "Unable to spawn process: %m." = "Kann keinen Prozess erzeugen: %m.";
-/* File: TerminalView.m:1242 */
+/* File: TerminalView.m:1367 */
 "[Process exited]" = "[Prozess beendet]";
 
 
@@ -139,35 +146,35 @@ add comments above this one
 
 
 /*** Strings from TerminalWindow.m ***/
-/* File: TerminalWindow.m:165 */
-/* File: TerminalWindow.m:161 */
+/* File: TerminalWindow.m:156 */
+/* File: TerminalWindow.m:152 */
 " (idle)" = " (unbenutzt)";
 
 
 /*** Strings from main.m ***/
-/* File: main.m:149 */
+/* File: main.m:151 */
 "Close" = "Schließen";
-/* File: main.m:138 */
+/* File: main.m:140 */
 "Copy" = "Kopieren";
-/* File: main.m:135 */
+/* File: main.m:137 */
 "Cut" = "Ausschneiden";
-/* File: main.m:144 */
+/* File: main.m:146 */
 "Edit" = "Bearbeiten";
-/* File: main.m:161 */
+/* File: main.m:163 */
 "Hide" = "Ausblenden";
-/* File: main.m:122 */
+/* File: main.m:124 */
 "Info" = "Info";
 /* File: main.m:118 */
 "Info..." = "Info...";
-/* File: main.m:127 */
+/* File: main.m:129 */
 "New window" = "Neues Fenster";
-/* File: main.m:141 */
+/* File: main.m:143 */
 "Paste" = "Einfügen";
 /* File: main.m:120 */
 "Preferences..." = "Grundeinstellungen...";
-/* File: main.m:165 */
+/* File: main.m:167 */
 "Quit" = "Beenden";
-/* File: main.m:157 */
+/* File: main.m:159 */
 "Services" = "Dienste";
-/* File: main.m:152 */
+/* File: main.m:154 */
 "Windows" = "Fenster";

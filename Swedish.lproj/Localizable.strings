@@ -1,6 +1,6 @@
 /***
 Swedish.lproj/Localizable.strings
-updated by make_strings 2002-06-13 02:32:39 +0200
+updated by make_strings 2002-06-13 22:03:41 +0200
 add comments above this one
 ***/
 
@@ -11,21 +11,25 @@ add comments above this one
 /* File: ServicesPrefs.m:657 */
 "Command line:" = "Kommandorad:";
 
-/* File: TerminalView.m:1361 */
-/* File: TerminalView.m:1362 */
-/* File: main.m:130 */
+/* File: TerminalView.m:1488 */
+/* File: TerminalView.m:1489 */
+/* File: main.m:132 */
 "Terminal" = "Terminal";
 
 
 /*** Unmatched/untranslated keys ***/
 
-/* File: TerminalView.m:1395 */
+/* File: TerminalView.m:1522 */
 /* Flag: untranslated */
 "Unable to open pipe for input: %m." = "Unable to open pipe for input: %m.";
 
-/* File: TerminalView.m:1407 */
+/* File: TerminalView.m:1534 */
 /* Flag: untranslated */
 "Unable to fork: %m." = "Unable to fork: %m.";
+
+/* File: main.m:122 */
+/* Flag: untranslated */
+"Benchmark" = "Benchmark";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -107,9 +111,9 @@ add comments above this one
 
 
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:1334 */
+/* File: TerminalView.m:1461 */
 "Unable to spawn process: %m." = "Kunde inte starta process: %m.";
-/* File: TerminalView.m:1242 */
+/* File: TerminalView.m:1367 */
 "[Process exited]" = "[Processen avslutade]";
 
 
@@ -141,35 +145,35 @@ add comments above this one
 
 
 /*** Strings from TerminalWindow.m ***/
-/* File: TerminalWindow.m:165 */
-/* File: TerminalWindow.m:161 */
+/* File: TerminalWindow.m:156 */
+/* File: TerminalWindow.m:152 */
 " (idle)" = " (ledig)";
 
 
 /*** Strings from main.m ***/
-/* File: main.m:149 */
+/* File: main.m:151 */
 "Close" = "Stäng";
-/* File: main.m:138 */
+/* File: main.m:140 */
 "Copy" = "Kopiera";
-/* File: main.m:135 */
+/* File: main.m:137 */
 "Cut" = "Klipp";
-/* File: main.m:144 */
+/* File: main.m:146 */
 "Edit" = "Redigera";
-/* File: main.m:161 */
+/* File: main.m:163 */
 "Hide" = "Göm";
-/* File: main.m:122 */
+/* File: main.m:124 */
 "Info" = "Info";
 /* File: main.m:118 */
 "Info..." = "Info...";
-/* File: main.m:127 */
+/* File: main.m:129 */
 "New window" = "Nytt fönster";
-/* File: main.m:141 */
+/* File: main.m:143 */
 "Paste" = "Klistra";
 /* File: main.m:120 */
 "Preferences..." = "Inställningar...";
-/* File: main.m:165 */
+/* File: main.m:167 */
 "Quit" = "Avsluta";
-/* File: main.m:157 */
+/* File: main.m:159 */
 "Services" = "Tjänster";
-/* File: main.m:152 */
+/* File: main.m:154 */
 "Windows" = "Fönster";
