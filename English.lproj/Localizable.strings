@@ -1,6 +1,6 @@
 /***
 English.lproj/Localizable.strings
-updated by make_strings 2002-06-10 00:50:00 +0200
+updated by make_strings 2002-06-12 18:10:18 +0200
 add comments above this one
 ***/
 
@@ -8,8 +8,13 @@ add comments above this one
 /*** Keys found in multiple places ***/
 
 /* File: ServicesParameterWindowController.m:92 */
-/* File: ServicesPrefs.m:573 */
+/* File: ServicesPrefs.m:650 */
 "Command line:" = "Command line:";
+
+/* File: TerminalView.m:1359 */
+/* File: TerminalView.m:1360 */
+/* File: main.m:130 */
+"Terminal" = "Terminal";
 
 
 /*** Strings from PreferencesWindowController.m ***/
@@ -22,9 +27,9 @@ add comments above this one
 
 
 /*** Strings from Services.m ***/
-/* File: Services.m:139 */
+/* File: Services.m:146 */
 "Service aborted by user." = "Service aborted by user.";
-/* File: Services.m:51 */
+/* File: Services.m:54 */
 "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it."
 = "There is no terminal service called '%@'.\nYour services list is probably out-of-date.\nRun 'make_services' to update it.";
 
@@ -39,47 +44,51 @@ add comments above this one
 
 
 /*** Strings from ServicesPrefs.m ***/
-/* File: ServicesPrefs.m:489 */
+/* File: ServicesPrefs.m:566 */
 "Accept types" = "Accept types";
-/* File: ServicesPrefs.m:405 */
+/* File: ServicesPrefs.m:480 */
 "Add" = "Add";
-/* File: ServicesPrefs.m:256 */
+/* File: ServicesPrefs.m:329 */
 "Error importing services" = "Error importing services";
-/* File: ServicesPrefs.m:307 */
+/* File: ServicesPrefs.m:382 */
 "Export services" = "Export services";
-/* File: ServicesPrefs.m:429 */
+/* File: ServicesPrefs.m:504 */
 "Export..." = "Export...";
-/* File: ServicesPrefs.m:498 */
+/* File: ServicesPrefs.m:575 */
 "Filenames" = "Filenames";
-/* File: ServicesPrefs.m:455 */
+/* File: ServicesPrefs.m:530 */
 "Ignore output" = "Ignore output";
 /* File: ServicesPrefs.m:242 */
 "Import services" = "Import services";
-/* File: ServicesPrefs.m:421 */
+/* File: ServicesPrefs.m:496 */
 "Import..." = "Import...";
-/* File: ServicesPrefs.m:465 */
+/* File: ServicesPrefs.m:540 */
 "Input in stdin" = "Input in stdin";
-/* File: ServicesPrefs.m:466 */
+/* File: ServicesPrefs.m:541 */
 "Input on command line" = "Input on command line";
-/* File: ServicesPrefs.m:553 */
+/* File: ServicesPrefs.m:630 */
 "Key:" = "Key:";
-/* File: ServicesPrefs.m:533 */
+/* File: ServicesPrefs.m:610 */
 "Name:" = "Name:";
-/* File: ServicesPrefs.m:464 */
+/* File: ServicesPrefs.m:539 */
 "No input" = "No input";
-/* File: ServicesPrefs.m:506 */
+/* File: ServicesPrefs.m:583 */
 "Plain text" = "Plain text";
-/* File: ServicesPrefs.m:413 */
+/* File: ServicesPrefs.m:488 */
 "Remove" = "Remove";
-/* File: ServicesPrefs.m:456 */
+/* File: ServicesPrefs.m:531 */
 "Return output" = "Return output";
-/* File: ServicesPrefs.m:474 */
+/* File: ServicesPrefs.m:549 */
 "Run in background" = "Run in background";
-/* File: ServicesPrefs.m:374 */
+/* File: ServicesPrefs.m:551 */
+"Run in idle window" = "Run in idle window";
+/* File: ServicesPrefs.m:550 */
+"Run in new window" = "Run in new window";
+/* File: ServicesPrefs.m:449 */
 "Terminal services" = "Terminal services";
-/* File: ServicesPrefs.m:379 */
+/* File: ServicesPrefs.m:454 */
 "Terminal\nservices" = "Terminal\nservices";
-/* File: ServicesPrefs.m:257 */
+/* File: ServicesPrefs.m:330 */
 "The file '%@' doesn't contain valid terminal services."
 = "The file '%@' doesn't contain valid terminal services.";
 /* File: ServicesPrefs.m:223 */
@@ -87,8 +96,14 @@ add comments above this one
 
 
 /*** Strings from TerminalView.m ***/
-/* File: TerminalView.m:989 */
+/* File: TerminalView.m:1405 */
+"Unable to fork: %m." = "Unable to fork: %m.";
+/* File: TerminalView.m:1393 */
+"Unable to open pipe for input: %m." = "Unable to open pipe for input: %m.";
+/* File: TerminalView.m:1332 */
 "Unable to spawn process: %m." = "Unable to spawn process: %m.";
+/* File: TerminalView.m:1242 */
+"[Process exited]\n" = "[Process exited]\n";
 
 
 /*** Strings from TerminalViewPrefs.m ***/
@@ -118,31 +133,35 @@ add comments above this one
 "Style:" = "Style:";
 
 
+/*** Strings from TerminalWindow.m ***/
+/* File: TerminalWindow.m:149 */
+/* File: TerminalWindow.m:145 */
+" (idle)" = " (idle)";
+
+
 /*** Strings from main.m ***/
-/* File: main.m:263 */
+/* File: main.m:149 */
 "Close" = "Close";
-/* File: main.m:249 */
+/* File: main.m:138 */
 "Copy" = "Copy";
-/* File: main.m:252 */
+/* File: main.m:135 */
 "Cut" = "Cut";
-/* File: main.m:258 */
+/* File: main.m:144 */
 "Edit" = "Edit";
-/* File: main.m:275 */
+/* File: main.m:161 */
 "Hide" = "Hide";
-/* File: main.m:236 */
-/* File: main.m:234 */
+/* File: main.m:122 */
+/* File: main.m:120 */
 "Info" = "Info";
-/* File: main.m:241 */
+/* File: main.m:127 */
 "New window" = "New window";
-/* File: main.m:255 */
+/* File: main.m:141 */
 "Paste" = "Paste";
-/* File: main.m:232 */
+/* File: main.m:118 */
 "Preferences..." = "Preferences...";
-/* File: main.m:279 */
+/* File: main.m:165 */
 "Quit" = "Quit";
-/* File: main.m:271 */
+/* File: main.m:157 */
 "Services" = "Services";
-/* File: main.m:244 */
-"Terminal" = "Terminal";
-/* File: main.m:266 */
+/* File: main.m:152 */
 "Windows" = "Windows";
