@@ -3,9 +3,19 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 */
 
 #include <math.h>
-#include <termio.h>
+#ifdef freebsd
+#  include <sys/types.h>
+#  include <sys/ioctl.h>
+#  include <termios.h>
+#  include <libutil.h>
+#  include <pcap.h>
+#else
+#  include <termio.h>
+#endif
 #include <unistd.h>
-#include <pty.h>
+#ifndef freebsd
+#  include <pty.h>
+#endif
 
 #include <Foundation/NSRunLoop.h>
 #include <Foundation/NSBundle.h>

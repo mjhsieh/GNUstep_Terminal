@@ -7,7 +7,7 @@ CVS_MODULE_NAME = Terminal
 CVS_OPTIONS = -d/opt/cvsroot
 VERSION = 0.0.3
 
-ADDITIONAL_OBJCFLAGS += -Wall -O2
+ADDITIONAL_OBJCFLAGS += -Wall -O2 -D$(subst -,_,$(GNUSTEP_HOST_OS))
 
 Terminal_OBJC_FILES = \
 	main.m
