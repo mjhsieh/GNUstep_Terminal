@@ -25,6 +25,7 @@ extern NSString *TerminalViewDisplayPrefsDidChangeNotification;
 	NSColorWell *w_cursorColor;
 	NSPopUpButton *pb_cursorStyle;
 	NSTextField *f_scrollBackLines;
+	NSButton *b_useMultiCellGlyphs;
 
 	NSTextField *f_cur;
 }

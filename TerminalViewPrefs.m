@@ -35,6 +35,7 @@ static NSString
 	*TerminalFontSizeKey=@"TerminalFontSize",
 	*BoldTerminalFontKey=@"BoldTerminalFont",
 	*BoldTerminalFontSizeKey=@"BoldTerminalFontSize",
+	*UseMultiCellGlyphsKey=@"UseMultiCellGlyphs",
 	*CursorStyleKey=@"CursorStyle",
 	*ScrollBackLinesKey=@"ScrollBackLines",
 
@@ -45,6 +46,8 @@ static NSString
 
 
 static NSFont *terminalFont,*boldTerminalFont;
+
+static BOOL useMultiCellGlyphs;
 
 static float brightness[3]={0.6,0.8,1.0};
 static float saturation[3]={1.0,1.0,0.75};
@@ -82,6 +85,8 @@ static int scrollBackLines;
 		else
 			boldTerminalFont=[[NSFont fontWithName: s  size: size] retain];
 
+		useMultiCellGlyphs=[ud boolForKey: UseMultiCellGlyphsKey];
+
 		cursorStyle=[ud integerForKey: CursorStyleKey];
 		if ([ud objectForKey: CursorColorRKey])
 		{
@@ -117,8 +122,8 @@ static int scrollBackLines;
 }
 
 +(BOOL) useMultiCellGlyphs
-{/* TODO */
-	return YES;
+{
+	return useMultiCellGlyphs;
 }
 
 +(const float *) brightnessForIntensities
@@ -184,6 +189,10 @@ static int scrollBackLines;
 	[ud setInteger: scrollBackLines
 		forKey: ScrollBackLinesKey];
 
+	useMultiCellGlyphs=!![b_useMultiCellGlyphs state];
+	[ud setBool: useMultiCellGlyphs
+		forKey: UseMultiCellGlyphsKey];
+
 	/* TODO: actually use this somewhere */
 	[[NSNotificationCenter defaultCenter]
 		postNotificationName: TerminalViewDisplayPrefsDidChangeNotification
@@ -193,6 +202,8 @@ static int scrollBackLines;
 -(void) revert
 {
 	NSFont *f;
+
+	[b_useMultiCellGlyphs setState: useMultiCellGlyphs];
 
 	[pb_cursorStyle selectItemAtIndex: [[self class] cursorStyle]];
 	[w_cursorColor setColor: [[self class] cursorColor]];
@@ -302,6 +313,15 @@ static int scrollBackLines;
 				[top addView: b enablingYResizing: NO];
 				DESTROY(b);
 			}
+
+
+			b=b_useMultiCellGlyphs=[[NSButton alloc] init];
+			[b setTitle: _(@"Handle wide (multi-cell) glyphs")];
+			[b setButtonType: NSSwitchButton];
+			[b sizeToFit];
+			[top addView: b enablingYResizing: NO];
+			DESTROY(b);
+
 
 			hb=[[GSHbox alloc] init];
 			[hb setDefaultMinXMargin: 4];
