@@ -72,16 +72,22 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 -(void) save
 {
+	NSUserDefaults *ud;
+
 	if (!services) return;
 	if (!top) return;
 
 	[self _update];
 
-	[[NSUserDefaults standardUserDefaults]
-		setObject: services
-		forKey: @"TerminalServices"];
+	ud=[NSUserDefaults standardUserDefaults];
 
-	[TerminalServices updateServicesPlist];
+	if (![services isEqual: [TerminalServices terminalServicesDictionary]])
+	{
+		[ud setObject: [services copy]
+			forKey: @"TerminalServices"];
+
+		[TerminalServices updateServicesPlist];
+	}
 }
 
 -(void) revert
