@@ -151,7 +151,7 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 	case TYPE_BACKGROUND:
 	{
 		NSTask *t=[[[NSTask alloc] init] autorelease];
-		NSPipe *stdin,*stdout;
+		NSPipe *sin,*sout;
 		NSFileHandle *in,*out;
 
 		[t setLaunchPath: @"/bin/sh"];
@@ -159,12 +159,12 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 
 		NSDebugLLog(@"service",@"t=%@",t);
 
-		stdin=[[[NSPipe alloc] init] autorelease];
-		[t setStandardInput: stdin];
-		in=[stdin fileHandleForWriting];
-		stdout=[[[NSPipe alloc] init] autorelease];
-		[t setStandardOutput: stdout];
-		out=[stdout fileHandleForReading];
+		sin=[[[NSPipe alloc] init] autorelease];
+		[t setStandardInput: sin];
+		in=[sin fileHandleForWriting];
+		sout=[[[NSPipe alloc] init] autorelease];
+		[t setStandardOutput: sout];
+		out=[sout fileHandleForReading];
 
 		NSDebugLLog(@"service",@"launching");
 		[t launch];
