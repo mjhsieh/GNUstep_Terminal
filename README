@@ -61,8 +61,8 @@ to this problem is to remap the command key (and possibly alternate key).
 The alternate key will always be treated as meta.
 
 Often, the escape key can be used to emulate a meta key. This means that
-you in some programs, you might have to press escape twice to get a 'real'
-escape, or there will be a delay before it handled. The 'Send a double
+in some programs, you might have to press escape twice to get a 'real'
+escape, or there will be a delay before it is handled. The 'Send a double
 escape...' option causes Terminal.app to send a double escape when you hit
 the escape key (ie. "\e\e"), which should work better (but you can no
 longer use the escape key as meta).
@@ -110,7 +110,7 @@ Command line
   can use '%%' to get a real '%'.
 
 Run in background/new window/idle window
-  If a service is set to run in the background, the service will have to
+  If a service is set to run in the background, the command will have to
   complete before the service will return, and the service can return
   output. Otherwise, the command's output will appear in a window. 'new
   window' causes a completely new window to be opened (and it will close
