@@ -11,8 +11,8 @@ of the License. See COPYING or main.m for more information.
 #include <Foundation/NSUserDefaults.h>
 #include <AppKit/NSPopUpButton.h>
 #include <AppKit/NSBox.h>
-#include <AppKit/GSTable.h>
-#include <AppKit/GSVbox.h>
+#include <GNUstepGUI/GSTable.h>
+#include <GNUstepGUI/GSVbox.h>
 #include "Label.h"
 
 #include "TerminalParser_LinuxPrefs.h"

@@ -17,8 +17,8 @@ of the License. See COPYING or main.m for more information.
 #include <AppKit/NSScrollView.h>
 #include <AppKit/NSClipView.h>
 #include <AppKit/NSBox.h>
-#include <AppKit/GSVbox.h>
-#include <AppKit/GSHbox.h>
+#include <GNUstepGUI/GSVbox.h>
+#include <GNUstepGUI/GSHbox.h>
 #include <AppKit/NSSavePanel.h>
 #include <AppKit/NSOpenPanel.h>
 #include "Label.h"

@@ -14,8 +14,8 @@ of the License. See COPYING or main.m for more information.
 #include <AppKit/NSButton.h>
 #include <AppKit/NSMatrix.h>
 #include <AppKit/NSTextField.h>
-#include <AppKit/GSTable.h>
-#include <AppKit/GSVbox.h>
+#include <GNUstepGUI/GSTable.h>
+#include <GNUstepGUI/GSVbox.h>
 #include "Label.h"
 
 #include "TerminalWindowPrefs.h"

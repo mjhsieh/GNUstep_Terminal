@@ -12,14 +12,14 @@ of the License. See COPYING or main.m for more information.
 #include <Foundation/NSBundle.h>
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSButton.h>
-#include <AppKit/GSHbox.h>
-#include <AppKit/GSVbox.h>
 #include <AppKit/NSScrollView.h>
 #include <AppKit/NSClipView.h>
 #include <AppKit/NSTableView.h>
 #include <AppKit/NSTableColumn.h>
 #include <AppKit/NSPanel.h>
 #include <AppKit/NSBox.h>
+#include <GNUstepGUI/GSHbox.h>
+#include <GNUstepGUI/GSVbox.h>
 
 #include "autokeyviewchain.h"
 
@@ -122,7 +122,7 @@ of the License. See COPYING or main.m for more information.
 	[win setDelegate: self];
 	[win setTitle: _(@"Preferences")];
 
-	[win setMinSize: NSMakeSize(290,400)];
+	[win setMinSize: NSMakeSize(360,430)];
 	[win setFrameUsingName: @"Preferences"];
 	[win setFrameAutosaveName: @"Preferences"];
 

@@ -31,8 +31,8 @@ copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 #include <AppKit/NSImage.h>
 #include <AppKit/NSImageView.h>
 #include <AppKit/NSScreen.h>
-#include <AppKit/GSVbox.h>
-#include <AppKit/GSHbox.h>
+#include <GNUstepGUI/GSVbox.h>
+#include <GNUstepGUI/GSHbox.h>
 #include "Label.h"
 
 
@@ -494,6 +494,8 @@ copyright 2002, 2003 Alexander Malmberg <alexander@malmberg.org>
 int main(int argc, char **argv)
 {
 	CREATE_AUTORELEASE_POOL(arp);
+
+/*	[NSObject enableDoubleReleaseCheck: YES];*/
 
 	[TerminalApplication sharedApplication];
 

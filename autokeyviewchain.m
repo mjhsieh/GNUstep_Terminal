@@ -61,7 +61,7 @@ of the License. See COPYING or main.m for more information.
 @end
 
 
-#include <AppKit/GSTable.h>
+#include <GNUstepGUI/GSTable.h>
 
 @implementation GSTable (autokeyviewchain)
 

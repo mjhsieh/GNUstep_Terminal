@@ -18,8 +18,8 @@ of the License. See COPYING or main.m for more information.
 #include <AppKit/NSGraphics.h>
 #include <AppKit/NSImage.h>
 #include <AppKit/NSTextField.h>
-#include <AppKit/GSVbox.h>
-#include <AppKit/GSHbox.h>
+#include <GNUstepGUI/GSVbox.h>
+#include <GNUstepGUI/GSHbox.h>
 #include "Label.h"
 
 #include "TerminalViewPrefs.h"

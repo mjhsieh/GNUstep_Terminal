@@ -18,7 +18,7 @@ of the License. See COPYING or main.m for more information.
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSScroller.h>
 #include <AppKit/NSWindow.h>
-#include <AppKit/GSHbox.h>
+#include <GNUstepGUI/GSHbox.h>
 
 #include "TerminalWindow.h"
 

@@ -13,8 +13,8 @@ of the License. See COPYING or main.m for more information.
 #include <AppKit/NSTextField.h>
 #include <AppKit/NSPanel.h>
 #include <AppKit/NSButton.h>
-#include <AppKit/GSVbox.h>
-#include <AppKit/GSHbox.h>
+#include <GNUstepGUI/GSVbox.h>
+#include <GNUstepGUI/GSHbox.h>
 
 #include "ServicesParameterWindowController.h"
 

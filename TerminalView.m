@@ -48,7 +48,7 @@ stupid but fast character cell display view.
 #include <Foundation/NSUserDefaults.h>
 #include <Foundation/NSCharacterSet.h>
 #include <Foundation/NSArchiver.h>
-#include <gnustep/base/Unicode.h>
+#include <GNUstepBase/Unicode.h>
 #include <AppKit/NSApplication.h>
 #include <AppKit/NSPasteboard.h>
 #include <AppKit/NSDragging.h>
