@@ -119,6 +119,8 @@ general
 		action: @selector(orderFrontStandardInfoPanel:)];
 	[m addItemWithTitle: _(@"Preferences...")
 		action: @selector(openPreferences:)];
+	[m addItemWithTitle: _(@"Benchmark")
+		action: @selector(benchmark:)];
 	[menu setSubmenu: m forItem: [menu addItemWithTitle: _(@"Info")]];
 	[m release];
 

@@ -150,52 +150,35 @@ TerminalScreen protocol implementation and rendering methods
 }
 
 
--(void) _setAttrs: (screen_char_t)sch : (float)x0 : (float)y0 : (NSGraphicsContext *)gc
-{
-	int fg,bg;
-	float h,s,b;
-	float bh,bs,bb;
+static int total_draw=0;
 
-	int in,ul,bl,re;
 
 static const float col_h[8]={  0,240,120,180,  0,300, 60,  0};
 static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
-/*static const float col[16][3]={
-{0.90, 0.70, 0.20},
-{0.00, 0.00, 0.66},
-{0.00, 0.66, 0.00},
-{0.00, 0.66, 0.66},
 
-{0.66, 0.00, 0.00},
-{0.66, 0.00, 0.66},
-{0.66, 0.66, 0.00},
-{0.66, 0.66, 0.66},
+static void set_background(NSGraphicsContext *gc,
+	unsigned char color,unsigned char in)
+{
+	float bh,bs,bb;
+	int bg=color>>4;
 
-{0.33, 0.33, 0.33},
-{0.00, 0.00, 1.00},
-{0.00, 1.00, 0.00},
-{0.00, 1.00, 1.00},
-
-{1.00, 0.00, 0.00},
-{1.00, 0.00, 1.00},
-{1.00, 1.00, 0.00},
-{1.00, 1.00, 1.00},
-};*/
-	fg=sch.color&0x0f;
-	bg=(sch.color&0xf0)>>4;
-
-	in=sch.attr&3;
-	ul=sch.attr&4;
-	re=sch.attr&8;
-	bl=sch.attr&16;
-
-	bb=0.6;
-	if (bg>=8)
-		bg-=8,bb=1.0;
 	if (bg==0)
 		bb=0.0;
+	else if (bg>=8)
+		bg-=8,bb=1.0;
+	else
+		bb=0.6;
 	bs=col_s[bg];
 	bh=col_h[bg]/360.0;
+
+	DPSsethsbcolor(gc,bh,bs,bb);
+}
+
+static void set_foreground(NSGraphicsContext *gc,
+	unsigned char color,unsigned char in)
+{
+	int fg=color;
+	float h,s,b;
 
 	if (fg>=8)
 	{
@@ -203,40 +186,23 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 		fg-=8;
 	}
 
-	if (in==0)
+	if (fg==0)
+		b=0.0;
+	else if (in==0)
 		b=0.6;
 	else if (in==1)
 		b=0.8;
 	else
 		b=1.0;
 
-	if (fg==0)
-		b=0.0;
-
 	h=col_h[fg]/360.0;
 	s=col_s[fg];
 	if (in==2)
 		s*=0.75;
 
-	if (re)
-	{
-		float t;
-#define SWAP(x,y) t=x; x=y; y=t;
-
-		SWAP(h,bh)
-		SWAP(s,bs)
-		SWAP(b,bb)
-#undef SWAP
-	}
-
-	DPSsethsbcolor(gc,bh,bs,bb);
-	DPSrectfill(gc,x0,y0,fx,fy);
-
 	DPSsethsbcolor(gc,h,s,b);
-
-	if (ul)
-		DPSrectfill(gc,x0,y0,fx,1);
 }
+
 
 -(void) drawRect: (NSRect)r
 {
@@ -250,7 +216,6 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	int encoding;
 
-	int total_draw=0;
 
 	NSDebugLLog(@"draw",@"drawRect: (%g %g)+(%g %g) %i\n",
 		r.origin.x,r.origin.y,r.size.width,r.size.height,
@@ -273,38 +238,142 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 
 	NSDebugLLog(@"draw",@"dirty (%i %i)-(%i %i)\n",x0,y0,x1,y1);
 
-	if (draw_all)
-	{
-		DPSsetgray(cur,0.0);
-		DPSrectfill(cur,r.origin.x,r.origin.y,r.size.width,r.size.height);
-	}
-
 	draw_cursor=draw_cursor || draw_all ||
 	            (SCREEN(cursor_x,cursor_y).attr&0x80)!=0;
 
-	if (current_scroll)
 	{
 		int ry;
 		screen_char_t *ch;
-		for (ix=x0;ix<x1;ix++)
-			for (iy=y0;iy<y1;iy++)
-			{
-				ry=iy+current_scroll;
-				if (ry>=0)
-					ch=&SCREEN(ix,ry);
-				else
-					ch=&sbuf[ix+(max_scrollback+ry)*sx];
+		float scr_y,scr_x,start_x;
 
-				if (!(ch->attr&0x80) && !draw_all)
+		unsigned char l_color,l_attr,color;
+
+		l_color=0;
+		l_attr=0;
+		set_foreground(cur,l_color,l_attr);
+		for (iy=y0;iy<y1;iy++)
+		{
+			ry=iy+current_scroll;
+			if (ry>=0)
+				ch=&SCREEN(x0,ry);
+			else
+				ch=&sbuf[x0+(max_scrollback+ry)*sx];
+
+			scr_y=(sy-1-iy)*fy;
+/*
+#define R(scr_x,scr_y,fx,fy) \
+				DPSgsave(cur); \
+				DPSsetgray(cur,0.0); \
+				DPSrectfill(cur,scr_x,scr_y,fx,fy); \
+				DPSgrestore(cur); \
+				DPSrectstroke(cur,scr_x,scr_y,fx,fy); \
+*/
+#define R(scr_x,scr_y,fx,fy) DPSrectfill(cur,scr_x,scr_y,fx,fy)
+			start_x=-1;
+			for (ix=x0;ix<x1;ix++,ch++)
+			{
+				if (!draw_all && !(ch->attr&0x80))
+				{
+					if (start_x!=-1)
+					{
+						scr_x=ix*fx;
+						R(start_x,scr_y,scr_x-start_x,fy);
+						start_x=-1;
+					}
+					continue;
+				}
+
+				scr_x=ix*fx;
+
+				if (ch->attr&0x8)
+				{
+					color=ch->color&0xf;
+					if (color!=l_color || (ch->attr&0x03)!=l_attr)
+					{
+						if (start_x!=-1)
+						{
+							R(start_x,scr_y,scr_x-start_x,fy);
+							start_x=scr_x;
+						}
+
+						total_draw++;
+						l_color=color;
+						l_attr=ch->attr&0x03;
+						set_foreground(cur,l_color,l_attr);
+					}
+				}
+				else
+				{
+					color=ch->color&0xf0;
+					if (color!=l_color)
+					{
+						if (start_x!=-1)
+						{
+							R(start_x,scr_y,scr_x-start_x,fy);
+							start_x=scr_x;
+						}
+
+						total_draw++;
+						l_color=color;
+						l_attr=ch->attr&0x03;
+						set_background(cur,l_color,l_attr);
+					}
+				}
+
+				if (start_x==-1)
+					start_x=scr_x;
+			}
+
+			if (start_x!=-1)
+			{
+				scr_x=ix*fx;
+				R(start_x,scr_y,scr_x-start_x,fy);
+			}
+		}
+
+		for (iy=y0;iy<y1;iy++)
+		{
+			ry=iy+current_scroll;
+			if (ry>=0)
+				ch=&SCREEN(x0,ry);
+			else
+				ch=&sbuf[x0+(max_scrollback+ry)*sx];
+
+			scr_y=(sy-1-iy)*fy;
+
+			for (ix=x0;ix<x1;ix++,ch++)
+			{
+				if (!draw_all && !(ch->attr&0x80))
 					continue;
 
 				ch->attr&=0x7f;
-				total_draw++;
-				[self _setAttrs: *ch : ix*fx:(sy-1-iy)*fy : cur];
-	
+
+				scr_x=ix*fx;
+
 				if (ch->ch!=0 && ch->ch!=32)
 				{
-					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
+					if (!(ch->attr&0x8))
+					{
+						color=ch->color&0xf;
+						if (color!=l_color || (ch->attr&0x03)!=l_attr)
+						{
+							total_draw++;
+							l_color=color;
+							l_attr=ch->attr&0x03;
+							set_foreground(cur,l_color,l_attr);
+						}
+					}
+					else
+					{
+						color=ch->color&0xf0;
+						if (color!=l_color)
+						{
+							total_draw++;
+							l_color=color;
+							l_attr=ch->attr&0x03;
+							set_background(cur,l_color,l_attr);
+						}
+					}
 
 					if ((ch->attr&3)==2)
 					{
@@ -322,73 +391,47 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 						current_font=f;
 					}
 
-					dlen=sizeof(buf)-1;
-					GSFromUnicode(&pbuf,&dlen,&ch->ch,1,encoding,NULL,GSUniTerminate);
+					if (ch->ch>=0x80)
+					{
+						dlen=sizeof(buf)-1;
+						GSFromUnicode(&pbuf,&dlen,&ch->ch,1,encoding,NULL,GSUniTerminate);
+					}
+					else
+					{
+						buf[0]=ch->ch;
+						buf[1]=0;
+					}
+					DPSmoveto(cur,scr_x+fx0,scr_y+fy0);
 					DPSshow(cur,buf);
 				}
 
 				if (ch->attr&0x40)
-					DPScompositerect(cur,ix*fx,(sy-1-iy)*fy,fx,fy,NSCompositeHighlight);
+					DPScompositerect(cur,scr_x,scr_y,fx,fy,NSCompositeHighlight);
 			}
-
-	}
-	else
-	{
-		for (ix=x0;ix<x1;ix++)
-			for (iy=y0;iy<y1;iy++)
-			{
-				if (!(SCREEN(ix,iy).attr&0x80) && !draw_all)
-					continue;
-				SCREEN(ix,iy).attr&=0x7f;
-				total_draw++;
-				[self _setAttrs: SCREEN(ix,iy) : ix*fx:(sy-1-iy)*fy : cur];
-	
-				if (SCREEN(ix,iy).ch!=0 && SCREEN(ix,iy).ch!=32)
-				{
-					DPSmoveto(cur,ix*fx+fx0,(sy-1-iy)*fy+fy0);
-
-					if ((SCREEN(ix,iy).attr&3)==2)
-					{
-						encoding=boldFont_encoding;
-						f=boldFont;
-					}
-					else
-					{
-						encoding=font_encoding;
-						f=font;
-					}
-					if (f!=current_font)
-					{
-						[f set];
-						current_font=f;
-					}
-
-					dlen=sizeof(buf)-1;
-					GSFromUnicode(&pbuf,&dlen,&SCREEN(ix,iy).ch,1,encoding,NULL,GSUniTerminate);
-					DPSshow(cur,buf);
-				}
-
-				if (SCREEN(ix,iy).attr&0x40)
-					DPScompositerect(cur,ix*fx,(sy-1-iy)*fy,fx,fy,NSCompositeHighlight);
-			}
+		}
 	}
 
 	if (draw_cursor)
 	{
+		float x,y;
 		[[TerminalViewDisplayPrefs cursorColor] set];
+
+		x=cursor_x*fx;
+		y=(sy-1-cursor_y+current_scroll)*fy;
+
 		switch ([TerminalViewDisplayPrefs cursorStyle])
 		{
 		case CURSOR_LINE:
-			DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy*0.1);
+			DPSrectfill(cur,x,y,fx,fy*0.1);
 			break;
 		case CURSOR_BLOCK_STROKE:
-			DPSrectstroke(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
+			DPSrectstroke(cur,x,y,fx,fy);
 			break;
 		case CURSOR_BLOCK_FILL:
-			DPSrectfill(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy);
+			DPSrectfill(cur,x,y,fx,fy);
 			break;
 		case CURSOR_BLOCK_INVERT:
-			DPScompositerect(cur,cursor_x*fx,(sy-1-cursor_y+current_scroll)*fy,fx,fy,
+			DPScompositerect(cur,x,y,fx,fy,
 				NSCompositeHighlight);
 			break;
 		}
@@ -403,6 +446,26 @@ static const float col_s[8]={0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0};
 -(BOOL) isOpaque
 {
 	return YES;
+}
+
+
+-(void) benchmark: (id)sender
+{
+	int i;
+	double t1,t2;
+	NSRect r=[self frame];
+	t1=[NSDate timeIntervalSinceReferenceDate];
+	total_draw=0;
+	for (i=0;i<100;i++)
+	{
+		draw_all=YES;
+		[self lockFocus];
+		[self drawRect: r];
+		[self unlockFocusNeedsFlush: NO];
+	}
+	t2=[NSDate timeIntervalSinceReferenceDate];
+	t2-=t1;
+	fprintf(stderr,"%8.4f  %8.5f/redraw   total_draw=%i\n",t2,t2/i,total_draw);
 }
 
 
