@@ -30,7 +30,7 @@ Terminal_LOCALIZED_RESOURCE_FILES = Localizable.strings
 Terminal_LANGUAGES = English Swedish German
 
 Terminal_APPLICATION_ICON = Terminal.tiff
-Terminal_RESOURCE_FILES = Terminal.tiff DefaultTerminalServices.plist
+Terminal_RESOURCE_FILES = Terminal.tiff DefaultTerminalServices.svcs
 
 MAKE_STRINGS_OPTIONS = --aggressive-match --aggressive-remove
 

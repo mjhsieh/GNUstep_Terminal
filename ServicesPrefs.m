@@ -14,6 +14,8 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 #include <AppKit/NSBox.h>
 #include <AppKit/GSVbox.h>
 #include <AppKit/GSHbox.h>
+#include <AppKit/NSSavePanel.h>
+#include <AppKit/NSOpenPanel.h>
 
 #include "ServicesPrefs.h"
 
@@ -223,6 +225,148 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 }
 
 
+-(void) _importServices: (id)sender
+{
+	NSOpenPanel *op;
+	NSDictionary *d;
+	NSEnumerator *e;
+	NSString *name;
+	int result;
+
+	[self save];
+
+	op=[NSOpenPanel openPanel];
+	[op setAccessoryView: nil];
+	[op setTitle: _(@"Import services")];
+	[op setAllowsMultipleSelection: NO];
+	[op setCanChooseDirectories: NO];
+	[op setCanChooseFiles: YES];
+
+	result=[op runModal];
+
+	if (result!=NSOKButton)
+		return;
+
+	d=[NSDictionary dictionaryWithContentsOfFile: [op filename]];
+	d=[d objectForKey: @"TerminalServices"];
+	if (!d)
+	{
+		NSRunAlertPanel(_(@"Error importing services"),
+			_(@"The file %@ doesn't containt valid terminal services."),
+			nil,nil,nil,
+			[op filename]);
+		return;
+	}
+
+	e=[d keyEnumerator];
+	while ((name=[e nextObject]))
+	{
+		NSString *new_name;
+		NSDictionary *service,*s2;
+		int i;
+
+		service=[d objectForKey: name];
+		new_name=name;
+		i=2;
+		while (1)
+		{
+			s2=[services objectForKey: new_name];
+			if (!s2 || [s2 isEqual: service])
+				break;
+
+			new_name=[NSString stringWithFormat: @"%@ (%i)",
+				name,i];
+			i++;
+		}
+
+		if (!s2)
+		{
+			[services setObject: service
+				forKey: new_name];
+			[service_list addObject: new_name];
+		}
+	}
+
+	[self revert]; /* reload views */
+	[self save]; /* update external service list */
+	[list reloadData];
+}
+
+
+-(void) _exportServices: (id)sender
+{
+	NSSavePanel *sp;
+	NSTableView *tv;
+	int result;
+
+	[self save];
+
+	sp=[NSSavePanel savePanel];
+	[sp setTitle: _(@"Export services")];
+
+	{
+		NSScrollView *sv;
+		NSTableColumn *c_name;
+
+		sv=[[NSScrollView alloc] initWithFrame: NSMakeRect(0,0,260,100)];
+		[sv setAutoresizingMask: NSViewWidthSizable|NSViewHeightSizable];
+		[sv setHasVerticalScroller: YES];
+		[sv setHasHorizontalScroller: NO];
+
+		c_name=[[NSTableColumn alloc] initWithIdentifier: @"Name"];
+		[c_name setEditable: NO];
+		[c_name setResizable: YES];
+		[c_name setWidth: 260];
+
+		tv=[[NSTableView alloc] initWithFrame: [[sv contentView] frame]];
+		[tv setAllowsMultipleSelection: YES];
+		[tv setAllowsColumnSelection: NO];
+		[tv setAllowsEmptySelection: NO];
+		[tv addTableColumn: c_name];
+		DESTROY(c_name);
+		[tv setAutoresizesAllColumnsToFit: YES];
+		[tv setDataSource: self];
+		[tv setDelegate: self];
+		[tv setHeaderView: nil];
+		[tv setCornerView: nil];
+		[tv reloadData];
+		[tv selectAll: self];
+
+		[sv setDocumentView: tv];
+		[sp setAccessoryView: sv];
+		DESTROY(sv);
+	}
+
+	result=[sp runModal];
+
+	if (result==NSOKButton)
+	{
+		NSEnumerator *e;
+		NSNumber *n;
+		NSMutableDictionary *d;
+		NSDictionary *d2;
+		NSString *name;
+
+		d=[[NSMutableDictionary alloc] init];
+
+		for (e=[tv selectedRowEnumerator];
+		     (n=[e nextObject]);)
+		{
+			name=[service_list objectAtIndex: [n intValue]];
+			[d setObject: [services objectForKey: name]
+				forKey: name];
+		}
+		d2=[NSDictionary dictionaryWithObject: d
+			forKey: @"TerminalServices"];
+		[d2 writeToFile: [sp filename] atomically: NO];
+		DESTROY(d);
+	}
+
+	DESTROY(tv);
+	[sp setAccessoryView: nil];
+}
+
+
 -(NSString *) name
 {
 	return _(@"Terminal services");
@@ -271,13 +415,21 @@ copyright 2002 Alexander Malmberg <alexander@malmberg.org>
 			[hb addView: b  enablingXResizing: NO];
 			DESTROY(b);
 
-/* TODO			b=[[NSButton alloc] init];
+			b=[[NSButton alloc] init];
+			[b setTitle: _(@"Import...")];
+			[b setTarget: self];
+			[b setAction: @selector(_importServices:)];
+			[b sizeToFit];
+			[hb addView: b  enablingXResizing: NO];
+			DESTROY(b);
+
+			b=[[NSButton alloc] init];
 			[b setTitle: _(@"Export...")];
 			[b setTarget: self];
 			[b setAction: @selector(_exportServices:)];
 			[b sizeToFit];
 			[hb addView: b  enablingXResizing: NO];
-			DESTROY(b);*/
+			DESTROY(b);
 
 			[top addView: hb enablingYResizing: NO];
 			DESTROY(hb);
